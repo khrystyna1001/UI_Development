@@ -11,17 +11,19 @@ export default function TabLayout() {
   return (
       <Tabs>
         <Tabs.Screen
-          name="index"
+          name="home"
           options={{
             title: 'Home',
             tabBarIcon: ({ color }) => <FontAwesome size={28} name="home" color={color} />,
+            headerShown: false
           }}
         />
         <Tabs.Screen
-          name="home"
+          name="index"
           options={{
             title: 'Marketplace',
             tabBarIcon: ({ color }) => <FontAwesome size={24} name="shopping-bag" color={color} />,
+            headerShown: false
           }}
         />
       <Tabs.Screen
@@ -29,6 +31,7 @@ export default function TabLayout() {
         options={{
           title: 'Messages',
           tabBarIcon: ({ color }) => <MaterialIcons name="message" size={26} color={color} />,
+//           headerShown: false
         }}
       />
       <Tabs.Screen
@@ -36,6 +39,7 @@ export default function TabLayout() {
          options={{
            title: 'Profile',
            tabBarIcon: ({ color }) => <FontAwesome size={28} name="user" color={color} />,
+           headerShown: false
          }}
      />
     </Tabs>

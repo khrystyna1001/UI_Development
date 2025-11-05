@@ -43,7 +43,7 @@ export default (props) => {
 								color: "#000000",
 								fontSize: 20,
 							}}>
-							{"HOMEHOME"}
+							{"Home"}
 						</Text>
 						<View
 							style={{
