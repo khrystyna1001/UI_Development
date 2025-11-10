@@ -6,9 +6,12 @@ import { View,
     SafeAreaView,
     KeyboardAvoidingView,
     Platform,
+    Pressable,
     Dimensions,
     }
 from 'react-native';
+
+import { router } from 'expo-router';
 
 import { useState } from 'react';
 
@@ -16,7 +19,7 @@ const { height } = Dimensions.get('window');
 
 const Icon = ({ name, size, color }) => (
   <Text style={{ fontSize: size, color: color, marginLeft: 10 }}>
-    {name === 'arrow-right' ? '>' : ''}
+    {name === 'arrow-right' ? '-->' : ''}
   </Text>
 );
 
@@ -24,9 +27,15 @@ export default function LoginScreen (onSwitchToSignUp) {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    console.log('Logging in with:', { login, password });
-  };
+  const handleLogin = (e) => {
+      e.preventDefault();
+      if (!login || !password) {
+        alert("Please enter both login and password.");
+        return;
+      }
+      console.log('Logging in with:', { login, password });
+      alert("Login attempt successful (check console).");
+    };
 
   return (
     <KeyboardAvoidingView
@@ -61,14 +70,18 @@ export default function LoginScreen (onSwitchToSignUp) {
           />
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <Pressable style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>Log In</Text>
           <Icon name="arrow-right" size={20} color="#fff" />
-        </TouchableOpacity>
+        </Pressable>
 
-        <TouchableOpacity onPress={onSwitchToSignUp} style={styles.switchLink}>
+        <Pressable style={styles.switchLink}
+            onPress={() =>
+                router.navigate({pathname: '/signup'})
+            }>
           <Text style={styles.switchLinkText}>Need an account? Sign Up</Text>
-        </TouchableOpacity>
+        </Pressable>
+
       </View>
     </KeyboardAvoidingView>
   );
@@ -81,7 +94,7 @@ const styles = StyleSheet.create({
   },
   screenContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F2F2F2',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 30,

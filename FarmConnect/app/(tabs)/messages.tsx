@@ -1,13 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, SafeAreaView, Dimensions, Image, StyleSheet } from 'react-native';
+import NavigationFooter from "../../components/footer";
 
-// --- Mock Icon Component (To simulate react-native-vector-icons) ---
-// In a real project, you would import a library like:
-// import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 const Icon = ({ name, size, color, style }) => (
   <Text style={[{ fontSize: size, color: color, alignSelf: 'center' }, style]}>
     {
-      // Mock icon names based on common MaterialCommunityIcons
       name === 'inbox' ? '📥' :
       name === 'send' ? '📤' :
       name === 'book-multiple' ? '📚' :
@@ -15,39 +12,34 @@ const Icon = ({ name, size, color, style }) => (
       name === 'store' ? '🛒' :
       name === 'message-text-multiple' ? '💬' :
       name === 'account' ? '👤' :
-      name === 'account-circle' ? '👤' : // Used for user avatars
-      '❓'
+      name === 'account-circle' ? '👤' :
+      '?'
     }
   </Text>
 );
-// --- End Mock Icon Component ---
 
 const messagesData = [
   { id: '1', name: 'John Smith', snippet: 'Are we still on for tomorrow?', time: '2 min ago', read: false },
   { id: '2', name: 'Anna Johnson', snippet: 'Check out this link!', time: '5 min ago', read: true },
   { id: '3', name: 'Mark Lee', snippet: 'Great meeting earlier!', time: '15 min ago', read: true },
   { id: '4', name: 'Lily Brown', snippet: 'Can you send me the files?', time: '1 hr ago', read: false },
-  // Adding a few more for scrollability
   { id: '5', name: 'David Clark', snippet: 'Re: Project status update', time: '1 hr ago', read: true },
   { id: '6', name: 'Jessica Alba', snippet: 'Let\'s grab lunch next week.', time: '2 hr ago', read: false },
 ];
 
-// Reusable card component for Inbox, Sent, Drafts
 const ActionCard = ({ title, iconName }) => (
   <TouchableOpacity style={styles.card}>
     <View style={styles.cardIconContainer}>
-      <Icon name={iconName} size={28} color="#007AFF" />
+      <Icon name={iconName} size={20} color="#007AFF" />
     </View>
     <Text style={styles.cardTitle}>{title}</Text>
   </TouchableOpacity>
 );
 
-// Message list item component
 const MessageItem = ({ name, snippet, time, read }) => (
   <TouchableOpacity style={styles.messageItemContainer}>
     <View style={styles.messageAvatar}>
-        {/* Placeholder for user avatar */}
-        <Icon name="account-circle" size={30} color="#666" style={{ marginHorizontal: 8 }} />
+        <Icon name="account-circle" size={13} color="#666" style={{ marginHorizontal: 8 }} />
     </View>
     <View style={styles.messageContent}>
       <Text style={[styles.messageName, !read && styles.messageNameUnread]}>{name}</Text>
@@ -57,24 +49,55 @@ const MessageItem = ({ name, snippet, time, read }) => (
   </TouchableOpacity>
 );
 
-const MessagesPage = () => {
-  // Mock state for handling UI interactions like selection (though not fully implemented here)
+export default function Messages () {
   const [selectedMessages, setSelectedMessages] = React.useState([]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
+              {/* Header */}
+              <View style={styles.headerContainer}>
+                <Image style={styles.headerImage} />
+                <View style={styles.headerRow}>
+                  <Text style={styles.headerTitle}>PROFILE</Text>
+                  <View style={styles.headerIcons}>
+                    <Text style={styles.icon}>🌾</Text>
+                    <Text style={styles.icon}>📝</Text>
+                  </View>
+                </View>
+              </View>
 
+              {/* Profile */}
+              <View style={styles.profileContainer}>
+                <View style={styles.avatar} />
+                <View style={styles.profileTextContainer}>
+                  <Text style={styles.profileName}>John Doe</Text>
+                  <Text style={styles.profileRole}>Organic Farmer</Text>
+                </View>
+              </View>
+
+              {/* Navigation Buttons */}
+              <View style={styles.navButtonRow}>
+                {[
+                  { icon: "🌱", label: "My Farm" },
+                  { icon: "📰", label: "Blog" },
+                  { icon: "👥", label: "Community" },
+                ].map((item, i) => (
+                  <View key={i} style={styles.navButton}>
+                    <View style={styles.navIconContainer}>
+                      <Text style={styles.navIcon}>{item.icon}</Text>
+                    </View>
+                    <Text style={styles.navLabel}>{item.label}</Text>
+                  </View>
+                ))}
+              </View>
         <ScrollView style={styles.scrollViewContent}>
 
-          {/* --- 2. Card Grid / Navigation --- */}
           <View style={styles.cardGrid}>
             <ActionCard title="Inbox" iconName="inbox" />
             <ActionCard title="Sent" iconName="send" />
             <ActionCard title="Drafts" iconName="book-multiple" />
           </View>
 
-          {/* --- 3. Active User Status --- */}
           <View style={styles.activeUserContainer}>
             <Icon name="account-circle" size={48} color="#999" style={styles.activeUserAvatar} />
             <View>
@@ -83,10 +106,8 @@ const MessagesPage = () => {
             </View>
           </View>
 
-          {/* --- 4. Message List Header --- */}
           <Text style={styles.sectionHeader}>Your Messages</Text>
 
-          {/* --- 5. Message List --- */}
           <View>
             {messagesData.map((message) => (
               <MessageItem
@@ -99,11 +120,9 @@ const MessagesPage = () => {
             ))}
           </View>
 
-          {/* Add some space at the bottom of the scroll view to prevent buttons from hiding content */}
           <View style={{ height: 160 }} />
         </ScrollView>
 
-        {/* --- 6. Search Bar (Fixed at the bottom, outside the scroll view) --- */}
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
@@ -111,13 +130,12 @@ const MessagesPage = () => {
             placeholderTextColor="#999"
           />
           <TouchableOpacity style={styles.searchButton}>
-            <Icon name="magnify" size={20} color="#FFF" />
+            <Icon size={20} color={"#fff"} />
           </TouchableOpacity>
           <Text style={styles.searchHint}>Find conversations by keyword</Text>
         </View>
 
 
-        {/* --- 7. Action Buttons --- */}
         <View style={styles.actionButtonsContainer}>
           <TouchableOpacity style={[styles.button, styles.deleteButton]}>
             <Text style={styles.buttonText}>Delete Selected</Text>
@@ -129,8 +147,7 @@ const MessagesPage = () => {
             <Text style={styles.composeButtonText}>Compose New Message</Text>
           </TouchableOpacity>
         </View>
-
-      </View>
+        <NavigationFooter />
     </SafeAreaView>
   );
 };
@@ -140,61 +157,78 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
   scrollViewContent: {
     flex: 1,
     paddingHorizontal: 16,
   },
-  // --- 1. Header Styles ---
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    paddingTop: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginLeft: -20,
-  },
-  headerRight: {
-    flexDirection: 'row',
-    width: 60,
-    justifyContent: 'space-between',
-  },
-  headerIcon: {
-    padding: 4,
-  },
 
-  // --- 2. Card Grid Styles ---
+      // Utility and Structure
+      container: { flex: 1, backgroundColor: "#FFFFFF" },
+      scrollContent: { paddingBottom: 20 }, // Added padding for content below scroll
+      scrollArea: { flex: 1 },
+      section: { paddingHorizontal: 16, marginBottom: 20 },
+      sectionHeader: { marginBottom: 10 },
+      sectionSubtitle: { color: "#777", fontSize: 14, marginBottom: 8 },
+
+      // Header
+      headerContainer: {
+        backgroundColor: "#FFFFFF",
+        marginBottom: 12,
+        paddingHorizontal: 16,
+        shadowColor: "#000000",
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 1 },
+        shadowRadius: 6,
+        elevation: 3, // Android shadow
+      },
+      headerImage: { height: 24, width: '100%' }, // Added width for placeholder
+      headerRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 12 },
+      headerTitle: { color: "#000", fontSize: 20, fontWeight: "600" },
+      headerIcons: { flexDirection: "row" },
+      icon: { color: "#000", fontSize: 16, marginRight: 16 },
+
+      // Profile
+      profileContainer: { flexDirection: "row", paddingTop: 16, marginBottom: 12, paddingHorizontal: 16 },
+      avatar: { width: 40, height: 40, backgroundColor: "#0000001A", borderRadius: 40, marginRight: 12 },
+      profileTextContainer: { flex: 1 },
+      profileName: { color: "#000", fontSize: 16, fontWeight: "600" },
+      profileRole: { color: "#777", fontSize: 12 },
+
+      // Nav Buttons
+      navButtonRow: { flexDirection: "row", paddingHorizontal: 16 },
+      navButton: {
+        flex: 1,
+        alignItems: "center",
+        borderColor: "#0000001A",
+        borderRadius: 6,
+        borderWidth: 1,
+        paddingVertical: 6,
+        marginRight: 8,
+      },
+      navIconContainer: { backgroundColor: "#0000000D", borderRadius: 24, padding: 4, marginBottom: 4 },
+      navIcon: { color: "#000", fontSize: 28 },
+      navLabel: { color: "#000", fontSize: 10, textAlign: 'center' },
+
+
+
   cardGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginVertical: 12,
+    marginTop: 10,
   },
   card: {
     flex: 1,
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 6,
     paddingVertical: 20,
     marginHorizontal: 4,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
     elevation: 2,
     borderWidth: 1,
     borderColor: '#eee',
-    minHeight: 110,
+    height: 90,
   },
   cardIconContainer: {
     backgroundColor: '#E6F0FF',
@@ -209,7 +243,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // --- 3. Active User Status Styles ---
+
   activeUserContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -231,7 +265,7 @@ const styles = StyleSheet.create({
     color: '#999',
   },
 
-  // --- 4. Section Header ---
+
   sectionHeader: {
     fontSize: 16,
     fontWeight: '700',
@@ -240,7 +274,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  // --- 5. Message List Styles ---
+
   messageItemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -283,7 +317,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // --- 6. Search Bar Styles ---
+
   searchContainer: {
     paddingHorizontal: 16,
     paddingBottom: 10,
@@ -296,7 +330,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     borderRadius: 8,
     paddingHorizontal: 16,
-    paddingRight: 50, // Space for the search icon button
+    paddingRight: 50,
     fontSize: 16,
     marginTop: 8,
   },
@@ -318,7 +352,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  // --- 7. Action Button Styles ---
+
   actionButtonsContainer: {
     paddingHorizontal: 16,
     paddingBottom: 8,
@@ -356,7 +390,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // --- 8. Bottom Nav Styles ---
+
   bottomNav: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -365,7 +399,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#eee',
-    paddingBottom: 20, // Add padding for modern phone bottom bar
+    paddingBottom: 20,
   },
   tabItem: {
     alignItems: 'center',
@@ -377,4 +411,3 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MessagesPage;
