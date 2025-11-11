@@ -11,7 +11,7 @@ export default function Profile (props) {
                 {/* The 'Image' component needs a source, using a placeholder for now */}
                 <Image style={styles.headerImage} source={{ uri: "https://via.placeholder.com/24x24" }} />
                 <View style={styles.headerRow}>
-                  <Text style={styles.headerTitle}>HOME</Text>
+                  <Text style={styles.headerTitle}>Profile</Text>
                   <View style={styles.headerIcons}>
                     <Text style={styles.icon}>🌾</Text>
                     <Text style={styles.icon}>📝</Text>

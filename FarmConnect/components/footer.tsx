@@ -19,7 +19,7 @@ export default function NavigationFooter() {
   return (
     <View style={styles.tabBar}>
       <NavTab iconName="home" label="Home" IconComponent={AntDesign} nav="" />
-      <NavTab iconName="shopping-bag" label="Marketplace" IconComponent={Feather} nav="marketplace" />
+      <NavTab iconName="shopping-bag" label="Marketplace" IconComponent={Feather} nav="blogs" />
       <NavTab iconName="message" label="Messages" IconComponent={AntDesign} nav="messages" />
       <NavTab iconName="user" label="Profile" IconComponent={Feather} nav="profile" />
     </View>

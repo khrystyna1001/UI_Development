@@ -58,7 +58,7 @@ export default function Messages () {
               <View style={styles.headerContainer}>
                 <Image style={styles.headerImage} />
                 <View style={styles.headerRow}>
-                  <Text style={styles.headerTitle}>PROFILE</Text>
+                  <Text style={styles.headerTitle}>Messages</Text>
                   <View style={styles.headerIcons}>
                     <Text style={styles.icon}>🌾</Text>
                     <Text style={styles.icon}>📝</Text>
