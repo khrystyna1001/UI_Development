@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, SafeAreaView, Dimensions, Image, StyleSheet } from 'react-native';
 import NavigationFooter from "../../components/footer";
+import NavigationHeader from '../../components/header';
+
 
 const Icon = ({ name, size, color, style }) => (
   <Text style={[{ fontSize: size, color: color, alignSelf: 'center' }, style]}>
@@ -55,41 +57,7 @@ export default function Messages () {
   return (
         <SafeAreaView style={styles.container}>
               {/* Header */}
-              <View style={styles.headerContainer}>
-                <Image style={styles.headerImage} />
-                <View style={styles.headerRow}>
-                  <Text style={styles.headerTitle}>Messages</Text>
-                  <View style={styles.headerIcons}>
-                    <Text style={styles.icon}>🌾</Text>
-                    <Text style={styles.icon}>📝</Text>
-                  </View>
-                </View>
-              </View>
-
-              {/* Profile */}
-              <View style={styles.profileContainer}>
-                <View style={styles.avatar} />
-                <View style={styles.profileTextContainer}>
-                  <Text style={styles.profileName}>John Doe</Text>
-                  <Text style={styles.profileRole}>Organic Farmer</Text>
-                </View>
-              </View>
-
-              {/* Navigation Buttons */}
-              <View style={styles.navButtonRow}>
-                {[
-                  { icon: "🌱", label: "My Farm" },
-                  { icon: "📰", label: "Blog" },
-                  { icon: "👥", label: "Community" },
-                ].map((item, i) => (
-                  <View key={i} style={styles.navButton}>
-                    <View style={styles.navIconContainer}>
-                      <Text style={styles.navIcon}>{item.icon}</Text>
-                    </View>
-                    <Text style={styles.navLabel}>{item.label}</Text>
-                  </View>
-                ))}
-              </View>
+              <NavigationHeader />
         <ScrollView style={styles.scrollViewContent}>
 
           <View style={styles.cardGrid}>
@@ -169,47 +137,6 @@ const styles = StyleSheet.create({
       section: { paddingHorizontal: 16, marginBottom: 20 },
       sectionHeader: { marginBottom: 10 },
       sectionSubtitle: { color: "#777", fontSize: 14, marginBottom: 8 },
-
-      // Header
-      headerContainer: {
-        backgroundColor: "#FFFFFF",
-        marginBottom: 12,
-        paddingHorizontal: 16,
-        shadowColor: "#000000",
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 1 },
-        shadowRadius: 6,
-        elevation: 3, // Android shadow
-      },
-      headerImage: { height: 24, width: '100%' }, // Added width for placeholder
-      headerRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 12 },
-      headerTitle: { color: "#000", fontSize: 20, fontWeight: "600" },
-      headerIcons: { flexDirection: "row" },
-      icon: { color: "#000", fontSize: 16, marginRight: 16 },
-
-      // Profile
-      profileContainer: { flexDirection: "row", paddingTop: 16, marginBottom: 12, paddingHorizontal: 16 },
-      avatar: { width: 40, height: 40, backgroundColor: "#0000001A", borderRadius: 40, marginRight: 12 },
-      profileTextContainer: { flex: 1 },
-      profileName: { color: "#000", fontSize: 16, fontWeight: "600" },
-      profileRole: { color: "#777", fontSize: 12 },
-
-      // Nav Buttons
-      navButtonRow: { flexDirection: "row", paddingHorizontal: 16 },
-      navButton: {
-        flex: 1,
-        alignItems: "center",
-        borderColor: "#0000001A",
-        borderRadius: 6,
-        borderWidth: 1,
-        paddingVertical: 6,
-        marginRight: 8,
-      },
-      navIconContainer: { backgroundColor: "#0000000D", borderRadius: 24, padding: 4, marginBottom: 4 },
-      navIcon: { color: "#000", fontSize: 28 },
-      navLabel: { color: "#000", fontSize: 10, textAlign: 'center' },
-
-
 
   cardGrid: {
     flexDirection: 'row',
