@@ -4,11 +4,15 @@ import {
   View,
   Text,
   Image,
+  Pressable,
   ScrollView,
   TextInput,
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+
+import { router } from 'expo-router';
+
 
 export default function NavigationHeader() {
     return(
@@ -37,16 +41,19 @@ export default function NavigationHeader() {
       {/* Navigation Buttons */}
       <View style={styles.navButtonRow}>
         {[
-          { icon: "🌱", label: "My Farm" },
-          { icon: "📰", label: "Blog" },
-          { icon: "👥", label: "Community" },
+          { icon: "🌱", label: "My Farm", nav: "farm" },
+          { icon: "📰", label: "Blog", nav: "blogs" },
+          { icon: "👥", label: "Gallery", nav: "gallery" },
         ].map((item, i) => (
-          <TouchableOpacity key={i} style={styles.navButton} onPress={() => alert(`${item.label} Pressed!`)}>
+          <Pressable key={i} onPress={() =>
+              router.navigate({pathname: `/(nav)/${item.nav}`})}
+              style={styles.navButton}>
             <View style={styles.navIconContainer}>
               <Text style={styles.navIcon}>{item.icon}</Text>
             </View>
             <Text style={styles.navLabel}>{item.label}</Text>
-          </TouchableOpacity>
+
+          </Pressable>
         ))}
       </View>
       </SafeAreaView>
