@@ -12,6 +12,8 @@ import {
   Dimensions
 } from 'react-native';
 
+import { useState } from 'react';
+
 import NavigationFooter from '../../components/footer';
 import NavigationHeader from '../../components/header';
 
@@ -38,12 +40,13 @@ const BlogItem = ({ title, body, tags, author }) => (
 
 
 export default function BlogsScreen(setScreen) {
+  const [textInput1, onChangeTextInput1] = useState("");
 
-    return (
-  <SafeAreaView style={styles.safeArea}>
+  return (
+  <SafeAreaView style={styles.container}>
     <NavigationHeader />
-    <ScrollView style={styles.scrollView}>
-
+    <ScrollView style={styles.scrollArea}>
+    <View style={styles.scrollView}>
       <Text style={styles.sectionTitle}>Blogs</Text>
 
       <BlogItem
@@ -58,28 +61,41 @@ export default function BlogsScreen(setScreen) {
         tags="Irrigation, Technology"
         author="Tom Brown"
       />
+    </View>
 
-      <Text style={styles.sectionTitle}>Share your thoughts</Text>
+      <View style={styles.section}>
+          <Text style={styles.sectionSubtitle}>Share your thoughts</Text>
+          <TextInput
+            placeholder="Write your blog here..."
+            value={textInput1}
+            onChangeText={onChangeTextInput1}
+            style={styles.textInput}
+            multiline // Added multiline for a better blog post experience
+          />
+          <Text style={styles.helperText}>
+            Share your farming experiences and tips.
+          </Text>
+          <TouchableOpacity
+            style={[styles.secondaryButton, { marginTop: 10 }]}
+            onPress={() => alert("Save Draft Pressed!")}
+          >
+            <Text style={styles.secondaryButtonText}>Save Draft</Text>
+          </TouchableOpacity>
 
-      <TextInput
-        style={styles.textInput}
-        multiline
-        placeholder="Write your farming experiences and tips..."
-        placeholderTextColor="#999"
-      />
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={() => {onChangeTextInput1(""); alert("Cancel Pressed!")}}
+          >
+            <Text style={styles.secondaryButtonText}>Cancel</Text>
+          </TouchableOpacity>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.buttonDraft}>
-          <Text style={styles.buttonTextBlack}>Save Draft</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonCancel}>
-          <Text style={styles.buttonTextBlack}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonPost}>
-          <Text style={styles.buttonTextWhite}>Post</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={() => alert(`Post Content: ${textInput1}`)}
+          >
+            <Text style={styles.primaryButtonText}>Post</Text>
+          </TouchableOpacity>
       </View>
-      <View style={{ height: 20 }} />
     </ScrollView>
     <NavigationFooter />
   </SafeAreaView>
@@ -92,6 +108,8 @@ const LIGHT_GREY = '#F4F4F4';
 const TEXT_GREY = '#555';
 
 const styles = StyleSheet.create({
+
+  container: { flex: 1, backgroundColor: "#FFFFFF" },
   safeArea: {
     flex: 1,
     backgroundColor: '#fff',
@@ -99,6 +117,25 @@ const styles = StyleSheet.create({
   scrollView: {
     paddingHorizontal: 15,
   },
+
+  section: { paddingHorizontal: 16, marginBottom: 20 },
+  sectionSubtitle: { color: "#777", fontSize: 14, marginBottom: 8 },
+
+  scrollArea: { flex: 1 },
+
+  textInput: {
+      borderWidth: 1,
+      borderColor: "#E0E0E0",
+      borderRadius: 8,
+      padding: 12,
+      fontSize: 14,
+      color: "#000",
+      minHeight: 100,
+      textAlignVertical: 'top', // For Android multiline
+      marginBottom: 8,
+    },
+  helperText: { fontSize: 12, color: "#999", marginBottom: 12 },
+
   // Header Styles
   header: {
     flexDirection: 'row',
@@ -255,53 +292,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: TEXT_GREY,
   },
-  textInput: {
-    backgroundColor: LIGHT_GREY,
-    borderRadius: 15,
-    padding: 15,
-    minHeight: 100,
-    textAlignVertical: 'top',
-    fontSize: 14,
-    marginBottom: 20,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 5,
-  },
-  buttonDraft: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: LIGHT_GREY,
-    alignItems: 'center',
-  },
-  buttonCancel: {
-    flex: 1,
-    backgroundColor: LIGHT_GREY,
-    padding: 15,
-    borderRadius: 10,
-    marginRight: 10,
-    alignItems: 'center',
-  },
-  buttonPost: {
-    flex: 1.5,
-    backgroundColor: '#000',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  buttonTextBlack: {
-    color: '#000',
-    fontWeight: 'bold',
-  },
-  buttonTextWhite: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
+  primaryButton: {
+      backgroundColor: "#000",
+      borderRadius: 6,
+      padding: 14,
+      alignItems: "center",
+      marginTop: 10,
+    },
+    primaryButtonText: { color: "#FFF", fontWeight: "600" },
+
+    secondaryButton: {
+      borderWidth: 1,
+      borderColor: "#000",
+      borderRadius: 6,
+      padding: 12,
+      alignItems: "center",
+      marginTop: 8,
+    },
+    secondaryButtonText: { fontWeight: "600", color: "#000" },
 
   // Gallery Screen Styles
   galleryContainer: {
