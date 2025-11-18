@@ -1,19 +1,17 @@
 import { View,
     Text,
-    StyleSheet,
     TextInput,
     TouchableOpacity,
     SafeAreaView,
     KeyboardAvoidingView,
     Platform,
     Pressable,
-    Dimensions,
     }
 from 'react-native';
-
-import { styles } from '../../styles/login.jsx';
 import { router } from 'expo-router';
 import { useState } from 'react';
+
+import { styles } from '../../styles/auth/login.jsx';
 
 const Icon = ({ name, size, color }) => (
   <Text style={{ fontSize: size, color: color, marginLeft: 10 }}>

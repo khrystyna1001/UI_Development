@@ -8,13 +8,10 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
 } from 'react-native';
-
-import { styles } from '../styles/navigation.jsx';
-
 import { router } from 'expo-router';
 
+import { styles } from '../styles/components/navigation.jsx';
 
 export default function NavigationHeader() {
     return(
