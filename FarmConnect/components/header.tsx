@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // Import useState
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -17,13 +17,9 @@ export default function NavigationHeader() {
     return(
       <SafeAreaView>
       <View style={styles.headerContainer}>
-        <Image style={styles.headerImage} source={{ uri: "https://via.placeholder.com/24x24" }} />
+        <Image style={styles.headerImage} />
         <View style={styles.headerRow}>
           <Text style={styles.headerTitle}>HOME</Text>
-          <View style={styles.headerIcons}>
-            <Text style={styles.icon}>🌾</Text>
-            <Text style={styles.icon}>📝</Text>
-          </View>
         </View>
       </View>
 
@@ -39,7 +35,7 @@ export default function NavigationHeader() {
       {/* Navigation Buttons */}
       <View style={styles.navButtonRow}>
         {[
-          { icon: "🌱", label: "My Farm", nav: "farm" },
+          { icon: "🌱", label: "My Farm", nav: "myfarm" },
           { icon: "📰", label: "Blog", nav: "blogs" },
           { icon: "👥", label: "Gallery", nav: "gallery" },
         ].map((item, i) => (

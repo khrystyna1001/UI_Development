@@ -29,16 +29,6 @@ export const styles = StyleSheet.create({
       fontWeight: "600"
   },
 
-  headerIcons: {
-      flexDirection: "row"
-  },
-
-  icon: {
-      color: "#000",
-      fontSize: 16,
-      marginRight: 16
-  },
-
   profileContainer: {
       flexDirection: "row",
       paddingTop: 16,

@@ -23,7 +23,6 @@ const GalleryItem = ({ label, size }) => {
     const PADDING_HORIZONTAL = 16;
     const ITEM_MARGIN = 8;
 
-    // Calculate dimensions based on size, ensuring space for margin/padding
     const dimensions = isLarge
       ? {
           width: SCREEN_WIDTH - (PADDING_HORIZONTAL * 2),
