@@ -1,102 +1,143 @@
-import {
-  SafeAreaView,
-  View,
-  Text,
-  Image,
-  Pressable,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  Header,
-} from 'react-native';
+import React, { useState } from 'react';
+import { View,
+    Text,
+    Image,
+    ScrollView,
+    TouchableOpacity,
+    TextInput,
+    SafeAreaView,
+    } from 'react-native';
+import NavigationFooter from "../../components/footer";
+import NavigationHeader from "../../components/header";
+import { router } from 'expo-router';
 
-import { useState } from 'react';
-import NavigationFooter from '../../components/footer';
-import NavigationHeader from '../../components/header';
+import { styles } from '../../styles/tabs/marketplace.jsx';
 
-import { styles } from '../../styles/nav/blogs.jsx';
+const mockBlogPosts = [
+  {
+    id: 1,
+    title: "Mastering Organic Pest Control",
+    summary: "Learn natural and effective ways to keep pests away from your crops without harmful chemicals.",
+    author: "Jane Smith",
+    date: "Sep 15, 2025",
+    reads: 4.5
+  },
+  {
+    id: 2,
+    title: "The Magic of Crop Rotation in Small Farms",
+    summary: "How to maximize soil health and yield efficiency using simple rotational strategies.",
+    author: "Alex Farmer",
+    date: "Aug 28, 2025",
+    reads: 3.1
+  },
+  {
+    id: 3,
+    title: "Watering Techniques for a Dry Summer",
+    summary: "Tips and tricks for conserving water while ensuring your crops thrive during hot periods.",
+    author: "John Doe",
+    date: "Aug 10, 2025",
+    reads: 5.2
+  },
+  {
+    id: 4,
+    title: "Starting Your First Herb Garden",
+    summary: "A beginner's guide to planting, growing, and harvesting popular kitchen herbs.",
+    author: "Alice Green",
+    date: "Jul 20, 2025",
+    reads: 1.8
+  },
+];
 
-const BlogItem = ({ title, body, tags, author }) => (
-  <View style={styles.blogItem}>
-    <View style={styles.blogImagePlaceholder}>
-      <Text style={styles.blogTitle}>{title}</Text>
-    </View>
+
+const BlogPostCard = ({ post, onPress }) => (
+  <TouchableOpacity style={styles.blogCard} onPress={onPress}>
+    <View style={styles.blogImagePlaceholder} />
     <View style={styles.blogContent}>
-      <Text style={styles.blogBody}>{body}</Text>
-      <View style={styles.blogFooter}>
-        <Text style={styles.blogTags}>
-          <Text style={{fontWeight: '600'}}>Tags: </Text>
-          {tags}
-        </Text>
-        <View style={styles.authorSection}>
-            <View style={styles.smallAvatarPlaceholder} />
-            <Text style={styles.blogAuthor}>{author}</Text>
-        </View>
+      <Text style={styles.blogTitle}>{post.title}</Text>
+      <Text style={styles.blogSummary}>{post.summary}</Text>
+      <View style={styles.blogMeta}>
+        <Text style={styles.blogAuthor}>{post.author} | {post.date}</Text>
+        <Text style={styles.blogReads}>⭐ {post.reads}k Reads</Text>
       </View>
     </View>
-  </View>
+  </TouchableOpacity>
 );
 
+export default function BlogPage () {
+  const [searchQuery, setSearchQuery] = useState("");
 
-export default function BlogsScreen(setScreen) {
-  const [textInput1, onChangeTextInput1] = useState("");
+  const filteredPosts = mockBlogPosts.filter(post =>
+    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    post.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    post.author.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-  <SafeAreaView style={styles.container}>
-    <NavigationHeader />
-    <ScrollView style={styles.scrollArea}>
-    <View style={styles.scrollView}>
-      <Text style={styles.sectionTitle}>Blogs</Text>
+    <SafeAreaView style={styles.safeArea}>
+      {/* Header */}
+      <NavigationHeader />
 
-      <BlogItem
-        title="Sunset on the farm"
-        body="Beautiful evening at the farm!"
-        tags="Sunset, Nature"
-        author="Jane Smith"
-      />
-      <BlogItem
-        title="New irrigation system"
-        body="Just installed a new irrigation system!"
-        tags="Irrigation, Technology"
-        author="Tom Brown"
-      />
-    </View>
-
-      <View style={styles.section}>
-          <Text style={styles.sectionSubtitle}>Share your thoughts</Text>
-          <TextInput
-            placeholder="Write your blog here..."
-            value={textInput1}
-            onChangeText={onChangeTextInput1}
-            style={styles.textInput}
-            multiline
-          />
-          <Text style={styles.helperText}>
-            Share your farming experiences and tips.
-          </Text>
-          <TouchableOpacity
-            style={[styles.secondaryButton, { marginTop: 10 }]}
-            onPress={() => alert("Save Draft Pressed!")}
-          >
-            <Text style={styles.secondaryButtonText}>Save Draft</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={() => {onChangeTextInput1(""); alert("Cancel Pressed!")}}
-          >
-            <Text style={styles.secondaryButtonText}>Cancel</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={() => alert(`Post Content: ${textInput1}`)}
-          >
-            <Text style={styles.primaryButtonText}>Post</Text>
-          </TouchableOpacity>
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="🔍 Search articles and tips..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        <TouchableOpacity style={styles.filterButton} onPress={() => alert("Filter Options")}>
+          <Text style={styles.filterText}>Filter</Text>
+        </TouchableOpacity>
       </View>
-    </ScrollView>
-    <NavigationFooter />
-  </SafeAreaView>
-  )
+
+      {/* Blog Content Scroll */}
+      <ScrollView style={styles.scrollViewContent} contentContainerStyle={styles.scrollContent}>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Featured Author</Text>
+          <View style={styles.authorCard}>
+            <View style={styles.authorAvatar} />
+            <View style={styles.authorInfo}>
+              <Text style={styles.authorName}>John Doe</Text>
+              <Text style={styles.authorBio}>Leading expert in sustainable farming techniques and organic pest control.</Text>
+            </View>
+            <TouchableOpacity style={styles.followButton} onPress={() => alert("Followed John Doe")}>
+              <Text style={styles.followButtonText}>+ Follow</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Blog Post List */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Latest Articles ({filteredPosts.length})</Text>
+          {filteredPosts.length > 0 ? (
+            filteredPosts.map((post) => (
+              <BlogPostCard
+                key={post.id}
+                post={post}
+                onPress={() => alert(`Reading: ${post.title}`)}
+              />
+            ))
+          ) : (
+            <Text style={styles.noResultsText}>No posts found matching your search.</Text>
+          )}
+        </View>
+
+        {/* Trending Tags (Example of additional content) */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Trending Topics</Text>
+          <View style={styles.tagContainer}>
+            {['#Organic', '#Compost', '#Yields', '#PestControl', '#Drought'].map((tag, i) => (
+              <TouchableOpacity key={i} style={styles.tagPill} onPress={() => setSearchQuery(tag.substring(1))}>
+                <Text style={styles.tagPillText}>{tag}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+      </ScrollView>
+
+      <NavigationFooter />
+    </SafeAreaView>
+  );
 };

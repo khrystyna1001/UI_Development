@@ -14,38 +14,9 @@ import { router } from 'expo-router';
 import { styles } from '../../styles/tabs/marketplace.jsx';
 
 const mockBlogPosts = [
-  {
-    id: 1,
-    title: "Mastering Organic Pest Control",
-    summary: "Learn natural and effective ways to keep pests away from your crops without harmful chemicals.",
-    author: "Jane Smith",
-    date: "Sep 15, 2025",
-    reads: 4.5
-  },
-  {
-    id: 2,
-    title: "The Magic of Crop Rotation in Small Farms",
-    summary: "How to maximize soil health and yield efficiency using simple rotational strategies.",
-    author: "Alex Farmer",
-    date: "Aug 28, 2025",
-    reads: 3.1
-  },
-  {
-    id: 3,
-    title: "Watering Techniques for a Dry Summer",
-    summary: "Tips and tricks for conserving water while ensuring your crops thrive during hot periods.",
-    author: "John Doe",
-    date: "Aug 10, 2025",
-    reads: 5.2
-  },
-  {
-    id: 4,
-    title: "Starting Your First Herb Garden",
-    summary: "A beginner's guide to planting, growing, and harvesting popular kitchen herbs.",
-    author: "Alice Green",
-    date: "Jul 20, 2025",
-    reads: 1.8
-  },
+  { tag: "Organic", name: "Fresh Tomatoes", label: "Tomatoes", qty: "5kg" },
+  { tag: "Non-GMO", name: "Golden Wheat", label: "Wheat", qty: "10kg" },
+  { tag: "Seasonal", name: "Rich Strawberries", label: "Strawberries", qty: "2kg" },
 ];
 
 
