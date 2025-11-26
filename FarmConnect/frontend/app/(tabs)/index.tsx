@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // Import useState
+import React, { useEffect, useState } from 'react'; // Import useState
 import {
   SafeAreaView,
   View,
@@ -9,13 +9,33 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import { getProducts, getProduct, getReviews, getReview } from '../../scripts/api';
+
 import NavigationFooter from '../../components/footer';
 import NavigationHeader from '../../components/header';
 
 import { styles } from '../../styles/tabs/home.jsx';
 
-export default function Home(props) {
+export default function Home() {
   const [textInput1, onChangeTextInput1] = useState("");
+
+  const [products, setProducts] = useState([]);
+  const [reviews, setReviews] = useState([]);
+
+  const fetchProducts = async () => {
+    const response = await getProducts();
+    setProducts(response);
+  };
+
+  const fetchReviews = async () => {
+    const response = await getReviews();
+    setReviews(response);
+  };
+
+  useEffect(() => {
+    fetchProducts();
+    fetchReviews();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -36,22 +56,18 @@ export default function Home(props) {
             showsHorizontalScrollIndicator={false}
             style={styles.horizontalScroll}
           >
-            {[
-              { tag: "Organic", name: "Fresh Tomatoes", label: "Tomatoes", qty: "5kg" },
-              { tag: "Non-GMO", name: "Golden Wheat", label: "Wheat", qty: "10kg" },
-              { tag: "Seasonal", name: "Rich Strawberries", label: "Strawberries", qty: "2kg" },
-            ].map((item, i) => (
+            {products.map((item, i) => (
               <View key={i} style={styles.productCard}>
                 <TouchableOpacity
                   style={styles.productTag}
                   onPress={() => alert(`View ${item.name}`)}
                 >
-                  <Text style={styles.productTagText}>{item.tag}</Text>
+                  <Text style={styles.productTagText}>{item.category}</Text>
                 </TouchableOpacity>
                 <Text style={styles.productName}>{item.name}</Text>
                 <View style={styles.productInfo}>
-                  <Text style={styles.productLabel}>{item.label}</Text>
-                  <Text style={styles.productQty}>{item.qty}</Text>
+                  <Text style={styles.productLabel}>{item.description}</Text>
+                  <Text style={styles.productQty}>{item.quantity}</Text>
                 </View>
               </View>
             ))}
@@ -69,14 +85,11 @@ export default function Home(props) {
             showsHorizontalScrollIndicator={false}
             style={styles.horizontalScroll}
           >
-            {[
-              { name: "Alice", text: "Amazing quality products! The tomatoes are fresh." },
-              { name: "Bob", text: "Loved the strawberries! Best I’ve ever had." },
-            ].map((item, i) => (
+            {reviews.map((item, i) => (
               <View key={i} style={styles.reviewCard}>
                 <View style={styles.reviewHeader}>
                   <View style={styles.reviewAvatar} />
-                  <Text style={styles.reviewName}>{item.name}</Text>
+                  <Text style={styles.reviewName}>{item.user}</Text>
                   <Image
                     source={{
                       uri:
@@ -86,7 +99,7 @@ export default function Home(props) {
                     style={styles.stars}
                   />
                 </View>
-                <Text style={styles.reviewText}>{item.text}</Text>
+                <Text style={styles.reviewText}>{item.content}</Text>
               </View>
             ))}
           </ScrollView>
