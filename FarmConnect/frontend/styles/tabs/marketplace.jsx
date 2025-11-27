@@ -107,7 +107,7 @@ export const styles = StyleSheet.create({
       fontWeight: '600',
     },
 
-    blogCard: {
+    productCard: {
       flexDirection: 'row',
       backgroundColor: '#FFF',
       padding: 10,
@@ -117,7 +117,7 @@ export const styles = StyleSheet.create({
       marginBottom: 10,
     },
 
-    blogImagePlaceholder: {
+    productImagePlaceholder: {
       width: 80,
       height: 80,
       borderRadius: 6,
@@ -125,24 +125,24 @@ export const styles = StyleSheet.create({
       marginRight: 10,
     },
 
-    blogContent: {
+    productContent: {
       flex: 1,
       justifyContent: 'space-between',
     },
 
-    blogTitle: {
+    productName: {
       fontSize: 15,
       fontWeight: '600',
       color: '#000',
     },
 
-    blogSummary: {
+    productDescription: {
       fontSize: 12,
       color: '#555',
       marginTop: 4,
     },
 
-    blogMeta: {
+    productMeta: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       marginTop: 8,
@@ -151,15 +151,21 @@ export const styles = StyleSheet.create({
       paddingTop: 5,
     },
 
-    blogAuthor: {
+    productAuthor: {
       fontSize: 10,
       color: '#999',
     },
 
-    blogReads: {
+    productQuantity: {
       fontSize: 10,
       color: '#4CAF50',
       fontWeight: '600',
+    },
+
+    productPrice: {
+      fontSize: 12,
+      color: '#000',
+      fontWeight: '700',
     },
 
     noResultsText: {

@@ -66,11 +66,14 @@ const BlogPostCard = ({ post, onPress }) => (
 export default function BlogPage () {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredPosts = mockBlogPosts.filter(post =>
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.author.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredPosts = mockBlogPosts.filter(post => {
+    const query = searchQuery?.toLowerCase() || '';
+    return (
+      post.title.toLowerCase().includes(query) ||
+      post.summary.toLowerCase().includes(query) ||
+      post.author.toLowerCase().includes(query)
+    );
+  });
 
   return (
     <SafeAreaView style={styles.safeArea}>

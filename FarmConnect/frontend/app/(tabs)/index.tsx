@@ -56,7 +56,7 @@ export default function Home() {
             showsHorizontalScrollIndicator={false}
             style={styles.horizontalScroll}
           >
-            {products.map((item, i) => (
+            {products.slice(0, 4).map((item, i) => (
               <View key={i} style={styles.productCard}>
                 <TouchableOpacity
                   style={styles.productTag}
@@ -85,18 +85,14 @@ export default function Home() {
             showsHorizontalScrollIndicator={false}
             style={styles.horizontalScroll}
           >
-            {reviews.map((item, i) => (
+            {reviews.slice(0, 3).map((item, i) => (
               <View key={i} style={styles.reviewCard}>
                 <View style={styles.reviewHeader}>
                   <View style={styles.reviewAvatar} />
-                  <Text style={styles.reviewName}>{item.user}</Text>
+                  <Text style={styles.reviewName}>{item.author.username}</Text>
                   <Image
-                    source={{
-                      uri:
-                        "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/4Qxx5uBEiw/k6y70q4t_expires_30_days.png",
-                    }}
                     resizeMode="stretch"
-                    style={styles.stars}
+                    style={[styles.stars, { width: item.rating * 20 }]}
                   />
                 </View>
                 <Text style={styles.reviewText}>{item.content}</Text>

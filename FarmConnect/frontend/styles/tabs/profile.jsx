@@ -44,6 +44,12 @@ export const styles = StyleSheet.create({
     color: "#555",
   },
 
+  quantity: {
+    marginTop: 4,
+    fontSize: 14,
+    color: "#777",
+  },
+
   reviewContainer: {
     flexDirection: "row",
     marginTop: 8,
@@ -103,11 +109,15 @@ export const styles = StyleSheet.create({
   },
 
   updateCard: {
-    flex: 1,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 8,
-    padding: 10,
-    marginRight: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
 
   updateTitle: {

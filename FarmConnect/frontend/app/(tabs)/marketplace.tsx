@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View,
     Text,
     Image,
@@ -7,41 +7,52 @@ import { View,
     TextInput,
     SafeAreaView,
     } from 'react-native';
+
+import { getProducts, getProduct } from "../../scripts/api";
+
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from "../../components/header";
 import { router } from 'expo-router';
 
 import { styles } from '../../styles/tabs/marketplace.jsx';
 
-const mockBlogPosts = [
-  { tag: "Organic", name: "Fresh Tomatoes", label: "Tomatoes", qty: "5kg" },
-  { tag: "Non-GMO", name: "Golden Wheat", label: "Wheat", qty: "10kg" },
-  { tag: "Seasonal", name: "Rich Strawberries", label: "Strawberries", qty: "2kg" },
-];
 
-
-const BlogPostCard = ({ post, onPress }) => (
-  <TouchableOpacity style={styles.blogCard} onPress={onPress}>
-    <View style={styles.blogImagePlaceholder} />
-    <View style={styles.blogContent}>
-      <Text style={styles.blogTitle}>{post.title}</Text>
-      <Text style={styles.blogSummary}>{post.summary}</Text>
-      <View style={styles.blogMeta}>
-        <Text style={styles.blogAuthor}>{post.author} | {post.date}</Text>
-        <Text style={styles.blogReads}>⭐ {post.reads}k Reads</Text>
+const ProductCard = ({ product, onPress }: { product: any; onPress: () => void }) => (
+  <TouchableOpacity style={styles.productCard} onPress={onPress}>
+    <View style={styles.productImagePlaceholder} />
+    <View style={styles.productContent}>
+      <Text style={styles.productName}>{product.name}</Text>
+      <Text style={styles.productDescription}>{product.description}</Text>
+      <View style={styles.productMeta}>
+        <Text style={styles.productAuthor}>{product.author} | {new Date(product.created_at).toLocaleDateString()}</Text>
+        <Text style={styles.productQuantity}>⭐ {product.quantity > 0 ? ' ' + product.quantity + ' available' : 'out of stock'}</Text>
+        <Text style={styles.productPrice}>${product.price}</Text>
       </View>
     </View>
   </TouchableOpacity>
 );
 
-export default function BlogPage () {
+export default function ProductsPage () {
   const [searchQuery, setSearchQuery] = useState("");
+  const [products, setProducts] = useState([]);
 
-  const filteredPosts = mockBlogPosts.filter(post =>
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.author.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const fetchProducts = async () => {
+      const response = await getProducts();
+      setProducts(response);
+  };
+
+  const filteredProducts = products.filter((post: any) => {
+    const query = searchQuery?.toLowerCase() || '';
+    return (
+      (post.name?.toLowerCase() || '').includes(query) ||
+      (post.label?.toLowerCase() || '').includes(query) ||
+      (post.tag?.toLowerCase() || '').includes(query)
+    );
+  });
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -52,7 +63,7 @@ export default function BlogPage () {
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="🔍 Search articles and tips..."
+          placeholder="🔍 Search products..."
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
@@ -80,17 +91,17 @@ export default function BlogPage () {
 
         {/* Blog Post List */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Latest Articles ({filteredPosts.length})</Text>
-          {filteredPosts.length > 0 ? (
-            filteredPosts.map((post) => (
-              <BlogPostCard
-                key={post.id}
-                post={post}
-                onPress={() => alert(`Reading: ${post.title}`)}
+          <Text style={styles.sectionTitle}>Latest Products ({products.length})</Text>
+          {products.length > 0 ? (
+            products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onPress={() => alert(`Viewing product: ${product.name}`)}
               />
             ))
           ) : (
-            <Text style={styles.noResultsText}>No posts found matching your search.</Text>
+            <Text style={styles.noResultsText}>No products found.</Text>
           )}
         </View>
 
