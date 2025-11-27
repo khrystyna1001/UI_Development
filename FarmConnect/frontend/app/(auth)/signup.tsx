@@ -11,7 +11,9 @@ from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
 
-import { styles } from '../../styles/auth/signup.jsx'
+import { signup } from '../../scripts/api';
+
+import styles from '../../styles/auth/signup.jsx';
 
 
 const Icon = ({ name, size, color }) => (
@@ -20,17 +22,18 @@ const Icon = ({ name, size, color }) => (
   </Text>
 );
 
-export default function LoginScreen (onSwitchToLogin) {
+export default function SignupScreen () {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
       e.preventDefault();
       if (!login || !password || !confirmPassword) {
           alert("All fields are required for sign up.");
           return;
       }
+
       if (password !== confirmPassword) {
         alert("Error: Passwords do not match!");
         return;
@@ -41,8 +44,13 @@ export default function LoginScreen (onSwitchToLogin) {
           return;
       }
 
-      console.log('Signing up with:', { login, password });
-      alert("Sign Up successful! Please log in.");
+      try {
+        await signup(login, password);
+        router.replace('/login');
+      } catch (error) {
+        console.error('Sign up error:', error);
+        alert("Sign Up failed. Please try again.");
+      }
     };
 
   return (
@@ -97,7 +105,7 @@ export default function LoginScreen (onSwitchToLogin) {
 
         <Pressable style={styles.switchLink}
             onPress={() =>
-                router.navigate({pathname: '/login'})
+                router.navigate('/login')
             }>
           <Text style={styles.switchLinkText}>Already have an account? Log In</Text>
         </Pressable>

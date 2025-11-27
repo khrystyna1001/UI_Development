@@ -2,7 +2,7 @@ import { StyleSheet, Dimensions } from 'react-native';
 
 const { height } = Dimensions.get('window');
 
-const styles = StyleSheet.create({
+export default StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#fff',

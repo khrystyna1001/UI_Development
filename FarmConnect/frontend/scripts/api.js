@@ -1,4 +1,4 @@
-import SecureStore from 'expo-secure-store';
+import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
 
@@ -13,10 +13,10 @@ const getToken = async () => {
         if (Platform.OS === 'web') {
             const token = window.localStorage.getItem(tokenKey);
             return token;
+        } else {
+            const token = await SecureStore.getItemAsync(tokenKey);
+            return token;
         }
-        const token = await SecureStore.getItemAsync(tokenKey);
-        return token;
-        
     } catch (error) {
         console.error("Error retrieving token:", error);
         return null;
@@ -80,9 +80,10 @@ export const getFarms = () => apiFetch(`/app/farms/`);
 export const getFarm = (id) => apiFetch(`/app/farms/${id}/`);
 
 // User
-// NOTE: These still target the admin path as per your original file
-export const getUsers = () => apiFetch(`/admin/auth/user/`);
-export const getUser = (id) => apiFetch(`/admin/auth/user/${id}/`);
+export const getUsers = () => apiFetch(`/app/user/`);
+export const getUser = (id) => apiFetch(`/app/user/${id}/`);
+
+export const getMyData = () => apiFetch(`/api/mydata/`);
 
 // Gallery
 export const getGalleries = () => apiFetch(`/app/gallery/`);
@@ -97,7 +98,6 @@ export const getMessages = () => apiFetch(`/app/messages/`);
 export const getMessage = (id) => apiFetch(`/app/messages/${id}/`);
 
 // Authentication
-
 export const login = async (username, password) => {
     try {
         const response = await fetch(`${API_BASE_URL}/api/login/`, {
@@ -129,6 +129,66 @@ export const login = async (username, password) => {
         return data;
     } catch (error) {
         console.error('Login API error:', error);
+        throw error;
+    }
+};
+
+export const signup = async (username, password) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/signup/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Sign up failed');
+        }
+
+        const data = await response.json();
+
+        if (data.token) {
+            if (Platform.OS === 'web') {
+                window.localStorage.setItem('userToken', data.token);
+            } else {
+                await SecureStore.setItemAsync('userToken', data.token);
+            }
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Sign up API error:', error);
+        throw error;
+    }
+};
+
+export const logout = async () => {
+    try {
+        const token = await getToken();
+        const response = await fetch(`${API_BASE_URL}/api/logout/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Logout failed');
+        }
+
+        await clearToken();
+
+        return true
+    } catch (error) {
+        console.error('Logout API error:', error);
         throw error;
     }
 };

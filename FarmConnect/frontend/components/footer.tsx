@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, Text, Pressable } from 'react-native';
-import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
+import { View, Text, Pressable } from 'react-native';
+import { AntDesign, Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 import { styles } from '../styles/components/footer.jsx'

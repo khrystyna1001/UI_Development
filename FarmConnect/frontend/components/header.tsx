@@ -1,19 +1,44 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   View,
   Text,
   Image,
   Pressable,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
 } from 'react-native';
 import { router } from 'expo-router';
+import { logout } from '../scripts/api';
+import { getMyData } from '../scripts/api';
+
+import { AntDesign, Feather } from '@expo/vector-icons';
 
 import { styles } from '../styles/components/navigation.jsx';
 
 export default function NavigationHeader() {
+    const [myData, setMyData] = useState(null);
+    
+    useEffect(() => {
+        const fetchMyData = async () => {
+            try {
+                const data = await getMyData();
+                setMyData(data);
+                console.log(data);
+            } catch (error) {
+                console.error('Error fetching my data:', error);
+            }
+        };
+        fetchMyData();
+    }, []);
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            router.replace('/login');
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    };
+    
     return(
       <SafeAreaView>
       <View style={styles.headerContainer}>
@@ -27,17 +52,20 @@ export default function NavigationHeader() {
       <View style={styles.profileContainer}>
         <View style={styles.avatar} />
         <View style={styles.profileTextContainer}>
-          <Text style={styles.profileName}>John Doe</Text>
-          <Text style={styles.profileRole}>Organic Farmer</Text>
+          <Text style={styles.profileName}>{myData?.username}</Text>
+          <Text style={styles.profileRole}>{myData?.is_superuser ? 'Organic Farmer' : 'User'}</Text>
         </View>
+        <Pressable onPress={handleLogout} style={styles.profileButton}>
+          <Feather name="log-out" size={16} color="#fff" />
+        </Pressable>
       </View>
 
       {/* Navigation Buttons */}
       <View style={styles.navButtonRow}>
         {[
-          { icon: "🌱", label: "My Farm", nav: "myfarm" },
-          { icon: "📰", label: "Blog", nav: "blogs" },
-          { icon: "👥", label: "Gallery", nav: "gallery" },
+          { icon: <Feather name="feather" size={24} color="black" />, label: "My Farm", nav: "myfarm" },
+          { icon: <AntDesign name="file-search" size={24} color="black" />, label: "Blog", nav: "blogs" },
+          { icon: <Feather name="image" size={24} color="black" />, label: "Gallery", nav: "gallery" },
         ].map((item, i) => (
           <Pressable key={i} onPress={() =>
               router.navigate({pathname: `/(nav)/${item.nav}`})}

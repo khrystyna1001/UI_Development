@@ -1,6 +1,17 @@
 from rest_framework.viewsets import ModelViewSet
-from .models import BlogPost, Product, Farm, GalleryImage, Review, Message
-from .serializer import BlogPostSerializer, ProductSerializer, FarmSerializer, GalleryImageSerializer, ReviewSerializer, MessageSerializer
+from rest_framework import generics, status
+from rest_framework.permissions import AllowAny
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from rest_framework.response import Response
+
+from app.models import BlogPost, Product, Farm, GalleryImage, Review, Message, User
+from app.serializer import BlogPostSerializer, ProductSerializer, FarmSerializer, GalleryImageSerializer, ReviewSerializer, MessageSerializer, UserRegistrationSerializer, UserSerializer
+
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 
@@ -27,4 +38,24 @@ class GalleryViewSet(ModelViewSet):
 class FarmViewSet(ModelViewSet):
     serializer_class = FarmSerializer
     queryset = Farm.objects.all()
-    
+
+class MyDataView(generics.RetrieveAPIView):
+    serializer_class = UserSerializer 
+
+    def get_object(self):
+        return self.request.user
+
+class LogoutView(generics.CreateAPIView):
+    serializer_class = UserSerializer
+
+    def post(self, request, *args, **kwargs):
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class SignupView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserRegistrationSerializer
+    permission_classes = [AllowAny]
+
+

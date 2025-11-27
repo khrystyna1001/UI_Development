@@ -62,7 +62,7 @@ export default function BlogPage () {
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="🔍 Search articles and tips..."
+          placeholder="Search articles and tips..."
           value={searchQuery}
           onChangeText={setSearchQuery}
         />

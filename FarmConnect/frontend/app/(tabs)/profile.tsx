@@ -16,7 +16,6 @@ import { router } from 'expo-router';
 import { styles } from '../../styles/tabs/profile.jsx';
 
 export default function Profile () {
-	const [textInput1, onChangeTextInput1] = useState('');
   const [blogPosts, setBlogPosts] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [products, setProducts] = useState([]);

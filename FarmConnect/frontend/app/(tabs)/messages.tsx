@@ -11,42 +11,16 @@ from 'react-native';
 import { getMessages } from '../../scripts/api';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 
+import { Feather } from '@expo/vector-icons';
+
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from '../../components/header';
 import { styles } from '../../styles/tabs/messages.jsx';
 
-
-const Icon = ({ name, size, color, style }) => (
-  <Text style={[{ fontSize: size, color: color, alignSelf: 'center' }, style]}>
-    {
-      name === 'inbox' ? '📥' :
-      name === 'send' ? '📤' :
-      name === 'book-multiple' ? '📚' :
-      name === 'home' ? '🏠' :
-      name === 'store' ? '🛒' :
-      name === 'message-text-multiple' ? '💬' :
-      name === 'account' ? '👤' :
-      name === 'account-circle' ? '👤' :
-      '?'
-    }
-  </Text>
-);
-
-
-
-const ActionCard = ({ title, iconName }) => (
-  <TouchableOpacity style={styles.card}>
-    <View style={styles.cardIconContainer}>
-      <Icon name={iconName} size={20} color="#007AFF" />
-    </View>
-    <Text style={styles.cardTitle}>{title}</Text>
-  </TouchableOpacity>
-);
-
 const MessageItem = ({ name, snippet, time, read }) => (
   <TouchableOpacity style={styles.messageItemContainer}>
     <View style={styles.messageAvatar}>
-        <Icon name="account-circle" size={13} color="#666" style={{ marginHorizontal: 8 }} />
+        <Feather name="user" size={13} color="#666" style={{ marginHorizontal: 8 }} />
     </View>
     <View style={styles.messageContent}>
       <Text style={[styles.messageName, !read && styles.messageNameUnread]}>{name}</Text>
@@ -57,13 +31,23 @@ const MessageItem = ({ name, snippet, time, read }) => (
 );
 
 export default function Messages () {
-  const [selectedMessages, setSelectedMessages] = React.useState([]);
   const [messages, setMessages] = React.useState([]);
+  const [searchQuery, setSearchQuery] = React.useState('');
 
   const fetchMessages = async () => {
     const messages = await getMessages();
     setMessages(messages);
   };
+
+  const searchedMessages = messages.filter((message: any) => {
+    const query = searchQuery?.toLowerCase() || '';
+    return (
+      message.title.toLowerCase().includes(query) ||
+      message.content.toLowerCase().includes(query) ||
+      message.author?.first_name?.toLowerCase().includes(query) ||
+      message.author?.last_name?.toLowerCase().includes(query)
+    );
+  });
 
   useEffect(() => {
     fetchMessages();
@@ -76,13 +60,37 @@ export default function Messages () {
         <ScrollView style={styles.scrollViewContent}>
 
           <View style={styles.cardGrid}>
-            <ActionCard title="Inbox" iconName="inbox" />
-            <ActionCard title="Sent" iconName="send" />
-            <ActionCard title="Drafts" iconName="book-multiple" />
+            <View style={styles.cardIconContainer}>
+              <Feather name="inbox" size={24} color="#007AFF" />
+            </View>
+            <View style={styles.cardIconContainer}>
+              <Feather name="send" size={24} color="#007AFF" />
+            </View>
+            <View style={styles.cardIconContainer}>
+              <Feather name="book" size={24} color="#007AFF" />
+            </View>
+          </View>
+
+          <View style={styles.searchContainer}>
+            <View style={styles.searchInputContainer}>
+              <Feather 
+                name="search" 
+                size={20} 
+                color="#999" 
+                style={styles.searchIcon} 
+              />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search messages..."
+                placeholderTextColor="#999"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+            </View>
           </View>
 
           <View style={styles.activeUserContainer}>
-            <Icon name="account-circle" size={48} color="#999" style={styles.activeUserAvatar} />
+            <Feather name="user" size={48} color="#999" style={styles.activeUserAvatar} />
             <View>
               <Text style={styles.activeUserName}>Jane Doe</Text>
               <Text style={styles.activeUserStatus}>Last active: 2 hours ago</Text>
@@ -92,7 +100,7 @@ export default function Messages () {
           <Text style={styles.sectionHeader}>Your Messages</Text>
 
           <View>
-            {Array.isArray(messages) && messages.map((message) => (
+            {Array.isArray(searchedMessages) && searchedMessages.map((message) => (
               <MessageItem
                 key={message.id}
                 name={message.title}
@@ -105,19 +113,6 @@ export default function Messages () {
 
           <View style={{ height: 160 }} />
         </ScrollView>
-
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search messages..."
-            placeholderTextColor="#999"
-          />
-          <TouchableOpacity style={styles.searchButton}>
-            <Icon size={20} color={"#fff"} />
-          </TouchableOpacity>
-          <Text style={styles.searchHint}>Find conversations by keyword</Text>
-        </View>
-
 
         <View style={styles.actionButtonsContainer}>
           <TouchableOpacity style={[styles.button, styles.deleteButton]}>

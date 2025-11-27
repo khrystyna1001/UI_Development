@@ -13,6 +13,7 @@ import NavigationFooter from "../../components/footer";
 import NavigationHeader from "../../components/header";
 import { router } from 'expo-router';
 
+
 import { styles } from '../../styles/tabs/marketplace.jsx';
 
 
@@ -62,7 +63,7 @@ export default function ProductsPage () {
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="🔍 Search products..."
+          placeholder={`Search products...`}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />

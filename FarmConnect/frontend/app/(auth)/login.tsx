@@ -107,7 +107,7 @@ export default function LoginScreen() {
 
         <Pressable style={styles.switchLink}
             onPress={() =>
-                router.navigate({pathname: '/signup'})
+                router.navigate('/signup')
             }>
           <Text style={styles.switchLinkText}>Need an account? Sign Up</Text>
         </Pressable>

@@ -92,4 +92,22 @@ export const styles = StyleSheet.create({
       fontSize: 10,
       textAlign: 'center'
   },
+  
+  // Logout Button Styles
+  profileButton: {
+    backgroundColor: '#FF3B30',
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    marginHorizontal: 10,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  
+  profileButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
 })

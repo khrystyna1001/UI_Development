@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 
+
 export const styles = StyleSheet.create({
   scrollViewContent: {
     flex: 1,
@@ -22,38 +23,18 @@ export const styles = StyleSheet.create({
   cardGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 12,
-    marginTop: 10,
+    marginBottom: 25,
   },
-
-  card: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 6,
-    paddingVertical: 20,
-    marginHorizontal: 4,
+  cardIconContainer: {
+    width: 100,
+    height: 60,
+    backgroundColor: '#f8fbff',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#e0f0ff',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: '#eee',
-    height: 90,
   },
-
-  cardIconContainer: {
-    backgroundColor: '#E6F0FF',
-    padding: 8,
-    borderRadius: 50,
-    marginBottom: 8,
-  },
-
-  cardTitle: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-
 
   activeUserContainer: {
     flexDirection: 'row',
@@ -120,40 +101,31 @@ export const styles = StyleSheet.create({
 
 
   searchContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 10,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
+    paddingHorizontal: 10,
+    marginBottom: 20,
   },
 
-  searchInput: {
-    height: 40,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingRight: 50,
-    fontSize: 16,
-    marginTop: 8,
-  },
-
-  searchButton: {
-    position: 'absolute',
-    right: 20,
-    top: 12,
-    backgroundColor: '#000',
-    borderRadius: 8,
-    width: 32,
-    height: 32,
-    justifyContent: 'center',
+  searchInputContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    height: 45,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-
-  searchHint: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 4,
-    marginBottom: 8,
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+    paddingVertical: 8,
   },
 
 
