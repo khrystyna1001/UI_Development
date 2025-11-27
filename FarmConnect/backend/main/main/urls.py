@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from app.views import BlogPostViewSet, ProductViewSet, ReviewViewSet, MessageViewSet, GalleryViewSet, FarmViewSet
 from rest_framework.routers import DefaultRouter
+from rest_framework.authtoken.views import obtain_auth_token
 
 router = DefaultRouter()
 router.register(r'blog', BlogPostViewSet, basename='blog')
@@ -31,4 +32,6 @@ router.register(r'farms', FarmViewSet, basename='farms')
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('app/', include(router.urls)),
+    path('auth/', include('django.contrib.auth.urls')),
+    path('api/login/', obtain_auth_token),
 ]

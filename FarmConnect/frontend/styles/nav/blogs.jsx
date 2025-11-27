@@ -7,16 +7,16 @@ const TEXT_GREY = '#555';
 
 export const styles = StyleSheet.create({
 
-  container: {
+  safeArea: {
       flex: 1,
       backgroundColor: "#FFFFFF"
   },
 
-  scrollView: {
-    paddingHorizontal: 15,
+  scrollContent: {
+      paddingBottom: 60
   },
 
-  scrollArea: {
+  scrollViewContent: {
       flex: 1
   },
 
@@ -25,86 +25,172 @@ export const styles = StyleSheet.create({
       marginBottom: 20
   },
 
-  sectionSubtitle: {
-      color: "#777",
-      fontSize: 14,
-      marginBottom: 8
-  },
-
-  textInput: {
-      borderWidth: 1,
-      borderColor: "#E0E0E0",
-      borderRadius: 8,
-      padding: 12,
-      fontSize: 14,
-      color: "#000",
-      minHeight: 100,
-      textAlignVertical: 'top',
-      marginBottom: 8,
-    },
-
-  helperText: {
-      fontSize: 12,
-      color: "#999",
-      marginBottom: 12
-  },
-
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginVertical: 10,
-    paddingHorizontal: 5,
+      fontSize: 18,
+      fontWeight: "600",
+      color: "#000",
+      marginBottom: 10,
   },
 
-  blogItem: {
-    backgroundColor: LIGHT_GREY,
-    borderRadius: 15,
-    marginBottom: 15,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 3,
+  searchContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    marginBottom: 20,
   },
 
-  blogImagePlaceholder: {
-    height: 150,
-    backgroundColor: '#eee',
+  searchInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    marginRight: 8,
+    backgroundColor: '#FAFAFA',
+  },
+
+  filterButton: {
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 15,
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
   },
 
-  blogTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: TEXT_GREY,
+  filterText: {
+    color: '#FFF',
+    fontWeight: '600',
   },
 
-  blogContent: {
+  authorCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8F8F8',
     padding: 15,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 3,
+    elevation: 1,
   },
 
-  blogBody: {
-    fontSize: 14,
+  authorAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#0000001A',
+    marginRight: 15,
+  },
+
+  authorInfo: {
+    flex: 1,
+  },
+
+  authorName: {
+    fontSize: 16,
+    fontWeight: '700',
     color: '#000',
+  },
+
+  authorBio: {
+    fontSize: 12,
+    color: '#777',
+    marginTop: 2,
+  },
+
+  followButton: {
+    backgroundColor: '#000',
+    borderRadius: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+
+  followButtonText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+
+  blogCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFF',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    borderRadius: 8,
     marginBottom: 10,
   },
 
-  blogFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
-    paddingTop: 10,
-    marginTop: 5,
+  blogImagePlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 6,
+    backgroundColor: '#E0E0E0',
+    marginRight: 10,
   },
 
-  blogTags: {
+  blogContent: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+
+  blogTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#000',
+  },
+
+  blogDescription: {
     fontSize: 12,
-    color: TEXT_GREY,
-    width: '60%',
+    color: '#555',
+    marginTop: 4,
+  },
+
+  blogMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F8F8F8',
+    paddingTop: 5,
+  },
+
+  blogAuthor: {
+    fontSize: 10,
+    color: '#999',
+  },
+
+  blogReads: {
+    fontSize: 10,
+    color: '#219e4dff',
+  },
+
+  noResultsText: {
+    textAlign: 'center',
+    padding: 20,
+    color: '#777',
+  },
+
+  tagContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+
+  tagPill: {
+    backgroundColor: '#F0F4F0',
+    borderRadius: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+
+  tagPillText: {
+    color: '#4CAF50',
+    fontSize: 12,
+    fontWeight: '500',
   },
 
   authorSection: {
@@ -118,11 +204,6 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: GREEN,
     marginRight: 5,
-  },
-
-  blogAuthor: {
-    fontSize: 12,
-    color: TEXT_GREY,
   },
 
   primaryButton: {

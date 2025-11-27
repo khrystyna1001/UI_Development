@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View,
     Text,
     ScrollView,
     TouchableOpacity,
     TextInput,
     SafeAreaView,
-    Dimensions,
-    Image,
     }
 from 'react-native';
+
+import { getMessages } from '../../scripts/api';
+import { formatDistanceToNow, parseISO } from 'date-fns';
 
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from '../../components/header';
@@ -31,14 +32,7 @@ const Icon = ({ name, size, color, style }) => (
   </Text>
 );
 
-const messagesData = [
-  { id: '1', name: 'John Smith', snippet: 'Are we still on for tomorrow?', time: '2 min ago', read: false },
-  { id: '2', name: 'Anna Johnson', snippet: 'Check out this link!', time: '5 min ago', read: true },
-  { id: '3', name: 'Mark Lee', snippet: 'Great meeting earlier!', time: '15 min ago', read: true },
-  { id: '4', name: 'Lily Brown', snippet: 'Can you send me the files?', time: '1 hr ago', read: false },
-  { id: '5', name: 'David Clark', snippet: 'Re: Project status update', time: '1 hr ago', read: true },
-  { id: '6', name: 'Jessica Alba', snippet: 'Let\'s grab lunch next week.', time: '2 hr ago', read: false },
-];
+
 
 const ActionCard = ({ title, iconName }) => (
   <TouchableOpacity style={styles.card}>
@@ -64,6 +58,16 @@ const MessageItem = ({ name, snippet, time, read }) => (
 
 export default function Messages () {
   const [selectedMessages, setSelectedMessages] = React.useState([]);
+  const [messages, setMessages] = React.useState([]);
+
+  const fetchMessages = async () => {
+    const messages = await getMessages();
+    setMessages(messages);
+  };
+
+  useEffect(() => {
+    fetchMessages();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -88,12 +92,12 @@ export default function Messages () {
           <Text style={styles.sectionHeader}>Your Messages</Text>
 
           <View>
-            {messagesData.map((message) => (
+            {Array.isArray(messages) && messages.map((message) => (
               <MessageItem
                 key={message.id}
-                name={message.name}
-                snippet={message.snippet}
-                time={message.time}
+                name={message.title}
+                snippet={message.content}
+                time={formatDistanceToNow(parseISO(message.created_at), { addSuffix: true })}
                 read={message.read}
               />
             ))}

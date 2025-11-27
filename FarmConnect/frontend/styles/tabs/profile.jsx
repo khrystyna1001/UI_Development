@@ -2,11 +2,11 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
 
+  // --- General ---
   container: {
       flex: 1,
       backgroundColor: "#FFFFFF"
   },
-
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
@@ -14,10 +14,10 @@ export const styles = StyleSheet.create({
     marginTop: 16,
   },
 
+  // --- Product List ---
   horizontalScroll: {
     flexDirection: "row",
   },
-
   productCard: {
     backgroundColor: "#f8f8f8",
     borderRadius: 8,
@@ -25,36 +25,23 @@ export const styles = StyleSheet.create({
     marginRight: 10,
     width: 140,
   },
-
   tag: {
     fontSize: 12,
     color: "#4CAF50",
     fontWeight: "600",
     marginBottom: 6,
   },
-
   productName: {
     fontSize: 16,
     fontWeight: "500",
   },
-
   price: {
     marginTop: 4,
     fontSize: 14,
     color: "#555",
   },
-
-  quantity: {
-    marginTop: 4,
-    fontSize: 14,
-    color: "#777",
-  },
-
-  reviewContainer: {
-    flexDirection: "row",
-    marginTop: 8,
-  },
-
+  
+  // --- Reviews ---
   reviewCard: {
     flex: 1,
     backgroundColor: "#f8f8f8",
@@ -62,22 +49,17 @@ export const styles = StyleSheet.create({
     padding: 10,
     marginRight: 10,
   },
-
   reviewer: {
     fontWeight: "600",
     marginBottom: 4,
   },
-
-  reviewText: {
-    color: "#555",
-  },
-
+  
+  // --- Performance ---
   performanceContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 8,
   },
-
   performanceBox: {
     flex: 1,
     backgroundColor: "#f8f8f8",
@@ -86,28 +68,21 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 8,
   },
-
   performanceValue: {
     fontSize: 18,
     fontWeight: "700",
   },
-
   performanceLabel: {
     fontSize: 14,
     color: "#555",
   },
-
   performanceChange: {
     color: "#4CAF50",
     marginTop: 4,
     fontSize: 12,
   },
 
-  updatesContainer: {
-    flexDirection: "row",
-    marginTop: 8,
-  },
-
+  // --- Updates / Blog Posts ---
   updateCard: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
@@ -119,22 +94,16 @@ export const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-
   updateTitle: {
     fontWeight: "600",
   },
-
-  updateSubtitle: {
-    marginTop: 4,
-    color: "#555",
-  },
-
   updateAuthor: {
     marginTop: 6,
     fontSize: 12,
     color: "#999",
   },
 
+  // --- Buttons ---
   shareButton: {
     borderWidth: 1,
     borderColor: "#000",
@@ -143,11 +112,9 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 16,
   },
-
   shareButtonText: {
     fontWeight: "600",
   },
-
   viewButton: {
     borderWidth: 1,
     borderColor: "#000",
@@ -156,11 +123,9 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 8,
   },
-
   viewButtonText: {
     fontWeight: "600",
   },
-
   contactButton: {
     backgroundColor: "#000",
     borderRadius: 6,
@@ -168,7 +133,6 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-
   contactButtonText: {
     color: "#fff",
     fontWeight: "600",

@@ -2,16 +2,16 @@ import React, {useState, useEffect} from "react";
 import { SafeAreaView,
     View,
     ScrollView,
-    Image,
     Text,
     TouchableOpacity,
-    TextInput
     } from "react-native";
 
-import { getProducts, getProduct, getReviews, getReview, getBlogPosts, getBlogPost } from "../../scripts/api";
+import { getProducts, getReviews, getBlogPosts } from "../../scripts/api";
 
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from '../../components/header';
+
+import { router } from 'expo-router';
 
 import { styles } from '../../styles/tabs/profile.jsx';
 
@@ -54,13 +54,15 @@ export default function Profile () {
           }}>
           <Text style={styles.sectionTitle}>Available Products</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-            {products.slice(0, 4).map((item, index) => (
-              <View key={index} style={styles.productCard}>
-                <Text style={styles.tag}>{item.category}</Text>
-                <Text style={styles.productName}>{item.name}</Text>
-                <Text style={styles.price}>{item.price}$/lbs</Text>
-                <Text style={styles.quantity}>Available: {item.quantity} lbs</Text>
-              </View>
+            {Array.isArray(products) && products.slice(0, 4).map((item, index) => (
+              <TouchableOpacity onPress={() => router.navigate(`products/${item.id}/`)}>
+                <View key={index} style={styles.productCard}>
+                  <Text style={styles.tag}>{item.category}</Text>
+                  <Text style={styles.productName}>{item.name}</Text>
+                  <Text style={styles.price}>{item.price}$/lbs</Text>
+                  <Text style={styles.quantity}>Available: {item.quantity} lbs</Text>
+                </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
 
@@ -72,17 +74,19 @@ export default function Profile () {
         showsHorizontalScrollIndicator={false} 
         style={{ paddingVertical: 8 }}
       >
-        {reviews.slice(0, 3).map((review, index) => (
-          <View key={index} style={styles.reviewCard}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-              <Text style={styles.reviewer}>{review.author.username}</Text>
-              <Text style={styles.starRating}>
-                {'★'.repeat(Math.round(review.rating))}
-                {'☆'.repeat(5 - Math.round(review.rating))}
-              </Text>
+        {Array.isArray(reviews) && reviews.slice(0, 3).map((review, index) => (
+          <TouchableOpacity onPress={() => router.navigate(`reviews/${review.id}/`)}>
+            <View key={index} style={styles.reviewCard}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                <Text style={styles.reviewer}>{review.author.username}</Text>
+                <Text style={styles.starRating}>
+                  {'★'.repeat(Math.round(review.rating))}
+                  {'☆'.repeat(5 - Math.round(review.rating))}
+                </Text>
+              </View>
+              <Text style={styles.reviewText}>{review.content}</Text>
             </View>
-            <Text style={styles.reviewText}>{review.content}</Text>
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
       </View>
@@ -90,16 +94,18 @@ export default function Profile () {
       {/* Recent Updates Section */}
       <View style={{ marginBottom: 24 }}>
         <Text style={styles.sectionTitle}>Recent Updates</Text>
-        {blogPosts.slice(0, 2).map((post, index) => (
-          <View key={index} style={styles.updateCard}>
-            <Text style={styles.updateTitle}>{post.title}</Text>
-            <Text style={styles.updateSubtitle}>
-              {post.content.length > 100 
-                ? `${post.content.substring(0, 100)}...` 
-                : post.content}
-            </Text>
-            <Text style={styles.updateAuthor}>Posted by {post.author} • {new Date(post.created_at).toLocaleDateString()}</Text>
-          </View>
+        {Array.isArray(blogPosts) && blogPosts.slice(0, 2).map((post, index) => (
+          <TouchableOpacity onPress={() => router.navigate(`blog/${post.id}/`)}>
+            <View key={index} style={styles.updateCard}>
+              <Text style={styles.updateTitle}>{post.title}</Text>
+              <Text style={styles.updateSubtitle}>
+                {post.content.length > 100 
+                  ? `${post.content.substring(0, 100)}...` 
+                  : post.content}
+              </Text>
+              <Text style={styles.updateAuthor}>Posted by {post.author} • {new Date(post.created_at).toLocaleDateString()}</Text>
+            </View>
+          </TouchableOpacity>
         ))}
       </View>
 

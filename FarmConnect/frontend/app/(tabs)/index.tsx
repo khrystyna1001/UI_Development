@@ -9,7 +9,9 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import { getProducts, getProduct, getReviews, getReview } from '../../scripts/api';
+import { router } from 'expo-router';
+
+import { getProducts, getReviews } from '../../scripts/api';
 
 import NavigationFooter from '../../components/footer';
 import NavigationHeader from '../../components/header';
@@ -18,9 +20,9 @@ import { styles } from '../../styles/tabs/home.jsx';
 
 export default function Home() {
   const [textInput1, onChangeTextInput1] = useState("");
-
   const [products, setProducts] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchProducts = async () => {
     const response = await getProducts();
@@ -56,7 +58,8 @@ export default function Home() {
             showsHorizontalScrollIndicator={false}
             style={styles.horizontalScroll}
           >
-            {products.slice(0, 4).map((item, i) => (
+            {Array.isArray(products) && products.slice(0, 4).map((item, i) => (
+              <TouchableOpacity onPress={() => router.navigate(`/products/${item.id}`)}>
               <View key={i} style={styles.productCard}>
                 <TouchableOpacity
                   style={styles.productTag}
@@ -70,6 +73,7 @@ export default function Home() {
                   <Text style={styles.productQty}>{item.quantity}</Text>
                 </View>
               </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
@@ -85,18 +89,20 @@ export default function Home() {
             showsHorizontalScrollIndicator={false}
             style={styles.horizontalScroll}
           >
-            {reviews.slice(0, 3).map((item, i) => (
-              <View key={i} style={styles.reviewCard}>
-                <View style={styles.reviewHeader}>
-                  <View style={styles.reviewAvatar} />
-                  <Text style={styles.reviewName}>{item.author.username}</Text>
-                  <Image
-                    resizeMode="stretch"
-                    style={[styles.stars, { width: item.rating * 20 }]}
-                  />
+            {Array.isArray(reviews) && reviews.slice(0, 3).map((item, i) => (
+              <TouchableOpacity onPress={() => router.navigate(`/reviews/${item.id}`)}>
+                <View key={i} style={styles.reviewCard}>
+                  <View style={styles.reviewHeader}>
+                    <View style={styles.reviewAvatar} />
+                    <Text style={styles.reviewName}>{item.author.username}</Text>
+                    <Image
+                      resizeMode="stretch"
+                      style={[styles.stars, { width: item.rating * 20 }]}
+                    />
+                  </View>
+                  <Text style={styles.reviewText}>{item.content}</Text>
                 </View>
-                <Text style={styles.reviewText}>{item.content}</Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
@@ -124,7 +130,7 @@ export default function Home() {
 
           <TouchableOpacity
             style={styles.secondaryButton}
-            onPress={() => {onChangeTextInput1(""); alert("Cancel Pressed!")}}
+            onPress={() => {onChangeTextInput1("")}}
           >
             <Text style={styles.secondaryButtonText}>Cancel</Text>
           </TouchableOpacity>

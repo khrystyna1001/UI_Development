@@ -1,16 +1,15 @@
 import { View,
     Text,
     TextInput,
-    TouchableOpacity,
-    SafeAreaView,
     KeyboardAvoidingView,
     Platform,
     Pressable,
-    }
-from 'react-native';
+    ActivityIndicator,
+    } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
-
+import * as SecureStore from 'expo-secure-store';
+import { login } from '../../scripts/api';
 import { styles } from '../../styles/auth/login.jsx';
 
 const Icon = ({ name, size, color }) => (
@@ -19,19 +18,42 @@ const Icon = ({ name, size, color }) => (
   </Text>
 );
 
-export default function LoginScreen (onSwitchToSignUp) {
-  const [login, setLogin] = useState('');
+export default function LoginScreen() {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = (e) => {
-      e.preventDefault();
-      if (!login || !password) {
-        alert("Please enter both login and password.");
+  const handleLogin = async () => {
+    if (!username || !password) {
+        setError('Please enter both username and password');
         return;
-      }
-      console.log('Logging in with:', { login, password });
-      alert("Login attempt successful (check console).");
-    };
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+        const data = await login(username, password);
+        
+        if (data.token) {
+            const token = data.token;
+            if (Platform.OS === 'web') {
+              window.localStorage.setItem('userToken', token);
+            } else {
+              await SecureStore.setItemAsync('userToken', token);
+            }
+            router.replace('/(tabs)');
+        } else {
+            setError('Invalid response from server');
+        }
+    } catch (err) {
+        console.error('Login error:', err);
+        setError(err.message || 'Login failed. Please try again.');
+    } finally {
+        setIsLoading(false);
+    }
+};
 
   return (
     <KeyboardAvoidingView
@@ -45,12 +67,12 @@ export default function LoginScreen (onSwitchToSignUp) {
           <Text style={styles.inputLabel}>Login</Text>
           <TextInput
             style={styles.input}
-            placeholder="Login"
+            placeholder="Username"
             placeholderTextColor="#999"
-            value={login}
-            onChangeText={setLogin}
-            keyboardType="email-address"
+            value={username}
+            onChangeText={setUsername}
             autoCapitalize="none"
+            autoCorrect={false}
           />
         </View>
 
@@ -66,9 +88,21 @@ export default function LoginScreen (onSwitchToSignUp) {
           />
         </View>
 
-        <Pressable style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Log In</Text>
-          <Icon name="arrow-right" size={20} color="#fff" />
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        
+        <Pressable 
+          style={[styles.button, isLoading && styles.buttonDisabled]} 
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+              <Text style={styles.buttonText}>Log In</Text>
+              <Icon name="arrow-right" size={20} color="#fff" />
+            </>
+          )}
         </Pressable>
 
         <Pressable style={styles.switchLink}

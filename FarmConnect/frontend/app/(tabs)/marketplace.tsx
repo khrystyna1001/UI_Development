@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View,
     Text,
-    Image,
     ScrollView,
     TouchableOpacity,
     TextInput,
@@ -17,8 +16,8 @@ import { router } from 'expo-router';
 import { styles } from '../../styles/tabs/marketplace.jsx';
 
 
-const ProductCard = ({ product, onPress }: { product: any; onPress: () => void }) => (
-  <TouchableOpacity style={styles.productCard} onPress={onPress}>
+const ProductCard = ({ product }: { product: any }) => (
+  <TouchableOpacity style={styles.productCard} onPress={() => router.navigate(`/products/${product.id}`)}>
     <View style={styles.productImagePlaceholder} />
     <View style={styles.productContent}>
       <Text style={styles.productName}>{product.name}</Text>
@@ -41,7 +40,7 @@ export default function ProductsPage () {
       setProducts(response);
   };
 
-  const filteredProducts = products.filter((post: any) => {
+  const searchedProducts = products.filter((post: any) => {
     const query = searchQuery?.toLowerCase() || '';
     return (
       (post.name?.toLowerCase() || '').includes(query) ||
@@ -67,7 +66,7 @@ export default function ProductsPage () {
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-        <TouchableOpacity style={styles.filterButton} onPress={() => alert("Filter Options")}>
+        <TouchableOpacity style={styles.filterButton} onPress={() => console.log("Filter pressed")}>
           <Text style={styles.filterText}>Filter</Text>
         </TouchableOpacity>
       </View>
@@ -91,9 +90,9 @@ export default function ProductsPage () {
 
         {/* Blog Post List */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Latest Products ({products.length})</Text>
-          {products.length > 0 ? (
-            products.map((product) => (
+          <Text style={styles.sectionTitle}>Latest Products ({searchedProducts.length})</Text>
+          {Array.isArray(searchedProducts) && searchedProducts.length > 0 ? (
+            searchedProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
