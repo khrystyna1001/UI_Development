@@ -194,4 +194,20 @@ export const styles = StyleSheet.create({
       fontWeight: '500',
     },
 
+    addButton: {
+      backgroundColor: '#4CAF50',
+      borderRadius: 5,
+      paddingVertical: 8,
+      marginHorizontal: 30,
+      marginVertical: 20,
+      paddingHorizontal: 10,
+    },
+
+    addButtonText: {
+      color: '#FFF',
+      fontSize: 16,
+      fontWeight: '600',
+      textAlign: 'center',
+    },
+
 });

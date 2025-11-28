@@ -63,56 +63,6 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  authorCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8F8F8',
-    padding: 15,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 3,
-    elevation: 1,
-  },
-
-  authorAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#0000001A',
-    marginRight: 15,
-  },
-
-  authorInfo: {
-    flex: 1,
-  },
-
-  authorName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#000',
-  },
-
-  authorBio: {
-    fontSize: 12,
-    color: '#777',
-    marginTop: 2,
-  },
-
-  followButton: {
-    backgroundColor: '#000',
-    borderRadius: 5,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-  },
-
-  followButtonText: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-
   blogCard: {
     flexDirection: 'row',
     backgroundColor: '#FFF',
@@ -231,6 +181,52 @@ export const styles = StyleSheet.create({
   secondaryButtonText: {
       fontWeight: "600",
       color: "#000"
+  },
+
+  createButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+
+  createButtonText: {
+    color: '#FFF',
+    fontWeight: '600',
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  modalContent: {
+    backgroundColor: '#FFF',
+    padding: 20,
+    borderRadius: 8,
+    width: '80%',
+    maxWidth: 400,
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+
+  sortOption: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+
+  selectedSortOption: {
+    backgroundColor: '#F0F0F0',
   },
 
 });

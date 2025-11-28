@@ -115,4 +115,16 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     letterSpacing: 0.5,
   },
+  actionButtonsContainer: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    marginTop: 16,
+  },
+  editButton: {
+    backgroundColor: '#2196F3',
+    marginRight: 8,
+  },
+  deleteButton: {
+    backgroundColor: '#F44336',
+  },
 });

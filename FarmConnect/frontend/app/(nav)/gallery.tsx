@@ -1,20 +1,21 @@
+import { useEffect, useState } from 'react';
+
 import {
   SafeAreaView,
   View,
   Text,
-  Image,
-  Pressable,
   ScrollView,
-  TextInput,
-  TouchableOpacity,
-  Header,
-  Dimensions
+  Dimensions,
+  TouchableOpacity
 } from 'react-native';
 
 import NavigationFooter from '../../components/footer';
 import NavigationHeader from '../../components/header';
 
+import { getGalleryImages } from '../../scripts/api';
+
 import { styles } from '../../styles/nav/gallery.jsx';
+import { router } from 'expo-router';
 
 const GalleryItem = ({ label, size }) => {
     const isLarge = size === 'large';
@@ -34,39 +35,80 @@ const GalleryItem = ({ label, size }) => {
         };
 
     return (
-      <View style={[styles.galleryItem, dimensions, isLarge ? styles.largeItemMargin : styles.smallItemMargin]}>
-        <Text style={styles.galleryLabel}>{label}</Text>
-        <Text style={styles.gallerySizeText}>({size})</Text>
-      </View>
+        <View style={[styles.galleryItem, dimensions, isLarge ? styles.largeItemMargin : styles.smallItemMargin]}>
+          <Text style={styles.galleryLabel}>{label}</Text>
+          <Text style={styles.gallerySizeText}>({size})</Text>
+        </View>
     );
 };
 
 
-export default function GalleryScreen ({ setScreen }){
+export default function GalleryScreen (){
+    const [images, setImages] = useState([]);
+
+    useEffect(() => {
+        const fetchImages = async () => {
+            const response = await getGalleryImages();
+            setImages(response);
+        };
+        fetchImages();
+    }, []);
+    
     return (
       <SafeAreaView style={styles.safeArea}>
         <NavigationHeader />
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
 
           <View style={styles.galleryContainer}>
+            {images.map((image, index) => {
+              if (index % 3 === 0) {
+                return (
+                  <TouchableOpacity 
+                    key={image.id} 
+                    onPress={() => router.navigate(`/gallery/${image.id}`)}
+                    style={styles.largeImageContainer}
+                  >
+                    <GalleryItem label={image.title} size="large" />
+                  </TouchableOpacity>
+                );
+              }
+              
+              if (index % 3 === 1) {
+                const nextImage = images[index + 1];
+                return (
+                  <View key={image.id} style={styles.smallImagesContainer}>
+                    <TouchableOpacity 
+                      onPress={() => router.navigate(`/gallery/${image.id}`)}
+                      style={styles.smallImageContainer}
+                    >
+                      <GalleryItem label={image.title} size="small" />
+                    </TouchableOpacity>
+                    
+                    {nextImage && (
+                      <TouchableOpacity 
+                        onPress={() => router.navigate(`/gallery/${nextImage.id}`)}
+                        style={styles.smallImageContainer}
+                      >
+                        <GalleryItem 
+                          label={nextImage.title} 
+                          size="small" 
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                      );
+                    }
 
-            {/* Row 1: Picture 1 (large) */}
-            <GalleryItem label="Picture 1" size="large" />
+                    return null;
+                  })}
 
-            {/* Row 2: Picture 2 (small), Picture 3 (small) - flow handles side-by-side */}
-            <GalleryItem label="Picture 2" size="small" />
-            <GalleryItem label="Picture 3" size="small" />
-
-            {/* Row 3: Picture 4 (large) */}
-            <GalleryItem label="Picture 4" size="large" />
-
-            {/* Row 4: Picture 5 (small), Picture 6 (small) */}
-            <GalleryItem label="Picture 5" size="small" />
-            <GalleryItem label="Picture 6" size="small" />
-
-          </View>
-          <View style={{ height: 30 }} />
-        </ScrollView>
+                </View>
+                <View>
+              <TouchableOpacity style={styles.addImageContainer} onPress={() => router.navigate('/gallery/create')}>
+                <Text style={styles.addImageText}>Add Image</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         <NavigationFooter />
       </SafeAreaView>
   )

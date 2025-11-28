@@ -107,42 +107,6 @@ export default function Home() {
           </ScrollView>
         </View>
 
-        {/* Share Your Thoughts */}
-        <View style={styles.section}>
-          <Text style={styles.sectionSubtitle}>Share your thoughts</Text>
-          <TextInput
-            placeholder="Write your blog here..."
-            value={textInput1}
-            onChangeText={onChangeTextInput1}
-            style={styles.textInput}
-            multiline
-          />
-          <Text style={styles.helperText}>
-            Share your farming experiences and tips.
-          </Text>
-
-          <TouchableOpacity
-            style={[styles.secondaryButton, { marginTop: 10 }]}
-            onPress={() => alert("Save Draft Pressed!")}
-          >
-            <Text style={styles.secondaryButtonText}>Save Draft</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={() => {onChangeTextInput1("")}}
-          >
-            <Text style={styles.secondaryButtonText}>Cancel</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={() => alert(`Post Content: ${textInput1}`)}
-          >
-            <Text style={styles.primaryButtonText}>Post</Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Farm Tips */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>

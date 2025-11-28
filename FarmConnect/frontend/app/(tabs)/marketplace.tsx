@@ -75,19 +75,9 @@ export default function ProductsPage () {
       {/* Blog Content Scroll */}
       <ScrollView style={styles.scrollViewContent} contentContainerStyle={styles.scrollContent}>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Featured Author</Text>
-          <View style={styles.authorCard}>
-            <View style={styles.authorAvatar} />
-            <View style={styles.authorInfo}>
-              <Text style={styles.authorName}>John Doe</Text>
-              <Text style={styles.authorBio}>Leading expert in sustainable farming techniques and organic pest control.</Text>
-            </View>
-            <TouchableOpacity style={styles.followButton} onPress={() => alert("Followed John Doe")}>
-              <Text style={styles.followButtonText}>+ Follow</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <TouchableOpacity style={styles.addButton} onPress={() => router.navigate(`/products/create`) }>
+          <Text style={styles.addButtonText}>Add Product</Text>
+        </TouchableOpacity>
 
         {/* Blog Post List */}
         <View style={styles.section}>

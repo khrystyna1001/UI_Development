@@ -15,6 +15,11 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 
+
+class UserViewSet(ModelViewSet):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+
 class BlogPostViewSet(ModelViewSet):
     serializer_class = BlogPostSerializer
     queryset = BlogPost.objects.all()

@@ -127,19 +127,6 @@ export default function Profile () {
           <Text style={styles.performanceChange}>+20%</Text>
         </View>
       </View>
-
-      {/* Buttons */}
-      <TouchableOpacity style={styles.shareButton}>
-        <Text style={styles.shareButtonText}>Share Profile</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.viewButton}>
-        <Text style={styles.viewButtonText}>View Location</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.contactButton}>
-        <Text style={styles.contactButtonText}>Contact</Text>
-      </TouchableOpacity>
     </ScrollView>
     <NavigationFooter />
 		</SafeAreaView>

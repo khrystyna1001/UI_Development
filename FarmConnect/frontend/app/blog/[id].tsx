@@ -5,10 +5,11 @@ import {
     Image,
     ScrollView, 
     ActivityIndicator, 
-    TouchableOpacity
+    TouchableOpacity,
+    Alert
 } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
-import { getBlogPost } from '../../scripts/api';
+import { getBlogPost, getUser, getMyData, deleteBlogPost } from '../../scripts/api';
 
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
@@ -19,24 +20,45 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 export default function BlogDetail() {
   const { id } = useLocalSearchParams();
   const [blog, setBlog] = useState(null);
+  const [author, setAuthor] = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const loadData = async () => {
       try {
-        const data = await getBlogPost(id);
-        setBlog(data);
+        const blogData = await getBlogPost(id);
+        setBlog(blogData);
+        
+        if (blogData?.author) {
+          const authorData = await getUser(blogData.author);
+          setAuthor(authorData);
+        }
+        
+        const userData = await getMyData();
+        setUser(userData);
       } catch (err) {
-        setError('Failed to fetch blog post');
+        setError('Failed to load data');
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProduct();
+    loadData();
   }, [id]);
+
+  const deleteBlog = async (id) => {
+    try {
+      await deleteBlogPost(id);
+      Alert.alert('Success', 'Blog post deleted successfully');
+    } catch (error) {
+      console.error('Error deleting blog post:', error);
+      Alert.alert('Error', 'Failed to delete blog post');
+    }
+    router.replace('/(nav)/blogs');
+  };
 
   if (loading) {
     return (
@@ -69,7 +91,7 @@ export default function BlogDetail() {
         />
       </View>
 
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+      <TouchableOpacity onPress={() => router.back() || router.replace('/blogs')} style={styles.backButton}>
             <Icon name="arrow-back" size={24} color="#333" />
             <Text style={styles.backButtonText}>Back</Text>
       </TouchableOpacity>
@@ -87,7 +109,7 @@ export default function BlogDetail() {
           <Text style={styles.sectionTitle}>Details</Text>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Author:</Text>
-            <Text style={styles.detailValue}>{blog.author?.first_name || 'Unknown'}</Text>
+            <Text style={styles.detailValue}>{author?.username || 'Unknown'}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Posted:</Text>
@@ -102,12 +124,33 @@ export default function BlogDetail() {
             </Text>
           </View>
           
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.messageButton]} 
-            onPress={() => console.log('Message clicked')}
-          >
-            <Text style={styles.actionButtonText}>Message Author</Text>
-          </TouchableOpacity>
+          {/* Edit button - only for the author */}
+          {author?.id === user?.id && (
+            <View style={styles.actionButtonsContainer}>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.editButton]}
+                onPress={() => router.replace(`/blog/create?id=${blog.id}`)}
+              >
+                <Text style={styles.actionButtonText}>Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.deleteButton]}
+                onPress={() => deleteBlog(blog.id)}
+              >
+                <Text style={styles.actionButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Message button - only for non-authors */}
+          {author?.id !== user?.id && (
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.messageButton]} 
+              onPress={() => console.log('Message clicked')}
+            >
+              <Text style={styles.actionButtonText}>Message Author</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </ScrollView>

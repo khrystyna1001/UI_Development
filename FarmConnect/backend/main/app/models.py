@@ -124,7 +124,7 @@ class Message(models.Model):
 
 class GalleryImage(models.Model):
     title = models.CharField(max_length=200)
-    image = models.ImageField(upload_to='gallery/')
+    image = models.ImageField(upload_to='gallery/', default="")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

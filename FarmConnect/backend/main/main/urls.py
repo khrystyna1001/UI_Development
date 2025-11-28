@@ -17,7 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from app.views import BlogPostViewSet, ProductViewSet, ReviewViewSet, MessageViewSet, GalleryViewSet, FarmViewSet, SignupView, MyDataView, LogoutView
+from app.views import BlogPostViewSet, ProductViewSet, ReviewViewSet, MessageViewSet, GalleryViewSet, FarmViewSet, SignupView, MyDataView, LogoutView, UserViewSet
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
 
@@ -28,6 +28,7 @@ router.register(r'reviews', ReviewViewSet, basename='reviews')
 router.register(r'messages', MessageViewSet, basename='messages')
 router.register(r'gallery', GalleryViewSet, basename='gallery')
 router.register(r'farms', FarmViewSet, basename='farms')
+router.register(r'users', UserViewSet, basename='users')
 
 urlpatterns = [
     path("admin/", admin.site.urls),

@@ -1,6 +1,5 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
 const PADDING_HORIZONTAL = 16;
 const ITEM_MARGIN = 8;
 
@@ -52,5 +51,36 @@ export const styles = StyleSheet.create({
       fontSize: 12,
       color: '#999',
       marginTop: 4,
+    },
+
+    largeImageContainer: {
+      width: '100%',
+      marginBottom: ITEM_MARGIN * 2,
+    },
+
+    smallImagesContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: '5',
+      marginBottom: ITEM_MARGIN * 2,
+    },
+
+    smallImageContainer: {
+      flex: 0.48,
+      marginBottom: ITEM_MARGIN,
+    },
+
+    addImageContainer: {
+      backgroundColor: '#f1f1f1',
+      marginBottom: ITEM_MARGIN * 2,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 16,
+    },
+    addImageText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#555',
+      textAlign: 'center',
     },
 });

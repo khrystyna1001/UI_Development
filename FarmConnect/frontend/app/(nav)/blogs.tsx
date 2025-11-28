@@ -6,13 +6,13 @@ import { View,
     TouchableOpacity,
     TextInput,
     SafeAreaView,
+    Modal,
     } from 'react-native';
 
-import { getBlogPosts } from "../../scripts/api";
+import { getBlogPosts, getMyData } from "../../scripts/api";
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from "../../components/header";
 import { router } from 'expo-router';
-
 import { styles } from '../../styles/nav/blogs.jsx';
 
 
@@ -23,7 +23,7 @@ const BlogPostCard = ({ post }: { post: any }) => (
       <Text style={styles.blogTitle}>{post.title}</Text>
       <Text style={styles.blogDescription}>{post.content}</Text>
       <View style={styles.blogMeta}>
-        <Text style={styles.blogAuthor}>{post.author.first_name} | {new Date(post.created_at).toLocaleDateString()}</Text>
+        <Text style={styles.blogAuthor}>{post.author.username} | {new Date(post.created_at).toLocaleDateString()}</Text>
         <Text style={styles.blogReads}>⭐ {post.reads}k Reads</Text>
       </View>
     </View>
@@ -32,14 +32,33 @@ const BlogPostCard = ({ post }: { post: any }) => (
 
 export default function BlogPage () {
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortPosts, setSortPosts] = useState("newest");
+  const [showSortButton, setShowSortButton] = useState(false);
   const [blogs, setBlogs] = useState([]);
+  const [user, setUser] = useState(null);
 
   const fetchBlogs = async () => {
     const response = await getBlogPosts();
     setBlogs(response);
   }
 
-  const searchedPosts = blogs.filter((post: any) => {
+  const sortBlogs = (blogs) => {
+    const sorted = [...blogs];
+    switch (sortPosts) {
+      case 'newest':
+        return sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      case 'oldest':
+        return sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      case 'title-asc':
+        return sorted.sort((a, b) => a.title.localeCompare(b.title));
+      case 'title-desc':
+        return sorted.sort((a, b) => b.title.localeCompare(a.title));
+      default:
+        return sorted;
+    }
+  };
+
+  const searchedPosts = sortBlogs(blogs).filter((post: any) => {
     const query = searchQuery?.toLowerCase() || '';
     return (
       post.title.toLowerCase().includes(query) ||
@@ -51,6 +70,14 @@ export default function BlogPage () {
 
   useEffect(() => {
     fetchBlogs();
+  }, []);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const user = await getMyData();
+      setUser(user);
+    };
+    loadUser();
   }, []);
 
   return (
@@ -66,27 +93,52 @@ export default function BlogPage () {
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-        <TouchableOpacity style={styles.filterButton} onPress={() => alert("Filter Options")}>
-          <Text style={styles.filterText}>Filter</Text>
+        <TouchableOpacity style={styles.filterButton} onPress={() => setShowSortButton(!showSortButton)}>
+          <Text style={styles.filterText}>Sort {showSortButton}</Text>
         </TouchableOpacity>
+        <Modal
+          visible={showSortButton}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowSortButton(false)}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlay} 
+            activeOpacity={1} 
+            onPress={() => setShowSortButton(false)}
+          >
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Sort By</Text>
+              {['newest', 'oldest', 'title-asc', 'title-desc'].map(option => (
+                <TouchableOpacity
+                  key={option}
+                  style={[
+                    styles.sortOption,
+                    sortPosts === option && styles.selectedSortOption
+                  ]}
+                  onPress={() => { 
+                    setSortPosts(option);
+                    setShowSortButton(false);
+                  }}
+                >
+                  <Text style={styles.sortOptionText}>
+                    {option.replace('-', ' ')}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </TouchableOpacity>
+        </Modal>
       </View>
 
       {/* Blog Content Scroll */}
       <ScrollView style={styles.scrollViewContent} contentContainerStyle={styles.scrollContent}>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Featured Author</Text>
-          <View style={styles.authorCard}>
-            <View style={styles.authorAvatar} />
-            <View style={styles.authorInfo}>
-              <Text style={styles.authorName}>John Doe</Text>
-              <Text style={styles.authorBio}>Leading expert in sustainable farming techniques and organic pest control.</Text>
-            </View>
-            <TouchableOpacity style={styles.followButton} onPress={() => alert("Followed John Doe")}>
-              <Text style={styles.followButtonText}>+ Follow</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        {user?.is_superuser && (
+          <TouchableOpacity style={styles.createButton} onPress={() => router.navigate('/blog/create')}>
+            <Text style={styles.createButtonText}>Create New Post</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Blog Post List */}
         <View style={styles.section}>

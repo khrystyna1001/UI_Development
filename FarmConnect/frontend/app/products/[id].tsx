@@ -5,10 +5,11 @@ import {
     Image,
     ScrollView, 
     ActivityIndicator, 
-    TouchableOpacity
+    TouchableOpacity,
+    Alert
 } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
-import { getProduct } from '../../scripts/api';
+import { getProduct, getMyData, getUser, deleteProduct } from '../../scripts/api';
 
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
@@ -23,15 +24,28 @@ export default function ProductDetail() {
   const [error, setError] = useState(null);
   const [inCart, setInCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [author, setAuthor] = useState(null);
+  const [user, setUser] = useState(null);
+
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const data = await getProduct(id);
         setProduct(data);
+
+        if (data.author) {
+          const author = await getUser(data.author);
+          setAuthor(author);
+        }
+
+        const user = await getMyData();
+        setUser(user);
+
       } catch (err) {
         setError('Failed to fetch product');
         console.error(err);
+        setLoading(false);
       } finally {
         setLoading(false);
       }
@@ -39,6 +53,17 @@ export default function ProductDetail() {
 
     fetchProduct();
   }, [id]);
+
+  const deleteProductById = async (id) => {
+      try {
+        await deleteProduct(id);
+        Alert.alert('Success', 'Product deleted successfully');
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        Alert.alert('Error', 'Failed to delete product');
+      }
+      router.replace('/(tabs)/marketplace');
+    };
 
   if (loading) {
     return (
@@ -93,7 +118,7 @@ export default function ProductDetail() {
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Seller:</Text>
-            <Text style={styles.detailValue}>{product.author.first_name}</Text>
+            <Text style={styles.detailValue}>{author?.username}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Posted:</Text>
@@ -130,23 +155,24 @@ export default function ProductDetail() {
           </View>
           
           <TouchableOpacity 
-            style={[styles.actionButton, inCart && styles.inCartButton]} 
-            onPress={() => {
-              setInCart(!inCart);
-              // Here you would typically add the item to your cart state/context
-              console.log(inCart ? 'Removed from cart' : 'Added to cart', { productId: id, quantity });
-            }}
-          >
-            <Text style={styles.actionButtonText}>
-              {inCart ? 'Remove from Cart' : 'Add to Cart'}
-            </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
             style={[styles.actionButton, styles.messageButton]} 
             onPress={() => console.log('Message clicked')}
           >
             <Text style={styles.actionButtonText}>Message Seller</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.editButton]} 
+            onPress={() => router.replace(`/products/create?id=${product.id}`)}
+          >
+            <Text style={styles.actionButtonText}>Edit</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.deleteButton]} 
+            onPress={() => deleteProductById(product.id)}
+          >
+            <Text style={styles.actionButtonText}>Delete</Text>
           </TouchableOpacity>
         </View>
       </View>
