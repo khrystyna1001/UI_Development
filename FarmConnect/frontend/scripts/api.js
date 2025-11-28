@@ -2,9 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
 
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'http://app-service:8000' 
-  : 'http://192.168.1.3:8000';
+const API_BASE_URL = 'http://localhost';
 
 
 const getToken = async () => {

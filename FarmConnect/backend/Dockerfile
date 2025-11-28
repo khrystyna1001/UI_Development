@@ -32,4 +32,6 @@ RUN chmod +x /app/entrypoint.sh && \
 
 COPY . .
 
+EXPOSE 8000
+
 ENTRYPOINT ["/app/entrypoint.sh"]
