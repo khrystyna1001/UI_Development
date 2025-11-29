@@ -7,13 +7,21 @@ import {
   ScrollView, 
   Alert, 
   ActivityIndicator,
-  StyleSheet 
 } from 'react-native';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { getProduct, createProduct, updateProduct, deleteProduct, getMyData } from '../../scripts/api';
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
 import { styles } from '../../styles/nav/productcreate';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+const ProductCategories = [
+  "Vegetable",
+  "Eggs",
+  "Goods",
+  "Meat",
+  "Fruit"
+]
 
 const ProductEditor = () => {
   const { id } = useLocalSearchParams();
@@ -27,6 +35,8 @@ const ProductEditor = () => {
     description: '',
     price: '',
     quantity: '1',
+    author: '',
+    category: ProductCategories[0]
   });
 
   useEffect(() => {
@@ -48,6 +58,8 @@ const ProductEditor = () => {
             description: productData.description || '',
             price: productData.price?.toString() || '',
             quantity: productData.quantity?.toString() || '1',
+            author: userData.id,
+            category: productData.category || ProductCategories[0]
           });
         }
       } catch (error) {
@@ -83,6 +95,8 @@ const ProductEditor = () => {
         description: formData.description,
         price: parseFloat(formData.price),
         quantity: parseInt(formData.quantity, 10),
+        author: formData.author,
+        category: formData.category,
       };
 
       if (isEditMode && id) {
@@ -126,6 +140,11 @@ const ProductEditor = () => {
     <View style={styles.container}>
       <NavigationHeader />
       <ScrollView style={styles.formContainer}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Icon name="arrow-back" size={24} color="#333" />
+          <Text style={styles.backButtonText}>Back</Text>
+        </TouchableOpacity>
+
         <Text style={styles.header}>
           {isEditMode ? 'Edit Product' : 'Add New Product'}
         </Text>
@@ -138,6 +157,29 @@ const ProductEditor = () => {
           placeholder="Enter product name"
           placeholderTextColor="#95a5a6"
         />
+
+        <View style={styles.categoryContainer}>
+          <Text style={styles.label}>Category *</Text>
+          <View style={styles.categoryList}>
+            {ProductCategories.map((category) => (
+              <TouchableOpacity
+                key={category}
+                style={[
+                  styles.categoryChip,
+                  formData.category === category && styles.selectedChip,
+                ]}
+                onPress={() => handleChange('category', category)}
+              >
+                <Text style={[
+                  styles.categoryChipText,
+                  formData.category === category && styles.selectedChipText,
+                ]}>
+                  {category}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
         <Text style={styles.label}>Description *</Text>
         <TextInput

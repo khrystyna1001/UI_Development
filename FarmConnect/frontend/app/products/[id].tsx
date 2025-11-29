@@ -9,7 +9,7 @@ import {
     Alert
 } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
-import { getProduct, getMyData, getUser, deleteProduct } from '../../scripts/api';
+import { getProduct, getMyData, deleteProduct } from '../../scripts/api';
 
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
@@ -22,9 +22,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [inCart, setInCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const [author, setAuthor] = useState(null);
   const [user, setUser] = useState(null);
 
 
@@ -33,11 +31,6 @@ export default function ProductDetail() {
       try {
         const data = await getProduct(id);
         setProduct(data);
-
-        if (data.author) {
-          const author = await getUser(data.author);
-          setAuthor(author);
-        }
 
         const user = await getMyData();
         setUser(user);
@@ -118,7 +111,11 @@ export default function ProductDetail() {
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Seller:</Text>
-            <Text style={styles.detailValue}>{author?.username}</Text>
+            <Text style={styles.detailValue}>{product.author_info?.username}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Category:</Text>
+            <Text style={styles.detailValue}>{product.category || 'Unknown'}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Posted:</Text>
@@ -154,26 +151,33 @@ export default function ProductDetail() {
             <Text style={styles.priceInfo}>${(product.price * quantity)?.toFixed(2) || '0.00'}</Text>
           </View>
           
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.messageButton]} 
-            onPress={() => console.log('Message clicked')}
-          >
-            <Text style={styles.actionButtonText}>Message Seller</Text>
-          </TouchableOpacity>
+          {/* Edit button - only for the author */}
+          {product?.author === user?.id && (
+            <View style={styles.actionButtonsContainer}>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.editButton]}
+                onPress={() => router.replace(`/products/create?id=${product.id}`)}
+              >
+                <Text style={styles.actionButtonText}>Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.deleteButton]}
+                onPress={() => deleteProduct(product.id)}
+              >
+                <Text style={styles.actionButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.editButton]} 
-            onPress={() => router.replace(`/products/create?id=${product.id}`)}
-          >
-            <Text style={styles.actionButtonText}>Edit</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.deleteButton]} 
-            onPress={() => deleteProductById(product.id)}
-          >
-            <Text style={styles.actionButtonText}>Delete</Text>
-          </TouchableOpacity>
+          {/* Message button - only for non-authors */}
+          {product?.author !== user?.id && (
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.messageButton]} 
+              onPress={() => router.replace('/(tabs)/messages')}
+            >
+              <Text style={styles.actionButtonText}>Message Author</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </ScrollView>

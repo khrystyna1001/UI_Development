@@ -14,6 +14,14 @@ import { getBlogPost, createBlogPost, updateBlogPost, deleteBlogPost, getMyData 
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
 import { styles } from '../../styles/nav/blogcreate.jsx';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+
+const BlogPostCategories = [
+  "Gardening",
+  "Recipes",
+  "Farming"
+]
 
 const BlogEditor = () => {
   const { id } = useLocalSearchParams();
@@ -28,6 +36,7 @@ const BlogEditor = () => {
     title: '',
     content: '',
     author: '',
+    category: BlogPostCategories[0],
   });
 
   useEffect(() => {
@@ -48,6 +57,7 @@ const BlogEditor = () => {
             title: post.title,
             content: post.content,
             author: userData.id,
+            category: post.category
           });
         }
       } catch (error) {
@@ -84,6 +94,7 @@ const BlogEditor = () => {
             title: formData.title,
             content: formData.content,
             author: userData.id,
+            category: formData.category,
         };
 
         if (isEditMode && id) {
@@ -129,6 +140,10 @@ const BlogEditor = () => {
       <NavigationHeader />
       <ScrollView style={styles.formContainer}>
         <Stack.Screen options={{ title: id ? 'Edit Blog Post' : 'Create Blog Post' }} />
+        <TouchableOpacity onPress={() => router.back() || router.replace('/blogs')} style={styles.backButton}>
+            <Icon name="arrow-back" size={24} color="#333" />
+            <Text style={styles.backButtonText}>Back</Text>
+        </TouchableOpacity>
         
         <Text style={styles.label}>Title *</Text>
         <TextInput
@@ -137,6 +152,29 @@ const BlogEditor = () => {
           onChangeText={(text) => handleChange('title', text)}
           placeholder="Enter blog post title"
         />
+
+        <View style={styles.categoryContainer}>
+          <Text style={styles.label}>Category *</Text>
+          <View style={styles.categoryList}>
+            {BlogPostCategories.map((category) => (
+              <TouchableOpacity
+                key={category}
+                style={[
+                  styles.categoryChip,
+                  formData.category === category && styles.selectedChip,
+                ]}
+                onPress={() => handleChange('category', category)}
+              >
+                <Text style={[
+                  styles.categoryChipText,
+                  formData.category === category && styles.selectedChipText,
+                ]}>
+                  {category}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
         <Text style={styles.label}>Content *</Text>
         <TextInput

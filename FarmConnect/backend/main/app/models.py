@@ -16,7 +16,17 @@ class BlogPost(models.Model):
         )
 
     reads = models.IntegerField(default=0)
-    category = models.CharField(max_length=100, default="")
+
+    class BlogPostCategories(models.TextChoices):
+        GARDENING = "Gardening"
+        RECIPES = "Recipes"
+        FARMING = "Farming"
+
+    category = models.CharField(
+        max_length=100, 
+        choices=BlogPostCategories, 
+        default=BlogPostCategories.GARDENING
+        )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -28,7 +38,19 @@ class Product(models.Model):
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.IntegerField(default=0)
-    category = models.CharField(max_length=100, default="")
+
+    class ProductCategories(models.TextChoices):
+        VEGETABLE = "Vegetable"
+        EGGS = "Eggs"
+        GOODS = "Goods"
+        MEAT = "Meat"
+        FRUIT = "Fruit"
+
+    category = models.CharField(
+        max_length=100, 
+        choices=ProductCategories, 
+        default=ProductCategories.GOODS
+        )
 
     author = models.ForeignKey(
             User,

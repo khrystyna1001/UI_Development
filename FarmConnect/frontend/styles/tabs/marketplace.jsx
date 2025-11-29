@@ -210,4 +210,36 @@ export const styles = StyleSheet.create({
       textAlign: 'center',
     },
 
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  
+    modalContent: {
+      backgroundColor: '#FFF',
+      padding: 20,
+      borderRadius: 8,
+      width: '80%',
+      maxWidth: 400,
+    },
+  
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      marginBottom: 16,
+    },
+  
+    sortOption: {
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: '#F0F0F0',
+    },
+  
+    selectedSortOption: {
+      backgroundColor: '#F0F0F0',
+    },
+
 });

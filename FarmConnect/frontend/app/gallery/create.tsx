@@ -6,44 +6,34 @@ import {
   TouchableOpacity, 
   ScrollView, 
   Alert, 
-  ActivityIndicator,
-  Image
+  ActivityIndicator
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { getGalleryImage, createGalleryImage, updateGalleryImage, deleteGalleryImage, getMyData } from '../../scripts/api';
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
 import { styles } from '../../styles/nav/gallerycreate';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 
 const GalleryEditor = () => {
   const { id } = useLocalSearchParams();
   const [loading, setLoading] = useState(!!id);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuperuser, setIsSuperuser] = useState(false);
   const [isEditMode, setIsEditMode] = useState(!!id);
 
   const [formData, setFormData] = useState({
     title: '',
-    image: '',
   });
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const userData = await getMyData();
-        setIsSuperuser(userData.is_superuser);
-        
-        if (!userData.is_superuser) {
-          Alert.alert('Access Denied', 'Only administrators can manage gallery images.');
-          router.back();
-          return;
-        }
 
         if (id) {
           const imageData = await getGalleryImage(id);
           setFormData({
             title: imageData.title,
-            image: "",
           });
         }
       } catch (error) {
@@ -66,7 +56,7 @@ const GalleryEditor = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.title.trim() || !formData.image) {
+    if (!formData.title.trim()) {
       Alert.alert('Validation Error', 'Please fill in all required fields and select an image');
       return;
     }
@@ -76,7 +66,6 @@ const GalleryEditor = () => {
     try {
       const galleryItem = {
         title: formData.title,
-        image: "",
       };
 
       if (isEditMode && id) {
@@ -122,6 +111,12 @@ const GalleryEditor = () => {
     <View style={styles.container}>
       <NavigationHeader />
       <ScrollView style={styles.formContainer}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.backButtonText}>← Back to Gallery</Text>
+        </TouchableOpacity>
         
         <Text style={styles.label}>Title *</Text>
         <TextInput

@@ -57,6 +57,8 @@ class BlogPostSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at', 'reads']
 
 class ProductSerializer(serializers.ModelSerializer):
+    author_info = UserSerializer(source='author', read_only=True)
+
     class Meta:
         model = Product
         fields = [
@@ -67,6 +69,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'quantity',
             'category',
             'author',
+            'author_info',
             'created_at',
             'updated_at'
         ]

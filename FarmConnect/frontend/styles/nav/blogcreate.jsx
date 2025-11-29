@@ -9,6 +9,22 @@ export const styles = StyleSheet.create({
         padding: 20,
         flex: 1,
     },
+    backButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+        marginVertical: 10,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 8,
+        alignSelf: 'flex-start',
+        marginLeft: 16,
+      },
+    backButtonText: {
+    marginLeft: 5,
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+    },
     label: {
         fontSize: 16,
         fontWeight: '600',
@@ -78,5 +94,35 @@ export const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
         paddingBottom: 8,
+    },
+    categoryContainer: { 
+        marginBottom: 20 
+    },
+    categoryList: { 
+        flexDirection: 'row', 
+        flexWrap: 'wrap', 
+        marginTop: 5 
+    },
+    categoryChip: {
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        marginRight: 8,
+        marginBottom: 8,
+        backgroundColor: '#fff',
+    },
+    categoryChipText: { 
+        fontSize: 14, 
+        color: '#555' 
+    },
+    selectedChip: {
+        backgroundColor: '#3F51B5',
+        borderColor: '#3F51B5',
+    },
+    selectedChipText: {
+        color: 'white',
+        fontWeight: 'bold',
     },
 });

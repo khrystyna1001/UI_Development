@@ -32,11 +32,8 @@ export default function MyFarm () {
               </View>
 
               <View style={styles.buttonGroup}>
-                <TouchableOpacity style={styles.shareButton}>
-                  <Text style={styles.actionButtonText}>Share Profile</Text>
-                </TouchableOpacity>
                 <TouchableOpacity style={styles.actionButton}>
-                  <Text style={[styles.actionButtonText, {color: "#fff"}]}>Contact</Text>
+                  <Text style={[styles.actionButtonText, {color: "#fff"}]}>Add a farm</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>

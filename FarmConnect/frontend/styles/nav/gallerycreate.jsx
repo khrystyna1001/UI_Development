@@ -9,6 +9,22 @@ export const styles = StyleSheet.create({
         padding: 20,
         flex: 1,
     },
+    backButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+        marginVertical: 10,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 8,
+        alignSelf: 'flex-start',
+        marginLeft: 16,
+      },
+      backButtonText: {
+        marginLeft: 5,
+        fontSize: 16,
+        color: '#333',
+        fontWeight: '500',
+      },
     label: {
         fontSize: 16,
         fontWeight: '600',

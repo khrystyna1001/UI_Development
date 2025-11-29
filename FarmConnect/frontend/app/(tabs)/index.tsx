@@ -1,17 +1,16 @@
-import React, { useEffect, useState } from 'react'; // Import useState
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   View,
   Text,
   Image,
   ScrollView,
-  TextInput,
   TouchableOpacity,
 } from 'react-native';
 
 import { router } from 'expo-router';
 
-import { getProducts, getReviews } from '../../scripts/api';
+import { getProducts, getReviews, getUser } from '../../scripts/api';
 
 import NavigationFooter from '../../components/footer';
 import NavigationHeader from '../../components/header';
@@ -19,10 +18,9 @@ import NavigationHeader from '../../components/header';
 import { styles } from '../../styles/tabs/home.jsx';
 
 export default function Home() {
-  const [textInput1, onChangeTextInput1] = useState("");
   const [products, setProducts] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [author, setAuthor] = useState(true);
 
   const fetchProducts = async () => {
     const response = await getProducts();
@@ -32,6 +30,12 @@ export default function Home() {
   const fetchReviews = async () => {
     const response = await getReviews();
     setReviews(response);
+
+    if (response.author) {
+      const author = await getUser(response.author);
+      setAuthor(author)
+    }
+    console.log(author)
   };
 
   useEffect(() => {
@@ -70,7 +74,7 @@ export default function Home() {
                 <Text style={styles.productName}>{item.name}</Text>
                 <View style={styles.productInfo}>
                   <Text style={styles.productLabel}>{item.description}</Text>
-                  <Text style={styles.productQty}>{item.quantity}</Text>
+                  <Text style={styles.productQty}>{item.quantity} lbs</Text>
                 </View>
               </View>
               </TouchableOpacity>
@@ -94,7 +98,7 @@ export default function Home() {
                 <View key={i} style={styles.reviewCard}>
                   <View style={styles.reviewHeader}>
                     <View style={styles.reviewAvatar} />
-                    <Text style={styles.reviewName}>{item.author.username}</Text>
+                    <Text style={styles.reviewName}>{item.author_info.username}</Text>
                     <Image
                       resizeMode="stretch"
                       style={[styles.stars, { width: item.rating * 20 }]}

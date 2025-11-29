@@ -9,7 +9,7 @@ import {
   Alert
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { getGalleryImage, getMyData, editGalleryImage, deleteGalleryImage } from '../../scripts/api';
+import { getGalleryImage, getMyData, updateGalleryImage, deleteGalleryImage } from '../../scripts/api';
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
 import { styles } from '../../styles/nav/image';
@@ -111,22 +111,20 @@ const GalleryImageProfile = () => {
           </View>
         </View>
       </View>
-      {user?.is_superuser && (
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity 
-            style={styles.editButton}
-            onPress={() => router.replace(`/gallery/create?id=${image.id}`)}
-          >
-            <Text style={styles.editButtonText}>Edit Image</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.deleteButton}
-            onPress={() => deleteImage(image.id)}
-          >
-            <Text style={styles.deleteButtonText}>Delete Image</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      <View style={styles.actionsContainer}>
+        <TouchableOpacity 
+          style={styles.editButton}
+          onPress={() => router.replace(`/gallery/create?id=${image.id}`)}
+        >
+          <Text style={styles.editButtonText}>Edit Image</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.deleteButton}
+          onPress={() => deleteImage(image.id)}
+        >
+          <Text style={styles.deleteButtonText}>Delete Image</Text>
+        </TouchableOpacity>
+      </View>
       </ScrollView>
       
       <NavigationFooter />

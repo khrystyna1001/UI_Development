@@ -9,7 +9,7 @@ import {
     Alert
 } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
-import { getBlogPost, getUser, getMyData, deleteBlogPost } from '../../scripts/api';
+import { getBlogPost, getMyData, deleteBlogPost } from '../../scripts/api';
 
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
@@ -20,7 +20,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 export default function BlogDetail() {
   const { id } = useLocalSearchParams();
   const [blog, setBlog] = useState(null);
-  const [author, setAuthor] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,21 +27,16 @@ export default function BlogDetail() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const blogData = await getBlogPost(id);
-        setBlog(blogData);
-        
-        if (blogData?.author) {
-          const authorData = await getUser(blogData.author);
-          setAuthor(authorData);
-        }
-        
-        const userData = await getMyData();
-        setUser(userData);
+          const blogData = await getBlogPost(id);
+          setBlog(blogData);
+          
+          const userData = await getMyData();
+          setUser(userData);
       } catch (err) {
-        setError('Failed to load data');
-        console.error(err);
+          setError('Failed to load data');
+          console.error(err);
       } finally {
-        setLoading(false);
+          setLoading(false);
       }
     };
 
@@ -109,7 +103,11 @@ export default function BlogDetail() {
           <Text style={styles.sectionTitle}>Details</Text>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Author:</Text>
-            <Text style={styles.detailValue}>{author?.username || 'Unknown'}</Text>
+            <Text style={styles.detailValue}>{blog.author_info?.username || 'Unknown'}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Category:</Text>
+            <Text style={styles.detailValue}>{blog.category || 'Unknown'}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Posted:</Text>
@@ -125,7 +123,7 @@ export default function BlogDetail() {
           </View>
           
           {/* Edit button - only for the author */}
-          {author?.id === user?.id && (
+          {blog.author === user?.id && (
             <View style={styles.actionButtonsContainer}>
               <TouchableOpacity 
                 style={[styles.actionButton, styles.editButton]}
@@ -143,10 +141,10 @@ export default function BlogDetail() {
           )}
 
           {/* Message button - only for non-authors */}
-          {author?.id !== user?.id && (
+          {blog.author !== user?.id && (
             <TouchableOpacity 
               style={[styles.actionButton, styles.messageButton]} 
-              onPress={() => console.log('Message clicked')}
+              onPress={() => router.replace('/(tabs)/messages')}
             >
               <Text style={styles.actionButtonText}>Message Author</Text>
             </TouchableOpacity>

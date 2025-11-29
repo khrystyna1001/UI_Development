@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View,
     Text,
-    Image,
     ScrollView,
     TouchableOpacity,
     TextInput,
@@ -23,12 +22,18 @@ const BlogPostCard = ({ post }: { post: any }) => (
       <Text style={styles.blogTitle}>{post.title}</Text>
       <Text style={styles.blogDescription}>{post.content}</Text>
       <View style={styles.blogMeta}>
-        <Text style={styles.blogAuthor}>{post.author.username} | {new Date(post.created_at).toLocaleDateString()}</Text>
+        <Text style={styles.blogAuthor}>{post.author_info?.username} | {new Date(post.created_at).toLocaleDateString()} | {post.category}</Text>
         <Text style={styles.blogReads}>⭐ {post.reads}k Reads</Text>
       </View>
     </View>
   </TouchableOpacity>
 );
+
+const BlogPostCategories = [
+  "Gardening",
+  "Recipes",
+  "Farming"
+]
 
 export default function BlogPage () {
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,8 +43,12 @@ export default function BlogPage () {
   const [user, setUser] = useState(null);
 
   const fetchBlogs = async () => {
-    const response = await getBlogPosts();
-    setBlogs(response);
+    try {
+      const response = await getBlogPosts();
+      setBlogs(response);
+    } catch (e) {
+      console.error(`Failed to fetch blogs ${e}`)
+    }
   }
 
   const sortBlogs = (blogs) => {
@@ -49,10 +58,6 @@ export default function BlogPage () {
         return sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       case 'oldest':
         return sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-      case 'title-asc':
-        return sorted.sort((a, b) => a.title.localeCompare(b.title));
-      case 'title-desc':
-        return sorted.sort((a, b) => b.title.localeCompare(a.title));
       default:
         return sorted;
     }
@@ -63,8 +68,7 @@ export default function BlogPage () {
     return (
       post.title.toLowerCase().includes(query) ||
       post.content.toLowerCase().includes(query) ||
-      post.author?.first_name?.toLowerCase().includes(query) ||
-      post.author?.last_name?.toLowerCase().includes(query)
+      post.category.toLowerCase().includes(query)
     );
   });
 
@@ -94,7 +98,7 @@ export default function BlogPage () {
           onChangeText={setSearchQuery}
         />
         <TouchableOpacity style={styles.filterButton} onPress={() => setShowSortButton(!showSortButton)}>
-          <Text style={styles.filterText}>Sort {showSortButton}</Text>
+          <Text style={styles.filterText}>Sort</Text>
         </TouchableOpacity>
         <Modal
           visible={showSortButton}
@@ -109,7 +113,7 @@ export default function BlogPage () {
           >
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Sort By</Text>
-              {['newest', 'oldest', 'title-asc', 'title-desc'].map(option => (
+              {['newest', 'oldest'].map(option => (
                 <TouchableOpacity
                   key={option}
                   style={[
@@ -148,7 +152,6 @@ export default function BlogPage () {
               <BlogPostCard
                 key={post.id}
                 post={post}
-                onPress={() => alert(`Reading: ${post.title}`)}
               />
             ))
           ) : (
@@ -160,9 +163,9 @@ export default function BlogPage () {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Trending Topics</Text>
           <View style={styles.tagContainer}>
-            {['#Organic', '#Compost', '#Yields', '#PestControl', '#Drought'].map((tag, i) => (
-              <TouchableOpacity key={i} style={styles.tagPill} onPress={() => setSearchQuery(tag.substring(1))}>
-                <Text style={styles.tagPillText}>{tag}</Text>
+            {BlogPostCategories.map((tag, i) => (
+              <TouchableOpacity key={i} style={styles.tagPill} onPress={() => setSearchQuery(tag)}>
+                <Text style={styles.tagPillText}>{`#${tag}`}</Text>
               </TouchableOpacity>
             ))}
           </View>

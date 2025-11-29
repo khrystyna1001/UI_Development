@@ -165,4 +165,44 @@ export const styles = StyleSheet.create({
     minWidth: 30,
     textAlign: 'center',
   },
+  actionButton: {
+    backgroundColor: "#4CAF50",
+    borderRadius: 8,
+    padding: 16,
+    alignItems: "center",
+    justifyContent: 'center',
+    marginTop: 16,
+    width: '100%',
+    flexDirection: 'row',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  messageButton: {
+    backgroundColor: '#1E88E5',
+    marginTop: 8,
+  },
+  actionButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
+    letterSpacing: 0.5,
+  },
+  actionButtonsContainer: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    marginTop: 16,
+  },
+  editButton: {
+    backgroundColor: '#2196F3',
+    marginRight: 8,
+  },
+  deleteButton: {
+    backgroundColor: '#F44336',
+  },
 });

@@ -77,7 +77,7 @@ export default function Profile () {
           <TouchableOpacity onPress={() => router.navigate(`reviews/${review.id}/`)}>
             <View key={index} style={styles.reviewCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                <Text style={styles.reviewer}>{review.author.username}</Text>
+                <Text style={styles.reviewer}>{review.author_info?.username}</Text>
                 <Text style={styles.starRating}>
                   {'★'.repeat(Math.round(review.rating))}
                   {'☆'.repeat(5 - Math.round(review.rating))}
@@ -102,7 +102,7 @@ export default function Profile () {
                   ? `${post.content.substring(0, 100)}...` 
                   : post.content}
               </Text>
-              <Text style={styles.updateAuthor}>Posted by {post.author} • {new Date(post.created_at).toLocaleDateString()}</Text>
+              <Text style={styles.updateAuthor}>Posted by {post.author_info?.username} • {new Date(post.created_at).toLocaleDateString()}</Text>
             </View>
           </TouchableOpacity>
         ))}
