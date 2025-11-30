@@ -111,6 +111,9 @@ const GalleryEditor = () => {
     <View style={styles.container}>
       <NavigationHeader />
       <ScrollView style={styles.formContainer}>
+        <Text style={styles.header}>
+          {isEditMode ? 'Edit Image' : 'Add New Image'}
+        </Text>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => router.back()}

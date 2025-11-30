@@ -194,20 +194,19 @@ export const styles = StyleSheet.create({
       fontWeight: '500',
     },
 
-    addButton: {
+    createButton: {
       backgroundColor: '#4CAF50',
-      borderRadius: 5,
-      paddingVertical: 8,
-      marginHorizontal: 30,
-      marginVertical: 20,
-      paddingHorizontal: 10,
+      borderRadius: 8,
+      padding: 14,
+      alignItems: 'center',
+      margin: 16,
+      marginBottom: 24,
     },
 
-    addButtonText: {
+    createButtonText: {
       color: '#FFF',
-      fontSize: 16,
       fontWeight: '600',
-      textAlign: 'center',
+      fontSize: 16,
     },
 
     modalOverlay: {
@@ -241,5 +240,60 @@ export const styles = StyleSheet.create({
     selectedSortOption: {
       backgroundColor: '#F0F0F0',
     },
+
+    modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  modalContent: {
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    padding: 20,
+    width: '90%',
+    maxHeight: '80%',
+  },
+
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+
+  closeButton: {
+    padding: 4,
+  },
+
+  filterOption: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+
+  filterOptionText: {
+    fontSize: 16,
+    color: '#333',
+  },
+
+  applyButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+
+  applyButtonText: {
+    color: '#FFF',
+    fontWeight: '600',
+  },
 
 });

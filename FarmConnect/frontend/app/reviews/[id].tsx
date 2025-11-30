@@ -84,7 +84,7 @@ export default function ReviewDetail() {
             <View style={styles.reviewHeader}>
                 <Text style={styles.reviewTitle}>{reviewTitle}</Text>
                 <View style={styles.authorRatingRow}>
-                    <Text style={styles.authorName}>— {review.author?.name || 'Anonymous'}</Text>
+                    <Text style={styles.authorName}>— {review.author_info?.username || 'Anonymous'}</Text>
                     <Text style={styles.starRating}>
                         {'★'.repeat(Math.round(review.rating))}
                         <Text style={styles.emptyStar}>{'☆'.repeat(5 - Math.round(review.rating))}</Text>

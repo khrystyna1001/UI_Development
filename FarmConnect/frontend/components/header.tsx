@@ -63,7 +63,7 @@ export default function NavigationHeader() {
       {/* Navigation Buttons */}
       <View style={styles.navButtonRow}>
         {[
-          { icon: <Feather name="feather" size={24} color="black" />, label: "My Farm", nav: "myfarm" },
+          { icon: <Feather name="feather" size={24} color="black" />, label: "Farms", nav: "farm" },
           { icon: <AntDesign name="file-search" size={24} color="black" />, label: "Blog", nav: "blogs" },
           { icon: <Feather name="image" size={24} color="black" />, label: "Gallery", nav: "gallery" },
         ].map((item, i) => (

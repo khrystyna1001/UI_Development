@@ -6,13 +6,22 @@ import { View,
     TextInput,
     SafeAreaView,
     Modal,
+    ActivityIndicator,
     } from 'react-native';
 
 import { getBlogPosts, getMyData } from "../../scripts/api";
+
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from "../../components/header";
+
 import { router } from 'expo-router';
+
 import { styles } from '../../styles/nav/blogs.jsx';
+
+import SearchFilterBar from '../../components/searchfilter';
+import FilterModal from '../../components/filtermodal';
+
+const GREEN = '#25D366';
 
 
 const BlogPostCard = ({ post }: { post: any }) => (
@@ -37,52 +46,103 @@ const BlogPostCategories = [
 
 export default function BlogPage () {
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortPosts, setSortPosts] = useState("newest");
-  const [showSortButton, setShowSortButton] = useState(false);
+  const [filteredBlogs, setFilteredBlogs] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState('newest');
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [blogs, setBlogs] = useState([]);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
+
+  const filterOptions = [
+    { label: 'Newest First', value: 'newest' },
+    { label: 'Oldest First', value: 'oldest' },
+  ];
 
   const fetchBlogs = async () => {
-    try {
-      const response = await getBlogPosts();
-      setBlogs(response);
-    } catch (e) {
-      console.error(`Failed to fetch blogs ${e}`)
-    }
-  }
-
-  const sortBlogs = (blogs) => {
-    const sorted = [...blogs];
-    switch (sortPosts) {
-      case 'newest':
-        return sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      case 'oldest':
-        return sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-      default:
-        return sorted;
-    }
-  };
-
-  const searchedPosts = sortBlogs(blogs).filter((post: any) => {
-    const query = searchQuery?.toLowerCase() || '';
-    return (
-      post.title.toLowerCase().includes(query) ||
-      post.content.toLowerCase().includes(query) ||
-      post.category.toLowerCase().includes(query)
-    );
-  });
-
-  useEffect(() => {
-    fetchBlogs();
-  }, []);
-
-  useEffect(() => {
-    const loadUser = async () => {
-      const user = await getMyData();
-      setUser(user);
+      try {
+        const data = await getBlogPosts();
+        setBlogs(data);
+  
+        const filtered = applyFilters(data, searchQuery, selectedFilter);
+        setFilteredBlogs(filtered);
+  
+        const response = await getMyData();
+        setUser(response);
+      } catch (err) {
+        console.error('Error fetching blogs:', err);
+        setError('Failed to load blogs. Please try again.');
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
     };
-    loadUser();
-  }, []);
+  
+    useEffect(() => {
+      fetchBlogs();
+    }, [filteredBlogs, blogs, selectedFilter]);
+
+  const applyFilters = (data, query, sortBy) => {
+      if (!data || !Array.isArray(data)) {
+        return [];
+      }
+  
+      let result = [...data];
+      
+      if (query) {
+        const lowerQuery = query.toLowerCase();
+        result = result.filter(blog => 
+          (blog?.title?.toLowerCase().includes(lowerQuery) || 
+          blog?.content?.toLowerCase().includes(lowerQuery) ||
+          blog?.author?.name?.toLowerCase().includes(lowerQuery)) ?? false
+        );
+      }
+      
+      switch(sortBy) {
+        case 'oldest':
+          result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+          break;
+        case 'newest':
+        default:
+          result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      }
+      
+      return result;
+    };
+  
+    const handleSearch = (text) => {
+      setSearchQuery(text);
+      const filtered = applyFilters(blogs, text, selectedFilter);
+      setFilteredBlogs(filtered);
+    };
+  
+    const onRefresh = () => {
+      setRefreshing(true);
+      fetchBlogs();
+    };
+  
+    if (loading && !refreshing) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={GREEN} />
+        </View>
+      );
+    }
+  
+    if (error) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity 
+            style={styles.retryButton} 
+            onPress={fetchBlogs}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -90,65 +150,32 @@ export default function BlogPage () {
       <NavigationHeader />
 
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search articles and tips..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
+       <SearchFilterBar
+          searchQuery={searchQuery}
+          onSearchChange={(searchQuery) => setSearchQuery(searchQuery)}
+          onFilterPress={() => setShowFilterModal(true)}
+          placeholder="Search blogs..."
         />
-        <TouchableOpacity style={styles.filterButton} onPress={() => setShowSortButton(!showSortButton)}>
-          <Text style={styles.filterText}>Sort</Text>
-        </TouchableOpacity>
-        <Modal
-          visible={showSortButton}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setShowSortButton(false)}
-        >
-          <TouchableOpacity 
-            style={styles.modalOverlay} 
-            activeOpacity={1} 
-            onPress={() => setShowSortButton(false)}
-          >
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Sort By</Text>
-              {['newest', 'oldest'].map(option => (
-                <TouchableOpacity
-                  key={option}
-                  style={[
-                    styles.sortOption,
-                    sortPosts === option && styles.selectedSortOption
-                  ]}
-                  onPress={() => { 
-                    setSortPosts(option);
-                    setShowSortButton(false);
-                  }}
-                >
-                  <Text style={styles.sortOptionText}>
-                    {option.replace('-', ' ')}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </TouchableOpacity>
-        </Modal>
-      </View>
+       <FilterModal
+        visible={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        title="Sort By"
+        options={filterOptions}
+        selectedOption={selectedFilter}
+        onSelect={(value) => {
+          setSelectedFilter(value);
+          setShowFilterModal(false);
+        }}
+      />
 
       {/* Blog Content Scroll */}
       <ScrollView style={styles.scrollViewContent} contentContainerStyle={styles.scrollContent}>
 
-        {user?.is_superuser && (
-          <TouchableOpacity style={styles.createButton} onPress={() => router.navigate('/blog/create')}>
-            <Text style={styles.createButtonText}>Create New Post</Text>
-          </TouchableOpacity>
-        )}
-
         {/* Blog Post List */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Latest Articles ({searchedPosts.length})</Text>
-          {searchedPosts.length > 0 ? (
-            searchedPosts.map((post: any) => (
+          <Text style={styles.sectionTitle}>Latest Articles ({filteredBlogs.length})</Text>
+          {filteredBlogs.length > 0 ? (
+            filteredBlogs.map((post: any) => (
               <BlogPostCard
                 key={post.id}
                 post={post}
@@ -172,6 +199,12 @@ export default function BlogPage () {
         </View>
 
       </ScrollView>
+
+      {user?.is_superuser && (
+          <TouchableOpacity style={styles.createButton} onPress={() => router.navigate('/blog/create')}>
+            <Text style={styles.createButtonText}>Create New Post</Text>
+          </TouchableOpacity>
+        )}
 
       <NavigationFooter />
     </SafeAreaView>

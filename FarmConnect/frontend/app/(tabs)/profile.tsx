@@ -6,7 +6,7 @@ import { SafeAreaView,
     TouchableOpacity,
     } from "react-native";
 
-import { getProducts, getReviews, getBlogPosts } from "../../scripts/api";
+import { getProducts, getReviews, getBlogPosts, getMyData } from "../../scripts/api";
 
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from '../../components/header';
@@ -19,32 +19,64 @@ export default function Profile () {
   const [blogPosts, setBlogPosts] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [products, setProducts] = useState([]);
+  const [user, setUser] = useState({})
+
+  const fetchUserData = async () => {
+    try {
+      const response = await getMyData();
+      setUser(response);
+    } catch (e) {
+      console.error(`Failed to fetch user data: ${e}`);
+    }
+  }
 
   const fetchProducts = async () => {
-    const response = await getProducts();
-    setProducts(response);
+    try {
+      const response = await getProducts();
+      setProducts(response);
+    } catch (e) {
+      console.error(`Failed to fetch products: ${e}`);
+    }
   }
 
   const fetchReviews = async () => {
-    const response = await getReviews();
-    setReviews(response);
+    try {
+      const response = await getReviews();
+      setReviews(response);
+    } catch (e) {
+      console.error(`Failed to fetch reviews: ${e}`);
+    }
   }
 
   const fetchBlogPosts = async () => {
-    const response = await getBlogPosts();
-    setBlogPosts(response);
+    try {
+      const response = await getBlogPosts();
+      setBlogPosts(response);
+    } catch (e) {
+      console.error(`Failed to fetch blogs: ${e}`);
+    }
   }
 
   useEffect(() => {
     fetchProducts();
     fetchReviews();
     fetchBlogPosts();
+    fetchUserData();
   }, []);
 	
 	return (
 		<SafeAreaView style={styles.container}>
       {/* Header */}
       <NavigationHeader />
+      <View style={styles.detailsContainer}>
+          {/* Review Header (Author & Rating) */}
+          <View style={styles.detailsHeader}>
+              <Text style={styles.userName}>— {user?.username || 'Anonymous'}</Text>
+              <Text style={styles.userName}> {user?.is_superuser ? 'Organic Farmer' : 'User'} </Text>
+          </View>
+          <View style={styles.divider} />
+      </View>
+
         <ScrollView
           style={{
             flex: 1,
@@ -66,68 +98,68 @@ export default function Profile () {
           </ScrollView>
 
           {/* Reviews Section */}
-    <View style={{ marginBottom: 24 }}>
-      <Text style={styles.sectionTitle}>Customer Reviews</Text>
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false} 
-        style={{ paddingVertical: 8 }}
-      >
-        {Array.isArray(reviews) && reviews.slice(0, 3).map((review, index) => (
-          <TouchableOpacity onPress={() => router.navigate(`reviews/${review.id}/`)}>
-            <View key={index} style={styles.reviewCard}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                <Text style={styles.reviewer}>{review.author_info?.username}</Text>
-                <Text style={styles.starRating}>
-                  {'★'.repeat(Math.round(review.rating))}
-                  {'☆'.repeat(5 - Math.round(review.rating))}
-                </Text>
-              </View>
-              <Text style={styles.reviewText}>{review.content}</Text>
+          <View style={{ marginBottom: 24 }}>
+            <Text style={styles.sectionTitle}>Customer Reviews</Text>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false} 
+              style={{ paddingVertical: 8 }}
+            >
+              {Array.isArray(reviews) && reviews.slice(0, 3).map((review, index) => (
+                <TouchableOpacity onPress={() => router.navigate(`reviews/${review.id}/`)}>
+                  <View key={index} style={styles.reviewCard}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                      <Text style={styles.reviewer}>{review.author_info?.username}</Text>
+                      <Text style={styles.starRating}>
+                        {'★'.repeat(Math.round(review.rating))}
+                        {'☆'.repeat(5 - Math.round(review.rating))}
+                      </Text>
+                    </View>
+                    <Text style={styles.reviewText}>{review.content}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
             </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-      </View>
 
-      {/* Recent Updates Section */}
-      <View style={{ marginBottom: 24 }}>
-        <Text style={styles.sectionTitle}>Recent Updates</Text>
-        {Array.isArray(blogPosts) && blogPosts.slice(0, 2).map((post, index) => (
-          <TouchableOpacity onPress={() => router.navigate(`blog/${post.id}/`)}>
-            <View key={index} style={styles.updateCard}>
-              <Text style={styles.updateTitle}>{post.title}</Text>
-              <Text style={styles.updateSubtitle}>
-                {post.content.length > 100 
-                  ? `${post.content.substring(0, 100)}...` 
-                  : post.content}
-              </Text>
-              <Text style={styles.updateAuthor}>Posted by {post.author_info?.username} • {new Date(post.created_at).toLocaleDateString()}</Text>
+            {/* Recent Updates Section */}
+            <View style={{ marginBottom: 24 }}>
+              <Text style={styles.sectionTitle}>Recent Updates</Text>
+              {Array.isArray(blogPosts) && blogPosts.slice(0, 2).map((post, index) => (
+                <TouchableOpacity onPress={() => router.navigate(`blog/${post.id}/`)}>
+                  <View key={index} style={styles.updateCard}>
+                    <Text style={styles.updateTitle}>{post.title}</Text>
+                    <Text style={styles.updateSubtitle}>
+                      {post.content.length > 100 
+                        ? `${post.content.substring(0, 100)}...` 
+                        : post.content}
+                    </Text>
+                    <Text style={styles.updateAuthor}>Posted by {post.author_info?.username} • {new Date(post.created_at).toLocaleDateString()}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
             </View>
-          </TouchableOpacity>
-        ))}
-      </View>
 
         {/* Farm Performance */}
-      <Text style={styles.sectionTitle}>Farm Performance</Text>
-      <View style={styles.performanceContainer}>
-        <View style={styles.performanceBox}>
-          <Text style={styles.performanceValue}>500 lbs</Text>
-          <Text style={styles.performanceLabel}>Crops Yielded</Text>
-          <Text style={styles.performanceChange}>+10%</Text>
+        <Text style={styles.sectionTitle}>Farm Performance</Text>
+        <View style={styles.performanceContainer}>
+          <View style={styles.performanceBox}>
+            <Text style={styles.performanceValue}>500 lbs</Text>
+            <Text style={styles.performanceLabel}>Crops Yielded</Text>
+            <Text style={styles.performanceChange}>+10%</Text>
+          </View>
+          <View style={styles.performanceBox}>
+            <Text style={styles.performanceValue}>$2000</Text>
+            <Text style={styles.performanceLabel}>Total Sales</Text>
+            <Text style={styles.performanceChange}>+5%</Text>
+          </View>
+          <View style={styles.performanceBox}>
+            <Text style={styles.performanceValue}>150</Text>
+            <Text style={styles.performanceLabel}>Customers</Text>
+            <Text style={styles.performanceChange}>+20%</Text>
+          </View>
         </View>
-        <View style={styles.performanceBox}>
-          <Text style={styles.performanceValue}>$2000</Text>
-          <Text style={styles.performanceLabel}>Total Sales</Text>
-          <Text style={styles.performanceChange}>+5%</Text>
-        </View>
-        <View style={styles.performanceBox}>
-          <Text style={styles.performanceValue}>150</Text>
-          <Text style={styles.performanceLabel}>Customers</Text>
-          <Text style={styles.performanceChange}>+20%</Text>
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
     <NavigationFooter />
 		</SafeAreaView>
 	);

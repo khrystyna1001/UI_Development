@@ -137,4 +137,33 @@ export const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
   },
+
+  detailsContainer: {
+    padding: 16,
+    paddingTop: 0,
+    backgroundColor: '#FFFFFF',
+    margin: 16,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  detailsHeader: {
+    paddingVertical: 15,
+    marginBottom: 10,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#666',
+    fontStyle: 'italic',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginTop: 5,
+  },
 });

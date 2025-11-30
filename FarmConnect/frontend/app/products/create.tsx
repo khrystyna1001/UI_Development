@@ -12,7 +12,7 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { getProduct, createProduct, updateProduct, deleteProduct, getMyData } from '../../scripts/api';
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
-import { styles } from '../../styles/nav/productcreate';
+import { styles } from '../../styles/tabs/productcreate';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const ProductCategories = [

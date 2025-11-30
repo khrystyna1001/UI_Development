@@ -139,7 +139,9 @@ const BlogEditor = () => {
     <View style={styles.container}>
       <NavigationHeader />
       <ScrollView style={styles.formContainer}>
-        <Stack.Screen options={{ title: id ? 'Edit Blog Post' : 'Create Blog Post' }} />
+        <Text style={styles.header}>
+          {isEditMode ? 'Edit Blog Post' : 'Create Blog Post'}
+        </Text>
         <TouchableOpacity onPress={() => router.back() || router.replace('/blogs')} style={styles.backButton}>
             <Icon name="arrow-back" size={24} color="#333" />
             <Text style={styles.backButtonText}>Back</Text>

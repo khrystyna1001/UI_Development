@@ -13,12 +13,15 @@ export const styles = StyleSheet.create({
     padding: 16,
   },
   backButton: {
-    marginBottom: 16,
-    padding: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   backButtonText: {
-    color: '#4CAF50',
+    marginLeft: 8,
     fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
   },
   imageContainer: {
     backgroundColor: '#fff',

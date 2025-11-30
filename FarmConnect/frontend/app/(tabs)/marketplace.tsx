@@ -3,19 +3,23 @@ import { View,
     Text,
     ScrollView,
     TouchableOpacity,
-    TextInput,
     SafeAreaView,
-    Modal
+    Modal,
+    ActivityIndicator
     } from 'react-native';
 
 import { getProducts, getMyData } from "../../scripts/api";
 
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from "../../components/header";
+
 import { router } from 'expo-router';
 
+import SearchFilterBar from '../../components/searchfilter';
+import FilterModal from '../../components/filtermodal';
 
 import { styles } from '../../styles/tabs/marketplace.jsx';
+import { Feather } from '@expo/vector-icons';
 
 const ProductCategories = [
   "Vegetable",
@@ -24,6 +28,8 @@ const ProductCategories = [
   "Meat",
   "Fruit"
 ]
+
+const GREEN = "#4CAF50";
 
 const ProductCard = ({ product }: { product: any }) => (
   <TouchableOpacity style={styles.productCard} onPress={() => router.navigate(`/products/${product.id}`)}>
@@ -42,50 +48,107 @@ const ProductCard = ({ product }: { product: any }) => (
 
 export default function ProductsPage () {
   const [searchQuery, setSearchQuery] = useState("");
-  const [user, setUser] = useState(null);
-  const [sortGoods, setSortGoods] = useState("newest");
-  const [showSortButton, setShowSortButton] = useState(false);
-  const [products, setProducts] = useState([]);
 
-  const fetchMyData = async () => {
-    const response = await getMyData();
-    if (response) {
-      setUser(response)
-    } else {
-      console.error("Failed to fetch current user data")
-    }
-  }
+  const [user, setUser] = useState(null);
+
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState('newest');
+
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState('');
+
+  const filterOptions = [
+    { label: 'Newest First', value: 'newest' },
+    { label: 'Oldest First', value: 'oldest' },
+  ];
 
   const fetchProducts = async () => {
-      const response = await getProducts();
-      setProducts(response);
-  };
+      try {
+        const data = await getProducts();
+        setProducts(data);
+  
+        const filtered = applyFilters(data, searchQuery, selectedFilter);
+        setFilteredProducts(filtered);
+  
+        const response = await getMyData();
+        setUser(response);
+      } catch (err) {
+        console.error('Error fetching blogs:', err);
+        setError('Failed to load blogs. Please try again.');
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    };
+  
+    useEffect(() => {
+      fetchProducts();
+    }, [filteredProducts, products, selectedFilter]);
 
-  const sortProducts = (products) => {
-    const sorted = [...products];
-    switch (sortGoods) {
-      case 'newest':
-        return sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      case 'oldest':
-        return sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-      default:
-        return sorted;
+  const applyFilters = (data, query, sortBy) => {
+      if (!data || !Array.isArray(data)) {
+        return [];
+      }
+  
+      let result = [...data];
+      
+      if (query) {
+        const lowerQuery = query.toLowerCase();
+        result = result.filter(blog => 
+          (blog?.title?.toLowerCase().includes(lowerQuery) || 
+          blog?.content?.toLowerCase().includes(lowerQuery) ||
+          blog?.author?.name?.toLowerCase().includes(lowerQuery)) ?? false
+        );
+      }
+      
+      switch(sortBy) {
+        case 'oldest':
+          result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+          break;
+        case 'newest':
+        default:
+          result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      }
+      
+      return result;
+    };
+  
+    const handleSearch = (text) => {
+      setSearchQuery(text);
+      const filtered = applyFilters(products, text, selectedFilter);
+      setFilteredProducts(filtered);
+    };
+  
+    const onRefresh = () => {
+      setRefreshing(true);
+      fetchProducts();
+    };
+  
+    if (loading && !refreshing) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={GREEN} />
+        </View>
+      );
     }
-  };
-
-  const searchedProducts = sortProducts(products).filter((p: any) => {
-    const query = searchQuery?.toLowerCase() || '';
-    return (
-      (p.name?.toLowerCase() || '').includes(query) ||
-      (p.label?.toLowerCase() || '').includes(query) ||
-      (p.category?.toLowerCase() || '').includes(query)
-    );
-  });
-
-  useEffect(() => {
-    fetchProducts();
-    fetchMyData();
-  }, []);
+  
+    if (error) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity 
+            style={styles.retryButton} 
+            onPress={fetchBlogs}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -93,69 +156,35 @@ export default function ProductsPage () {
       <NavigationHeader />
 
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder={`Search products...`}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
+        <SearchFilterBar
+          searchQuery={searchQuery}
+          onSearchChange={(searchQuery) => setSearchQuery(searchQuery)}
+          onFilterPress={() => setShowFilterModal(true)}
+          placeholder="Search products..."
         />
-        <TouchableOpacity style={styles.filterButton} onPress={() => setShowSortButton(!showSortButton)}>
-          <Text style={styles.filterText}>Sort</Text>
-        </TouchableOpacity>
-        <Modal
-          visible={showSortButton}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setShowSortButton(false)}
-        >
-          <TouchableOpacity 
-            style={styles.modalOverlay} 
-            activeOpacity={1} 
-            onPress={() => setShowSortButton(false)}
-          >
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Sort By</Text>
-              {['newest', 'oldest'].map(option => (
-                <TouchableOpacity
-                  key={option}
-                  style={[
-                    styles.sortOption,
-                    sortGoods === option && styles.selectedSortOption
-                  ]}
-                  onPress={() => { 
-                    setSortGoods(option);
-                    setShowSortButton(false);
-                  }}
-                >
-                  <Text style={styles.sortOptionText}>
-                    {option.replace('-', ' ')}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </TouchableOpacity>
-        </Modal>
-      </View>
+       <FilterModal
+        visible={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        title="Sort By"
+        options={filterOptions}
+        selectedOption={selectedFilter}
+        onSelect={(value) => {
+          setSelectedFilter(value);
+          setShowFilterModal(false);
+        }}
+      />
 
       {/* Product Content Scroll */}
       <ScrollView style={styles.scrollViewContent} contentContainerStyle={styles.scrollContent}>
 
-        {user?.is_superuser && (
-        <TouchableOpacity style={styles.addButton} onPress={() => router.navigate(`/products/create`) }>
-          <Text style={styles.addButtonText}>Add Product</Text>
-        </TouchableOpacity>
-        )}
-
         {/* Product List */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Latest Products ({searchedProducts.length})</Text>
-          {Array.isArray(searchedProducts) && searchedProducts.length > 0 ? (
-            searchedProducts.map((product) => (
+          <Text style={styles.sectionTitle}>Latest Products ({filteredProducts.length})</Text>
+          {Array.isArray(filteredProducts) && filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
-                onPress={() => alert(`Viewing product: ${product.name}`)}
               />
             ))
           ) : (
@@ -176,6 +205,12 @@ export default function ProductsPage () {
         </View>
 
       </ScrollView>
+
+      {user?.is_superuser && (
+        <TouchableOpacity style={styles.createButton} onPress={() => router.navigate(`/products/create`) }>
+          <Text style={styles.createButtonText}>Add Product</Text>
+        </TouchableOpacity>
+      )}
 
       <NavigationFooter />
     </SafeAreaView>

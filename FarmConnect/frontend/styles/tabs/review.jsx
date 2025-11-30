@@ -30,18 +30,13 @@ export const styles = StyleSheet.create({
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    marginVertical: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-    marginLeft: 16,
+    marginBottom: 20,
   },
   backButtonText: {
-    marginLeft: 5,
+    marginLeft: 8,
     fontSize: 16,
-    color: '#333',
     fontWeight: '500',
+    color: '#333',
   },
 
   // --- Main Layout Styles ---
