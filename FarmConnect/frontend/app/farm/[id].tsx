@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { getFarm, deleteFarm } from '../../scripts/api';
+import { getFarm, deleteFarm, getMyData } from '../../scripts/api';
 import NavigationHeader from '../../components/header';
 import NavigationFooter from '../../components/footer';
 import { styles } from '../../styles/nav/farmdetail';
@@ -21,12 +21,16 @@ const FarmDetailScreen = () => {
   const [farm, setFarm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchFarm = async () => {
       try {
         const data = await getFarm(id);
         setFarm(data);
+
+        const myData = await getMyData();
+        setUser(myData);
       } catch (err) {
         console.error('Error fetching farm:', err);
         setError('Failed to load farm details');
@@ -115,6 +119,7 @@ const FarmDetailScreen = () => {
       </ScrollView>
 
        {/* Action Buttons */}
+      {user?.is_superuser && (
       <View style={styles.actionButtons}>
         <TouchableOpacity 
           style={[styles.actionButton, { backgroundColor: '#4CAF50' }]}
@@ -132,6 +137,7 @@ const FarmDetailScreen = () => {
           <Text style={styles.actionButtonText}>Delete Farm</Text>
         </TouchableOpacity>
       </View>
+      )}
 
       <NavigationFooter />
     </View>

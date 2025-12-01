@@ -13,12 +13,14 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 
 import { Feather } from '@expo/vector-icons';
 
+import { router } from 'expo-router';
+
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from '../../components/header';
 import { styles } from '../../styles/tabs/messages.jsx';
 
-const MessageItem = ({ name, snippet, time, read }) => (
-  <TouchableOpacity style={styles.messageItemContainer}>
+const MessageItem = ({ id, name, snippet, time, read }) => (
+  <TouchableOpacity style={styles.messageItemContainer} onPress={() => router.replace(`/messages/${id}`)}>>
     <View style={styles.messageAvatar}>
         <Feather name="user" size={13} color="#666" style={{ marginHorizontal: 8 }} />
     </View>
@@ -35,8 +37,12 @@ export default function Messages () {
   const [searchQuery, setSearchQuery] = React.useState('');
 
   const fetchMessages = async () => {
-    const messages = await getMessages();
-    setMessages(messages);
+    try {
+      const messages = await getMessages();
+      setMessages(messages);
+    } catch (e) {
+      console.error(e)
+    }
   };
 
   const searchedMessages = messages.filter((message: any) => {
@@ -89,20 +95,13 @@ export default function Messages () {
             </View>
           </View>
 
-          <View style={styles.activeUserContainer}>
-            <Feather name="user" size={48} color="#999" style={styles.activeUserAvatar} />
-            <View>
-              <Text style={styles.activeUserName}>Jane Doe</Text>
-              <Text style={styles.activeUserStatus}>Last active: 2 hours ago</Text>
-            </View>
-          </View>
-
           <Text style={styles.sectionHeader}>Your Messages</Text>
 
           <View>
             {Array.isArray(searchedMessages) && searchedMessages.map((message) => (
               <MessageItem
                 key={message.id}
+                id={message.id}
                 name={message.title}
                 snippet={message.content}
                 time={formatDistanceToNow(parseISO(message.created_at), { addSuffix: true })}

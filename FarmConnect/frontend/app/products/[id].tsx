@@ -162,7 +162,7 @@ export default function ProductDetail() {
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[styles.actionButton, styles.deleteButton]}
-                onPress={() => deleteProduct(product.id)}
+                onPress={() => deleteProductById(product.id)}
               >
                 <Text style={styles.actionButtonText}>Delete</Text>
               </TouchableOpacity>
