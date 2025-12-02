@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+
+# BlogPost
 class BlogPost(models.Model):
     title = models.CharField(max_length=200)
     content = models.CharField(max_length=100, default="")
@@ -33,6 +35,25 @@ class BlogPost(models.Model):
     def __str__(self):
         return self.title
 
+# Farm
+class Farm(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='farms',
+        default=1,
+    )
+    name = models.CharField(max_length=200)
+    location = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.name
+
+# Product
 class Product(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
@@ -52,6 +73,14 @@ class Product(models.Model):
         default=ProductCategories.GOODS
         )
 
+    farm = models.ForeignKey(
+        Farm, 
+        on_delete=models.SET_NULL, 
+        related_name='products',
+        null=True, 
+        blank=True
+    )
+
     author = models.ForeignKey(
             User,
             on_delete=models.SET_NULL,
@@ -66,8 +95,8 @@ class Product(models.Model):
     def __str__(self):
         return self.name
         
+# Review
 class Review(models.Model):
-
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -82,7 +111,7 @@ class Review(models.Model):
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
-        related_name='products',
+        related_name='reviews',
         null=True,
         blank=True,
     )
@@ -92,7 +121,7 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='blogs'
+        related_name='reviews',
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -112,38 +141,46 @@ class Review(models.Model):
         elif self.blog_post:
             return f"Review by {self.author.username} for Blog: {self.blog_post.title}"
         return f"Review by {self.author.username}"
-        
+
+# Chat & Message 
+class Chat(models.Model):
+    user1 = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='chats_as_user1', 
+    )
+
+    user2 = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='chats_as_user2',
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 class Message(models.Model):
+    chat = models.ForeignKey(
+        Chat,
+        on_delete=models.CASCADE,
+        related_name='messages',
+        null=True,
+    )
+    
     sender = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='sent_messages',
+        related_name='sent_messages_in_chat',
     )
-
-    receiver = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='received_messages',
-    )
-
-    title = models.CharField(max_length=100, null=True)
     content = models.CharField(max_length=200)
     read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    class Meta:
-        constraints = [
-            models.CheckConstraint(
-                check=~models.Q(sender=models.F('receiver')),
-                name='sender_is_not_receiver'
-            )
-        ]
-
     def __str__(self):
-        return f"Message from {self.sender.username} to {self.receiver.username}"
+        return f"Message from {self.sender.username} in chat {self.chat_id}"
 
+# GalleryImage
 class GalleryImage(models.Model):
     title = models.CharField(max_length=200)
     image = models.ImageField(upload_to='gallery/', default="")
@@ -152,14 +189,4 @@ class GalleryImage(models.Model):
     
     def __str__(self):
         return self.title
-    
-class Farm(models.Model):
-    name = models.CharField(max_length=200)
-    location = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return self.name
         

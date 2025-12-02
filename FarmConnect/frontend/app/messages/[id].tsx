@@ -3,85 +3,93 @@ import {
     View, 
     Text, 
     ScrollView, 
-    ActivityIndicator, 
+    KeyboardAvoidingView, 
     TouchableOpacity,
-    Alert
+    TextInput,
+    Platform,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { getMessage, getMyData, deleteMessage, getUser } from '../../scripts/api';
+import { getMessage, createMessage, getMyData, deleteMessage, getUser, getMessages } from '../../scripts/api';
 
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
-import { styles } from '../../styles/tabs/product';
+
+import { styles } from '../../styles/tabs/chat';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Feather from 'react-native-vector-icons/Feather';
 
+const MessageItem = ({ id, name, snippet, time, read, senderId }) => (
+  <View>
+    <View style={styles.messageAvatar}>
+      <Feather name="user" size={13} color="#666" style={{ marginHorizontal: 8 }} />
+    </View>
+    <View style={styles.messageContent}>
+      <Text style={[styles.messageName, !read && styles.messageNameUnread]}>{name}</Text>
+      <Text style={[styles.messageSnippet, !read && styles.messageSnippetUnread]} numberOfLines={1}>
+        {snippet}
+      </Text>
+    </View>
+    <Text style={styles.messageTime}>{time}</Text>
+  </View>
+);
 
-export default function MessageDetail() {
+export default function ChatScreen() {
   const { id } = useLocalSearchParams();
-  const [message, setMessage] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [message, setMessage] = useState('');
+  const [otherUser, setOtherUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
-  const [senderData, setSenderData] = useState(null);
-  const [receiverData, setReceiverData] = useState(null);
-
 
   useEffect(() => {
-    const fetchMessage = async () => {
+    const loadData = async () => {
       try {
-        const messageData = await getMessage(id);
-        setMessage(messageData);
-        console.log(messageData)
-
         const userData = await getMyData();
         setUser(userData);
-
-        if (messageData.sender) {
-            const senderData = await getUser(messageData.sender);
-            setSenderData(senderData);
-        }
-
-        if (messageData.receiver) {
-            const receiverData = await getUser(messageData.receiver);
-            setReceiverData(receiverData);
-        }
-
-      } catch (err) {
-        setError('Failed to fetch message');
-        console.error(err);
-        setLoading(false);
+        
+        const allMessages = await getMessages();
+        const message = await getMessage(id);
+        setMessage(message);
+        const conversation = allMessages.filter(
+          msg => msg.sender === userId || msg.receiver === userId
+        );
+        setMessages(conversation);
+      } catch (error) {
+        console.error('Error loading chat:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchMessage();
+    loadData();
   }, [id]);
 
-  const deleteMessageById = async (id) => {
-      try {
-        await deleteMessage(id);
-        Alert.alert('Success', 'Message deleted successfully');
-      } catch (error) {
-        console.error('Error deleting message:', error);
-        Alert.alert('Error', 'Failed to delete message');
-      }
-      router.replace('/(tabs)/messages');
-    };
+  const handleSend = async () => {
+    if (!message.trim()) return;
+    
+    try {
+      const newMessage = {
+        receiver: userId,
+        content: message,
+        title: `Message to ${otherUser?.first_name || 'User'}`
+      };
+      
+      await createMessage(newMessage);
+      setMessage('');
+      const allMessages = await getMessages();
+      const conversation = allMessages.filter(
+        msg => msg.sender === user.id || msg.receiver === user.id
+      );
+      setMessages(conversation);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={styles.loadingText}>Loading message details...</Text>
-      </View>
-    );
-  }
-
-  if (error || !message) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error || 'Message not found'}</Text>
+        <Text>Loading chat...</Text>
       </View>
     );
   }
@@ -89,61 +97,48 @@ export default function MessageDetail() {
   return (
     <View style={styles.container}>
       <NavigationHeader />
-      <ScrollView style={styles.container}>
-
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <Icon name="arrow-back" size={24} color="#333" />
-        <Text style={styles.backButtonText}>Back</Text>
-      </TouchableOpacity>
-
-      <View style={styles.detailsContainer}>
-        <Text style={styles.name}>{message.title}</Text>
-        
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Description</Text>
-          <Text style={styles.description}>{message.content}</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Content</Text>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Sender:</Text>
-            <Text style={styles.detailValue}>{senderData.username}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Receiver:</Text>
-            <Text style={styles.detailValue}>{receiverData.username}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Read:</Text>
-            <Text style={styles.detailValue}>{message.read ? 'True' : 'False'}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Posted:</Text>
-            <Text style={styles.detailValue}>
-              {new Date(message.created_at).toLocaleDateString()}
-            </Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Last Updated:</Text>
-            <Text style={styles.detailValue}>
-              {new Date(message.updated_at || message.created_at).toLocaleDateString()}
-            </Text>
-          </View>
-          
-          {message?.sender !== message?.receiver !== user.id && (
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.messageButton]} 
-              onPress={() => router.replace('/(tabs)/messages')}
-            >
-              <Text style={styles.actionButtonText}>Reply</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back() || router.push('/messages')}>
+          <Icon name="arrow-back" size={24} color="#000" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>
+          {`Chat with ${message.sender_info?.username} and ${message.receiver_info?.username}`}
+        </Text>
       </View>
-    </ScrollView>
-    
-    <NavigationFooter />
+
+      <ScrollView 
+        style={styles.messagesContainer}
+        contentContainerStyle={styles.messagesContent}
+      >
+        {messages.map((msg, index) => (
+          <MessageItem
+            key={index}
+            id={msg.id}
+            name={msg.title}
+            snippet={msg.content}
+            time={formatDistanceToNow(parseISO(msg.created_at), { addSuffix: true })}
+            read={msg.read}
+            senderId={msg.sender_info?.username === currentUserId ? msg.receiver_info?.username : msg.sender_info?.username}
+          />
+        ))}
+      </ScrollView>
+
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.inputContainer}
+      >
+        <TextInput
+          style={styles.input}
+          value={message}
+          onChangeText={setMessage}
+          placeholder="Type a message..."
+          placeholderTextColor="#999"
+        />
+        <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
+          <Icon name="send" size={24} color="#fff" />
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
+      <NavigationFooter />
     </View>
   );
 }

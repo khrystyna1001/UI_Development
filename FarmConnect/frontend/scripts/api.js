@@ -108,6 +108,13 @@ export const createReview = (data) => apiFetch(`/app/reviews/`, { method: 'POST'
 export const updateReview = (id, data) => apiFetch(`/app/reviews/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
 export const deleteReview = (id) => apiFetch(`/app/reviews/${id}/`, { method: 'DELETE' });
 
+// Chat
+export const getChats = () => apiFetch(`/app/chats/`);
+export const getChat = (id) => apiFetch(`/app/chats/${id}/`);
+export const createChat = (data) => apiFetch(`/app/chats/`, { method: 'POST', body: JSON.stringify(data) });
+export const updateChat = (id, data) => apiFetch(`/app/chats/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteChat = (id) => apiFetch(`/app/chats/${id}/`, { method: 'DELETE' });
+
 // Message
 export const getMessages = () => apiFetch(`/app/messages/`);
 export const getMessage = (id) => apiFetch(`/app/messages/${id}/`);

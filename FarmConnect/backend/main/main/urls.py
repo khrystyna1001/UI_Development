@@ -17,9 +17,11 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from app.views import BlogPostViewSet, ProductViewSet, ReviewViewSet, MessageViewSet, GalleryViewSet, FarmViewSet, SignupView, MyDataView, LogoutView, UserViewSet
+from app.views import BlogPostViewSet, ProductViewSet, ReviewViewSet, MessageViewSet, GalleryViewSet, FarmViewSet, SignupView, MyDataView, LogoutView, UserViewSet, ChatViewSet 
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+
 
 router = DefaultRouter()
 router.register(r'blog', BlogPostViewSet, basename='blog')
@@ -29,7 +31,7 @@ router.register(r'messages', MessageViewSet, basename='messages')
 router.register(r'gallery', GalleryViewSet, basename='gallery')
 router.register(r'farms', FarmViewSet, basename='farms')
 router.register(r'users', UserViewSet, basename='users')
-
+router.register(r'chats', ChatViewSet, basename='chats')
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('app/', include(router.urls)),
@@ -38,4 +40,7 @@ urlpatterns = [
     path('api/signup/', SignupView.as_view()),
     path('api/mydata/', MyDataView.as_view()),
     path('api/logout/', LogoutView.as_view()),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
