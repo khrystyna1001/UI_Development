@@ -22,7 +22,6 @@ from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
-
 router = DefaultRouter()
 router.register(r'blog', BlogPostViewSet, basename='blog')
 router.register(r'products', ProductViewSet, basename='products')
@@ -43,4 +42,5 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('dj-rest-auth/', include('dj_rest_auth.urls')),
 ]

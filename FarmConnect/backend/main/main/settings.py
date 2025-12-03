@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'drf_spectacular',
     'corsheaders',
+    'dj_rest_auth',
+
 ]
 
 MIDDLEWARE = [

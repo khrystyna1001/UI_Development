@@ -111,8 +111,8 @@ export default function Profile () {
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                       <Text style={styles.reviewer}>{review.author_info?.username}</Text>
                       <Text style={styles.starRating}>
-                        {'★'.repeat(Math.round(review.rating))}
-                        {'☆'.repeat(5 - Math.round(review.rating))}
+                        {'★'.repeat(Math.min(5, Math.max(1, Math.round(Number(review.rating) || 0))))}
+                        {'☆'.repeat(5 - Math.min(5, Math.max(0, Math.round(Number(review.rating) || 0))))}
                       </Text>
                     </View>
                     <Text style={styles.reviewText}>{review.content}</Text>

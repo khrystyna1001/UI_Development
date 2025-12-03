@@ -1,4 +1,3 @@
-from pyexpat import model
 from rest_framework import serializers
 from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm, Chat
 from django.contrib.auth.models import User
@@ -158,12 +157,15 @@ class ChatSerializer(serializers.ModelSerializer):
 
 # GalleryImage
 class GalleryImageSerializer(serializers.ModelSerializer):
+    author_info = UserSerializer(source='author', read_only=True)
     class Meta:
         model = GalleryImage
         fields = [
             'id',
             'title',
             'image',
+            'author',
+            'author_info',
             'created_at',
             'updated_at'
         ]

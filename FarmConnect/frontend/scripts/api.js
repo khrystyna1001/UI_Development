@@ -66,61 +66,61 @@ const apiFetch = async (endpoint, options = {}) => {
 };
 
 // Blog
-export const getBlogPosts = () => apiFetch(`/app/blog/`);
-export const getBlogPost = (id) => apiFetch(`/app/blog/${id}/`);
-export const createBlogPost = (data) => apiFetch(`/app/blog/`, { method: 'POST', body: JSON.stringify(data) });
-export const updateBlogPost = (id, data) => apiFetch(`/app/blog/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
-export const deleteBlogPost = (id) => apiFetch(`/app/blog/${id}/`, { method: 'DELETE' });
+export const getBlogPosts = async () => apiFetch(`/app/blog/`);
+export const getBlogPost = async (id) => apiFetch(`/app/blog/${id}/`);
+export const createBlogPost = async (data) => apiFetch(`/app/blog/`, { method: 'POST', body: JSON.stringify(data) });
+export const updateBlogPost = async (id, data) => apiFetch(`/app/blog/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteBlogPost = async (id) => apiFetch(`/app/blog/${id}/`, { method: 'DELETE' });
 
 // Product
-export const getProducts = () => apiFetch(`/app/products/`);
-export const getProduct = (id) => apiFetch(`/app/products/${id}/`);
-export const createProduct = (data) => apiFetch(`/app/products/`, { method: 'POST', body: JSON.stringify(data) });
-export const updateProduct = (id, data) => apiFetch(`/app/products/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
-export const deleteProduct = (id) => apiFetch(`/app/products/${id}/`, { method: 'DELETE' });
+export const getProducts = async () => apiFetch(`/app/products/`);
+export const getProduct = async (id) => apiFetch(`/app/products/${id}/`);
+export const createProduct = async (data) => apiFetch(`/app/products/`, { method: 'POST', body: JSON.stringify(data) });
+export const updateProduct = async (id, data) => apiFetch(`/app/products/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteProduct = async (id) => apiFetch(`/app/products/${id}/`, { method: 'DELETE' });
 
 // Farm
-export const getFarms = () => apiFetch(`/app/farms/`);
-export const getFarm = (id) => apiFetch(`/app/farms/${id}/`);
-export const createFarm = (data) => apiFetch(`/app/farms/`, { method: 'POST', body: JSON.stringify(data) });
-export const updateFarm = (id, data) => apiFetch(`/app/farms/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
-export const deleteFarm = (id) => apiFetch(`/app/farms/${id}/`, { method: 'DELETE' });
+export const getFarms = async () => apiFetch(`/app/farms/`);
+export const getFarm = async (id) => apiFetch(`/app/farms/${id}/`);
+export const createFarm = async (data) => apiFetch(`/app/farms/`, { method: 'POST', body: JSON.stringify(data) });
+export const updateFarm = async (id, data) => apiFetch(`/app/farms/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteFarm = async (id) => apiFetch(`/app/farms/${id}/`, { method: 'DELETE' });
 
 // User
-export const getUsers = () => apiFetch(`/app/users/`);
-export const getUser = (id) => apiFetch(`/app/users/${id}/`);
-export const createUser = (data) => apiFetch(`/app/users/`, { method: 'POST', body: JSON.stringify(data) });
-export const updateUser = (id, data) => apiFetch(`/app/users/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
-export const deleteUser = (id) => apiFetch(`/app/users/${id}/`, { method: 'DELETE' });
-export const getMyData = () => apiFetch(`/api/mydata/`);
+export const getUsers = async () => apiFetch(`/app/users/`);
+export const getUser = async (id) => apiFetch(`/app/users/${id}/`);
+export const createUser = async (data) => apiFetch(`/app/users/`, { method: 'POST', body: JSON.stringify(data) });
+export const updateUser = async (id, data) => apiFetch(`/app/users/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteUser = async (id) => apiFetch(`/app/users/${id}/`, { method: 'DELETE' });
+export const getMyData = async () => apiFetch(`/api/mydata/`);
 
 // Gallery
-export const getGalleryImages = () => apiFetch(`/app/gallery/`);
-export const getGalleryImage = (id) => apiFetch(`/app/gallery/${id}/`);
-export const createGalleryImage = (data) => apiFetch(`/app/gallery/`, { method: 'POST', body: JSON.stringify(data) });
-export const updateGalleryImage = (id, data) => apiFetch(`/app/gallery/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
-export const deleteGalleryImage = (id) => apiFetch(`/app/gallery/${id}/`, { method: 'DELETE' });
+export const getGalleryImages = async () => apiFetch(`/app/gallery/`);
+export const getGalleryImage = async (id) => apiFetch(`/app/gallery/${id}/`);
+export const createGalleryImage = async (data) => apiFetch(`/app/gallery/`, { method: 'POST', body: JSON.stringify(data) });
+export const updateGalleryImage = async (id, data) => apiFetch(`/app/gallery/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteGalleryImage = async (id) => apiFetch(`/app/gallery/${id}/`, { method: 'DELETE' });
 
 // Review
-export const getReviews = () => apiFetch(`/app/reviews/`);
-export const getReview = (id) => apiFetch(`/app/reviews/${id}/`);
-export const createReview = (data) => apiFetch(`/app/reviews/`, { method: 'POST', body: JSON.stringify(data) });
-export const updateReview = (id, data) => apiFetch(`/app/reviews/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
-export const deleteReview = (id) => apiFetch(`/app/reviews/${id}/`, { method: 'DELETE' });
+export const getReviews = async () => apiFetch(`/app/reviews/`);
+export const getReview = async (id) => apiFetch(`/app/reviews/${id}/`);
+export const createReview = async (data) => apiFetch(`/app/reviews/`, { method: 'POST', body: JSON.stringify(data) });
+export const updateReview = async (id, data) => apiFetch(`/app/reviews/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteReview = async (id) => apiFetch(`/app/reviews/${id}/`, { method: 'DELETE' });
 
 // Chat
-export const getChats = () => apiFetch(`/app/chats/`);
-export const getChat = (id) => apiFetch(`/app/chats/${id}/`);
-export const createChat = (data) => apiFetch(`/app/chats/`, { method: 'POST', body: JSON.stringify(data) });
-export const updateChat = (id, data) => apiFetch(`/app/chats/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
-export const deleteChat = (id) => apiFetch(`/app/chats/${id}/`, { method: 'DELETE' });
+export const getChats = async () => apiFetch(`/app/chats/`);
+export const getChat = async (id) => apiFetch(`/app/chats/${id}/`);
+export const createChat = async (data) => apiFetch(`/app/chats/`, { method: 'POST', body: JSON.stringify(data) });
+export const updateChat = async (id, data) => apiFetch(`/app/chats/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteChat = async (id) => apiFetch(`/app/chats/${id}/`, { method: 'DELETE' });
 
 // Message
-export const getMessages = () => apiFetch(`/app/messages/`);
-export const getMessage = (id) => apiFetch(`/app/messages/${id}/`);
-export const createMessage = (data) => apiFetch(`/app/messages/`, { method: 'POST', body: JSON.stringify(data) });
-export const updateMessage = (id, data) => apiFetch(`/app/messages/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
-export const deleteMessage = (id) => apiFetch(`/app/messages/${id}/`, { method: 'DELETE' });
+export const getMessages = async () => apiFetch(`/app/messages/`);
+export const getMessage = async (id) => apiFetch(`/app/messages/${id}/`);
+export const createMessage = async (data) => apiFetch(`/app/messages/`, { method: 'POST', body: JSON.stringify(data) });
+export const updateMessage = async (id, data) => apiFetch(`/app/messages/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteMessage = async (id) => apiFetch(`/app/messages/${id}/`, { method: 'DELETE' });
 
 // Authentication
 export const login = async (username, password) => {

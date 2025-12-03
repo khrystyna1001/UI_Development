@@ -1,12 +1,11 @@
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
-from rest_framework import status
 from faker import Faker
 from django.contrib.auth.models import User
-from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm
-from app.serializer import BlogPostSerializer, ProductSerializer, ReviewSerializer, MessageSerializer
+from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm, Chat
 from django.core.files.uploadedfile import SimpleUploadedFile
+from rest_framework.authtoken.models import Token
 
 # Create your tests here.
 
@@ -22,34 +21,56 @@ class APITestCase(TestCase):
         # --- CREATE USER ---
         self.test_user = User.objects.create_user(
             username=self.fake.user_name(),
-            password=self.fake.password()
+            password=self.fake.password(),
         )
         self.second_user = User.objects.create_user(
             username=self.fake.user_name(),
-            password=self.fake.password()
+            password=self.fake.password(),
         )
 
+        # --- INTIALIZE TOKENS ---
+        self.token1, created = Token.objects.get_or_create(user=self.test_user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token1.key}')
+
+        self.token2, created = Token.objects.get_or_create(user=self.second_user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token2.key}')
+
+        # --- Farm Setup ---
+        self.farm_data = {
+            'name': self.fake.company(),
+            'location': self.fake.city() + ", " + self.fake.country(),
+            'description': self.fake.paragraph(nb_sentences=2),
+            'user': self.test_user,
+        }
+        self.farm = Farm.objects.create(**self.farm_data)
+        self.farm_list_url = reverse('farms-list')
+        self.farm_detail_url = reverse('farms-detail', kwargs={'pk': self.farm.pk})
+
         # --- BlogPost Setup ---
+        valid_categories = [choice[0] for choice in BlogPost.BlogPostCategories.choices]
+        valid_category = valid_categories[0]
         self.blog_post_data = {
             'title': self.fake.text(max_nb_chars=80),
             'content': self.fake.text(max_nb_chars=100),
             'author': self.test_user,
             'reads': 0,
-            'category': 'Organic',
+            'category': valid_category,
         }
         self.blog_post = BlogPost.objects.create(**self.blog_post_data)
         self.blog_list_url = reverse('blog-list')
         self.blog_detail_url = reverse('blog-detail', kwargs={'pk': self.blog_post.pk})
 
         # --- Product Setup ---
+        valid_categories = [choice[0] for choice in Product.ProductCategories.choices]
+        valid_category = valid_categories[0]
         self.product_data = {
             'name': self.fake.word(ext_word_list=['Organic Apples', 'Heirloom Tomatoes', 'Fresh Honey']),
             'description': self.fake.text(max_nb_chars=100),
-            'price': round(self.fake.pyfloat(left_digits=2, right_digits=2, positive=True, min_value=0.50, max_value=10.00), 2),
-            'category': 'Organic',
+            'price': round(self.fake.pyfloat(left_digits=2, right_digits=2, positive=True, min_value=0.50, max_value=10.00), 1),
+            'category': valid_category,
             'quantity': 50,
             'author': self.test_user,
-
+            'farm': self.farm,
         }
         self.product = Product.objects.create(**self.product_data)
         self.product_list_url = reverse('products-list')
@@ -66,11 +87,20 @@ class APITestCase(TestCase):
         self.review_list_url = reverse('reviews-list')
         self.review_detail_url = reverse('reviews-detail', kwargs={'pk': self.review.pk})
 
+        # --- Chat Setup ---
+        self.chat_data = {
+            'user1': self.test_user,
+            'user2': self.second_user
+        }
+
+        self.chat = Chat.objects.create(**self.chat_data)
+        self.chat_list_url = reverse('chats-list')
+        self.chat_detail_url = reverse('chats-detail', kwargs={'pk': self.chat.pk})
+
         # --- Message Setup ---
         self.message_data = {
+            'chat': self.chat,
             'sender': self.test_user,
-            'receiver': self.second_user,
-            'title': self.fake.sentence(nb_words=4),
             'content': self.fake.text(max_nb_chars=150),
             'read': False,
         }
@@ -91,16 +121,6 @@ class APITestCase(TestCase):
         self.gallery_image = GalleryImage.objects.create(**self.gallery_data)
         self.gallery_list_url = reverse('gallery-list')
         self.gallery_detail_url = reverse('gallery-detail', kwargs={'pk': self.gallery_image.pk})
-
-        # --- Farm Setup ---
-        self.farm_data = {
-            'name': self.fake.company(),
-            'location': self.fake.city() + ", " + self.fake.country(),
-            'description': self.fake.paragraph(nb_sentences=2),
-        }
-        self.farm = Farm.objects.create(**self.farm_data)
-        self.farm_list_url = reverse('farms-list')
-        self.farm_detail_url = reverse('farms-detail', kwargs={'pk': self.farm.pk})
 
 
     def tearDown(self):

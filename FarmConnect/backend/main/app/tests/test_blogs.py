@@ -14,10 +14,12 @@ class BlogViewSetTests(APITestCase):
 
     # POST /blogs/
     def test_create_blog_post(self):
+        valid_categories = [choice[0] for choice in BlogPost.BlogPostCategories.choices]
+        valid_category = valid_categories[0]
         new_blog_data = {
             'title': self.fake.text(max_nb_chars=80),
             'content': self.fake.text(max_nb_chars=100),
-            'category': 'New Category',
+            'category': valid_category,
             'author': self.test_user.pk
         }
         response = self.client.post(self.blog_list_url, new_blog_data, format='json')
@@ -34,11 +36,13 @@ class BlogViewSetTests(APITestCase):
 
     # PUT /blogs/{ID}/
     def test_update_blog_post(self):
+        valid_categories = [choice[0] for choice in BlogPost.BlogPostCategories.choices]
+        valid_category = valid_categories[0]
         self.blog_post.refresh_from_db()
         updated_data = {
             'title': self.fake.text(max_nb_chars=80) + " UPDATED",
             'content': self.fake.text(max_nb_chars=100),
-            'category': 'Updated Tips',
+            'category': valid_category,
             'reads': self.blog_post.reads,
             'author': self.test_user.pk,
         }

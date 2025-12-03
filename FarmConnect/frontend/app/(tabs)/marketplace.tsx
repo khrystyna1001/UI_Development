@@ -19,7 +19,6 @@ import SearchFilterBar from '../../components/searchfilter';
 import FilterModal from '../../components/filtermodal';
 
 import { styles } from '../../styles/tabs/marketplace.jsx';
-import { Feather } from '@expo/vector-icons';
 
 const ProductCategories = [
   "Vegetable",

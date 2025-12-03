@@ -71,16 +71,16 @@ export const styles = StyleSheet.create({
     },
 
     addImageContainer: {
-      backgroundColor: '#f1f1f1',
-      marginBottom: ITEM_MARGIN * 2,
-      justifyContent: 'center',
+      backgroundColor: '#4CAF50',
+      borderRadius: 8,
+      padding: 14,
       alignItems: 'center',
-      padding: 16,
+      margin: 16,
+      marginBottom: 24,
     },
     addImageText: {
-      fontSize: 16,
+      color: '#FFF',
       fontWeight: '600',
-      color: '#555',
-      textAlign: 'center',
+      fontSize: 16,
     },
 });

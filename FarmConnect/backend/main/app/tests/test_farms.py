@@ -17,6 +17,7 @@ class FarmViewSetTests(APITestCase):
             'name': self.fake.company() + " Inc.",
             'location': self.fake.city() + ", " + self.fake.country(),
             'description': self.fake.paragraph(nb_sentences=3),
+            'user': self.test_user.pk,
         }
         response = self.client.post(self.farm_list_url, new_farm_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -35,6 +36,7 @@ class FarmViewSetTests(APITestCase):
             'name': self.farm.name + " (HQ)",
             'location': 'New York, USA',
             'description': self.farm.description,
+            'user': self.test_user.pk,
         }
 
         response = self.client.put(self.farm_detail_url, updated_data, format='json')

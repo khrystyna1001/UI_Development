@@ -34,6 +34,16 @@ services:
     labels:
       - "traefik.http.routers.app-service.rule=Host(`localhost`)"
 
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    labels:
+      - "traefik.enable=false"
+
   pgadmin:
     image: dpage/pgadmin4:9.8
     environment:
@@ -81,3 +91,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:

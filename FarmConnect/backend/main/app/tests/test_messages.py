@@ -10,19 +10,19 @@ class MessageViewSetTests(APITestCase):
         response = self.client.get(self.message_list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['title'], self.message_data['title'])
+        self.assertEqual(response.data[0]['content'], self.message_data['content'])
     # POST /messages/
     def test_create_message_success(self):
         new_message_data = {
+            'chat': self.chat.pk,
             'sender': self.test_user.pk,
-            'receiver': self.second_user.pk,
-            'title': self.fake.sentence(nb_words=5),
             'content': self.fake.text(max_nb_chars=150),
+            'read': False,
         }
         response = self.client.post(self.message_list_url, new_message_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Message.objects.count(), 2)
-        self.assertEqual(response.data['title'], new_message_data['title'])
+        self.assertEqual(response.data['content'], new_message_data['content'])
 #     # POST /messages/ (Constraint Failure Test)
 #     def test_create_message_self_fail(self):
 #         bad_message_data = {
@@ -37,19 +37,17 @@ class MessageViewSetTests(APITestCase):
 #         self.assertEqual(Message.objects.count(), 1)
     # GET /messages/{ID}/
     def test_retrieve_message(self):
-        """Ensure a single message can be retrieved by its ID."""
         response = self.client.get(self.message_detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['sender'], self.test_user.pk)
-        self.assertEqual(response.data['receiver'], self.second_user.pk)
+        self.assertEqual(response.data['sender_info']['id'], self.test_user.pk)
+        self.assertEqual(response.data['chat'], self.chat.pk)
     # PUT /messages/{ID}/
     def test_update_message(self):
         self.message.refresh_from_db()
 
         updated_data = {
+            'chat': self.message.chat.pk,
             'sender': self.message.sender.pk,
-            'receiver': self.message.receiver.pk,
-            'title': "RE: " + self.message.title,
             'content': "The content has been slightly updated.",
             'read': True,
         }
@@ -58,7 +56,7 @@ class MessageViewSetTests(APITestCase):
 
         self.message.refresh_from_db()
         self.assertTrue(self.message.read)
-        self.assertEqual(self.message.title, updated_data['title'])
+        self.assertEqual(self.message.content, updated_data['content'])
     # PATCH /messages/{ID}/
     def test_partial_update_message_read_status(self):
         partial_data = {

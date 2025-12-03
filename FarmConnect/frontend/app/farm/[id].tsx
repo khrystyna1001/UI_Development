@@ -13,8 +13,6 @@ import NavigationHeader from '../../components/header';
 import NavigationFooter from '../../components/footer';
 import { styles } from '../../styles/nav/farmdetail';
 
-const GREEN = '#4CAF50';
-
 const FarmDetailScreen = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();

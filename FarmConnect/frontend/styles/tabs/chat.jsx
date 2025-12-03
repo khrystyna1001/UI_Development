@@ -1,3 +1,4 @@
+
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
@@ -5,17 +6,28 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#f0f0f0',
   },
   headerTitle: {
+    flex: 1,
+    textAlign: 'center',
     fontSize: 18,
     fontWeight: '600',
-    marginLeft: 16,
+    marginHorizontal: 8,
+  },
+  keyboardAvoidingView: {
+    flex: 1,
   },
   messagesContainer: {
     flex: 1,
@@ -30,56 +42,124 @@ export const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 8,
   },
-  sentMessage: {
+  currentUserBubble: {
     alignSelf: 'flex-end',
-    backgroundColor: '#007AFF',
+    backgroundColor: '#4CAF50',
     borderBottomRightRadius: 4,
   },
-  receivedMessage: {
+  otherUserBubble: {
     alignSelf: 'flex-start',
     backgroundColor: '#f0f0f0',
     borderBottomLeftRadius: 4,
   },
+  sendingMessage: {
+    opacity: 0.7,
+  },
+  errorMessage: {
+    backgroundColor: '#ffebee',
+  },
   messageText: {
     fontSize: 16,
-    color: '#000',
+    lineHeight: 22,
   },
-  sentMessageText: {
+  currentUserText: {
     color: '#fff',
   },
+  otherUserText: {
+    color: '#333',
+  },
   messageTime: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: 10,
     marginTop: 4,
+  },
+  currentUserTime: {
+    color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'right',
+  },
+  otherUserTime: {
+    color: '#999',
   },
   inputContainer: {
     flexDirection: 'row',
-    padding: 16,
+    alignItems: 'center',
+    padding: 12,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: '#f0f0f0',
     backgroundColor: '#fff',
   },
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    backgroundColor: '#f5f5f5',
     borderRadius: 20,
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 8,
+    paddingVertical: 10,
+    maxHeight: 120,
+    fontSize: 16,
   },
   sendButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginLeft: 12,
+    padding: 8,
   },
-  loadingContainer: {
+  modalOverlay: {
     flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
+  },
+  modalContainer: {
+    width: '100%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#555',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  modalButton: {
+    flex: 1,
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 5,
+  },
+  cancelButton: {
+    backgroundColor: '#f1f1f1',
+  },
+  deleteButton: {
+    backgroundColor: '#ff4444',
+  },
+  cancelButtonText: {
+    color: '#333',
+    fontWeight: '600',
+  },
+  deleteButtonText: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  deleteMessageButton: {
+    marginLeft: 8,
+    padding: 4,
   },
 });

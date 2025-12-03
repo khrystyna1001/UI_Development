@@ -12,7 +12,7 @@ import {
 import NavigationFooter from '../../components/footer';
 import NavigationHeader from '../../components/header';
 
-import { getGalleryImages } from '../../scripts/api';
+import { getGalleryImages, getMyData } from '../../scripts/api';
 
 import { styles } from '../../styles/nav/gallery.jsx';
 import { router } from 'expo-router';
@@ -45,10 +45,13 @@ const GalleryItem = ({ label, size }) => {
 
 export default function GalleryScreen (){
     const [images, setImages] = useState([]);
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
         const fetchImages = async () => {
             const response = await getGalleryImages();
+            const userData = await getMyData();
+            setUser(userData);
             setImages(response);
         };
         fetchImages();
@@ -60,7 +63,7 @@ export default function GalleryScreen (){
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
 
           <View style={styles.galleryContainer}>
-            {images.map((image, index) => {
+            {images.filter((image) => image.author === user?.id).map((image, index) => {
               if (index % 3 === 0) {
                 return (
                   <TouchableOpacity 

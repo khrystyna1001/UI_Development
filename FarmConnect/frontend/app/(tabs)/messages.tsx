@@ -1,132 +1,220 @@
-import React, { useEffect } from 'react';
-import { View,
-    Text,
-    ScrollView,
-    TouchableOpacity,
-    TextInput,
-    SafeAreaView,
-    }
-from 'react-native';
-
-import { getMessages } from '../../scripts/api';
+import React, { useEffect, useState } from 'react';
+import { 
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  SafeAreaView,
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 
-import { Feather } from '@expo/vector-icons';
-
-import { router } from 'expo-router';
-
+import { getChats, getMyData } from '../../scripts/api';
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from '../../components/header';
 import { styles } from '../../styles/tabs/messages.jsx';
 
-const MessageItem = ({ id, name, snippet, time, read }) => (
-  <TouchableOpacity style={styles.messageItemContainer} onPress={() => router.replace(`/messages/${id}`)}>>
-    <View style={styles.messageAvatar}>
-        <Feather name="user" size={13} color="#666" style={{ marginHorizontal: 8 }} />
-    </View>
-    <View style={styles.messageContent}>
-      <Text style={[styles.messageName, !read && styles.messageNameUnread]}>{name}</Text>
-      <Text style={[styles.messageSnippet, !read && styles.messageSnippetUnread]} numberOfLines={1}>{snippet}</Text>
-    </View>
-    <Text style={styles.messageTime}>{time}</Text>
-  </TouchableOpacity>
-);
+const ChatItem = ({ chat, currentUserId, otherUser, onPress }) => {
+  const lastMessage = chat.messages?.[chat.messages.length - 1];
+  const unreadCount = chat.messages?.filter(m => !m.read && m.sender !== currentUserId).length || 0;
+  const hasUnread = unreadCount > 0;
 
-export default function Messages () {
-  const [messages, setMessages] = React.useState([]);
-  const [searchQuery, setSearchQuery] = React.useState('');
+  return (
+    <TouchableOpacity 
+      style={[
+        styles.chatItemContainer,
+        hasUnread && styles.chatItemUnread
+      ]} 
+      activeOpacity={0.7}
+      onPress={() => onPress(chat.id, otherUser.id)}
+    >
+      <View style={styles.avatarContainer}>
+        <View style={[styles.avatar, hasUnread && styles.avatarUnread]}>
+          <Feather 
+            name="user" 
+            size={24} 
+            color={hasUnread ? '#4CAF50' : '#666'} 
+          />
+        </View>
+        {hasUnread && (
+          <View style={styles.unreadBadge}>
+            <Text style={styles.unreadText}>
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </Text>
+          </View>
+        )}
+      </View>
+      
+      <View style={styles.chatContent}>
+        <View style={styles.chatHeader}>
+          <Text 
+            style={[
+              styles.chatName,
+              hasUnread && styles.chatNameUnread
+            ]}
+            numberOfLines={1}
+          >
+            {otherUser?.username}
+          </Text>
+          {lastMessage && (
+            <Text 
+              style={[
+                styles.chatTime,
+                hasUnread && styles.chatTimeUnread
+              ]}
+            >
+              {formatDistanceToNow(parseISO(lastMessage.created_at), { 
+                addSuffix: true 
+              })}
+            </Text>
+          )}
+        </View>
+        
+        {lastMessage && (
+          <View style={styles.messagePreview}>
+            <Text 
+              style={[
+                styles.chatSnippet,
+                hasUnread && styles.chatSnippetUnread
+              ]} 
+              numberOfLines={1}
+            >
+              {lastMessage.sender === currentUserId && (
+                <Text style={styles.youPrefix}>You: </Text>
+              )}
+              {lastMessage.content}
+            </Text>
+            {hasUnread && (
+              <View style={styles.unreadDot} />
+            )}
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+};
 
-  const fetchMessages = async () => {
+export default function Messages() {
+  const [chats, setChats] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  const fetchData = async () => {
     try {
-      const messages = await getMessages();
-      setMessages(messages);
-    } catch (e) {
-      console.error(e)
+      setLoading(true);
+      const [userData, chatData] = await Promise.all([
+        getMyData(),
+        getChats(),
+      ]);
+      setCurrentUser(userData);
+      setChats(chatData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const searchedMessages = messages.filter((message: any) => {
-    const query = searchQuery?.toLowerCase() || '';
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const filteredChats = chats.filter(chat => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    const otherUser = chat.user1.id === currentUser?.id ? chat.user2 : chat.user1;
+
     return (
-      message.title.toLowerCase().includes(query) ||
-      message.content.toLowerCase().includes(query) ||
-      message.author?.first_name?.toLowerCase().includes(query) ||
-      message.author?.last_name?.toLowerCase().includes(query)
+      otherUser?.first_name?.toLowerCase().includes(query) ||
+      otherUser?.last_name?.toLowerCase().includes(query) ||
+      otherUser?.username?.toLowerCase().includes(query) ||
+      chat.messages?.some(msg => 
+        msg.content.toLowerCase().includes(query)
+      )
     );
   });
 
-  useEffect(() => {
-    fetchMessages();
-  }, []);
+  const handleChatPress = (chatId) => {
+    router.replace(`/chat/${chatId}/`);
+  };
+
+  const handleNewChat = () => {
+    router.replace('/chat/create/');
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <NavigationHeader />
+        <View style={styles.loadingContainer}>
+          <Text>Loading messages...</Text>
+        </View>
+        <NavigationFooter />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-        {/* Header */}
-        <NavigationHeader />
-        <ScrollView style={styles.scrollViewContent}>
-
-          <View style={styles.cardGrid}>
-            <View style={styles.cardIconContainer}>
-              <Feather name="inbox" size={24} color="#007AFF" />
-            </View>
-            <View style={styles.cardIconContainer}>
-              <Feather name="send" size={24} color="#007AFF" />
-            </View>
-            <View style={styles.cardIconContainer}>
-              <Feather name="book" size={24} color="#007AFF" />
-            </View>
+      <NavigationHeader />
+      <ScrollView style={styles.scrollViewContent}>
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputContainer}>
+            <Feather 
+              name="search" 
+              size={20} 
+              color="#999" 
+              style={styles.searchIcon} 
+            />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search chats..."
+              placeholderTextColor="#999"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
           </View>
-
-          <View style={styles.searchContainer}>
-            <View style={styles.searchInputContainer}>
-              <Feather 
-                name="search" 
-                size={20} 
-                color="#999" 
-                style={styles.searchIcon} 
-              />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search messages..."
-                placeholderTextColor="#999"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-            </View>
-          </View>
-
-          <Text style={styles.sectionHeader}>Your Messages</Text>
-
-          <View>
-            {Array.isArray(searchedMessages) && searchedMessages.map((message) => (
-              <MessageItem
-                key={message.id}
-                id={message.id}
-                name={message.title}
-                snippet={message.content}
-                time={formatDistanceToNow(parseISO(message.created_at), { addSuffix: true })}
-                read={message.read}
-              />
-            ))}
-          </View>
-
-          <View style={{ height: 160 }} />
-        </ScrollView>
-
-        <View style={styles.actionButtonsContainer}>
-          <TouchableOpacity style={[styles.button, styles.deleteButton]}>
-            <Text style={styles.buttonText}>Delete Selected</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.readButton]}>
-            <Text style={styles.buttonText}>Mark as Read</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.composeButton]}>
-            <Text style={styles.composeButtonText}>Compose New Message</Text>
-          </TouchableOpacity>
         </View>
-        <NavigationFooter />
+
+        <Text style={styles.sectionHeader}>Your Chats</Text>
+
+        {filteredChats.length > 0 ? (
+          filteredChats.map(chat => {
+            const otherUser = chat.user1.id === currentUser?.id ? chat.user2 : chat.user1;
+            return (
+            <ChatItem
+              key={chat.id}
+              chat={chat}
+              currentUserId={currentUser?.id}
+              otherUser={otherUser}
+              onPress={handleChatPress}
+            />
+          )})
+        ) : (
+          <View style={styles.emptyState}>
+            <Feather name="message-square" size={48} color="#ccc" />
+            <Text style={styles.emptyText}>No chats yet</Text>
+            <Text style={styles.emptySubtext}>Start a new conversation</Text>
+          </View>
+        )}
+
+        <View style={{ height: 100 }} />
+      </ScrollView>
+
+      <TouchableOpacity 
+        style={styles.newChatButton}
+        onPress={handleNewChat}
+      >
+        <Text style={styles.newChatButtonText}>New Chat</Text>
+      </TouchableOpacity>
+
+      <NavigationFooter />
     </SafeAreaView>
-    );
-};
+  );
+}
 
 
