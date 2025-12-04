@@ -14,7 +14,7 @@ import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, router } from 'expo-router';
 import { format } from 'date-fns';
 
-import { getChat, deleteChat, deleteMessage, createMessage, getMyData } from '../../scripts/api';
+import { getChat, deleteChat, deleteMessage, createMessage, getMyData, updateMessage } from '../../scripts/api';
 
 import { styles } from '../../styles/tabs/chat';
 
@@ -53,61 +53,74 @@ export default function ChatDetail() {
         setMessages(chatData.messages || []);
         const other = chatData.user1.id === user?.id ? chatData.user2 : chatData.user1;
         setOtherUser(other);
+        
+        if (chatData.messages && user) {
+          const unreadMessages = chatData.messages.filter(
+          msg => msg.sender !== user.id && !msg.read
+        );
+          
+          await Promise.all(
+            unreadMessages.map(async msg => await handleRead(msg.id).catch(console.error))
+          );
+        }
       } catch (error) {
         console.error('Error loading chat:', error);
+        Alert.alert('Error', 'Failed to load chat. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
-    loadChat();
-  }, [id]);
+    if (user) {
+      loadChat();
+    }
 
-    const handleSend = async () => {
+  }, [id, user]);
+
+  const handleSend = async () => {
     if (!message.trim()) return;
 
     try {
-        setSending(true);
-        const newMessage = {
-            id: `temp-${Date.now()}`,
-            content: message.trim(),
-            sender: user.id,
-            created_at: new Date().toISOString(),
-            isOptimistic: true
-        };
+      setSending(true);
+      const newMessage = {
+          id: `temp-${Date.now()}`,
+          content: message.trim(),
+          sender: user.id,
+          created_at: new Date().toISOString(),
+          isOptimistic: true
+      };
 
-        setMessages(prev => [
-            ...prev.filter(msg => msg.id !== newMessage.id),
-            { ...newMessage, isOptimistic: false }
-        ].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)));
-        setMessage('');
+      setMessages(prev => [...prev.filter(msg => msg.id !== newMessage.id),
+          { ...newMessage, isOptimistic: false }
+          ].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)));
+      setMessage('');
 
-        try {
-            await createMessage({
-                content: newMessage.content,
-                chat: id,
-                sender: user.id,
-                created_at: newMessage.created_at
-            });
-        } catch (error) {
-            console.error('Failed to save message:', error);
-            Alert.alert('Error', 'Failed to save message. Please check your connection.');
-            setMessages(prev => prev.filter(msg => msg.id !== newMessage.id));
-            return;
-        }
+      try {
+          await createMessage({
+              content: newMessage.content,
+              chat: id,
+              sender: user.id,
+              created_at: newMessage.created_at
+          });
+      } catch (error) {
+          console.error('Failed to save message:', error);
+          Alert.alert('Error', 'Failed to save message. Please check your connection.');
+          setMessages(prev => prev.filter(msg => msg.id !== newMessage.id));
+          return;
+      }
 
-        setTimeout(() => {
-            scrollViewRef.current?.scrollToEnd({ animated: true });
-        }, 100);
+      setTimeout(() => {
+          scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
 
-    } catch (error) {
-        console.error('Failed to send message:', error);
-        Alert.alert('Error', 'Failed to send message. Please try again.');
-        setMessages(prev => prev.filter(msg => msg.id !== newMessage.id));
-    } finally {
-        setSending(false);
-    }
-    };
+  } catch (error) {
+      console.error('Failed to send message:', error);
+      Alert.alert('Error', 'Failed to send message. Please try again.');
+      setMessages(prev => prev.filter(msg => msg.id !== newMessage.id));
+  } finally {
+      setSending(false);
+  }
+  };
 
   const handleDeleteChat = async () => {
     try {
@@ -121,9 +134,25 @@ export default function ChatDetail() {
       setShowDeleteModal(false);
     } finally {
       setDeleting(false);
-      router.replace('/(tabs)/messages');
     }
+
   };
+
+  const handleDeleteMessage = async (messageId) => {
+    try {
+      setDeleting(true);
+      setMessages(prev => prev.filter(msg => msg.id !== messageId));
+      
+      await deleteMessage(messageId);
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error('Failed to delete message:', error);
+      Alert.alert('Error', 'Failed to delete message. Please try again.');
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+    }
+  }
 
   const showDeleteConfirmation = (type: 'chat' | 'message', id?) => {
     setDeleteType(type);
@@ -133,19 +162,28 @@ export default function ChatDetail() {
     setShowDeleteModal(true);
     };
 
-  const handleDeleteMessage = async (messageId) => {
-    try {
-        setDeleting(true);
-        await deleteMessage(messageId);
-        setMessages(prev => prev.filter(msg => msg.id !== messageId));
-        setShowDeleteModal(false);
-    } catch (error) {
-        console.error('Failed to delete message:', error);
-        Alert.alert('Error', 'Failed to delete message. Please try again.');
-    } finally {
-        setDeleting(false);
+  const handleRead = async (messageId) => {
+    if (!messages) return;
+    if (!user) return;
+
+    const message = messages.find(msg => msg.id === id);
+    if (!message) return;
+
+    const messageData = {
+       id,
+       sender: user?.id,
+       content: message.content,
+       read: true,
     }
-    };
+    try {
+      await updateMessage(messageId, messageData);
+      setMessages(prev => prev.map(msg => msg.id === id ? { ...msg, read: true } : msg));
+      console.log('Message read:', messageData);
+    } catch (error) {
+      console.error('Failed to read chat:', error);
+      Alert.alert('Error', 'Failed to read chat. Please try again.');
+    }
+  };
 
   if (loading) {
     return (
@@ -172,7 +210,7 @@ export default function ChatDetail() {
           {deleting ? (
             <ActivityIndicator size="small" color="#ff4444" />
           ) : (
-            <Feather name="trash-2" size={24} color="#ff4444" />
+            <Feather name="trash-2" size={24} color="#000000" />
           )}
         </TouchableOpacity>
         <Modal
@@ -243,6 +281,16 @@ export default function ChatDetail() {
                   message.error && styles.errorMessage
                 ]}
               >
+                {isCurrentUser && (
+                <TouchableOpacity
+                    onPress={() => showDeleteConfirmation('message', message.id)}
+                    disabled={deleting}
+                    style={[styles.deleteMessageButton, { opacity: deleting ? 0.5 : 1 }]}
+                    activeOpacity={0.7}
+                >
+                    <Feather name="trash-2" size={16} color="#ffffffff" />
+                </TouchableOpacity>
+                )}
                 <Text style={[
                   styles.messageText,
                   isCurrentUser ? styles.currentUserText : styles.otherUserText
@@ -257,15 +305,6 @@ export default function ChatDetail() {
                   {message.isSending && ' · Sending...'}
                   {message.error && ' · Failed to send'}
                 </Text>
-                {isCurrentUser && (
-                <TouchableOpacity
-                    onPress={() => showDeleteConfirmation('message', message.id)}
-                    disabled={deleting}
-                    style={styles.deleteMessageButton}
-                >
-                    <Feather name="trash-2" size={14} color="#ff4444" />
-                </TouchableOpacity>
-                )}
             </View>
           );
           })}

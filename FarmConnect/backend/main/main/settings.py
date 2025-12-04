@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
+import sys
 from pathlib import Path
 from environ import Env
 
@@ -18,7 +20,8 @@ TRUE_ROOT_DIR = Path(__file__).resolve().parent.parent.parent.parent
 env.read_env(str(TRUE_ROOT_DIR / '.env'))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE_DIR)
 
 
 # Quick-start development settings - unsuitable for production
@@ -45,8 +48,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
 
-    "app",
-    "rest_framework",
+    'app',
+    'rest_framework',
     'rest_framework.authtoken',
     'drf_spectacular',
     'corsheaders',
@@ -82,7 +85,7 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
-ROOT_URLCONF = "main.urls"
+ROOT_URLCONF = "main.main.urls"
 
 TEMPLATES = [
     {

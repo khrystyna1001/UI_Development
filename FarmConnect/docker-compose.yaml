@@ -22,7 +22,10 @@ services:
 
   app-service:
     build: ./backend
-    command: uv run python main/manage.py runserver 0.0.0.0:8000
+    environment:
+      PYTHONPATH: /app
+      DJANGO_SETTINGS_MODULE: main.main.settings
+    command: uv run gunicorn main.main.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
     volumes:
       - ./backend:/app
     working_dir: /app
