@@ -231,7 +231,7 @@ export const styles = StyleSheet.create({
     marginLeft: 8,
   },
   actionButtons: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-between',
     padding: 16,
     backgroundColor: '#fff',

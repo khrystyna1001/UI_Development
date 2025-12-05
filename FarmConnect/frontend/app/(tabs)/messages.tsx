@@ -14,6 +14,7 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import { getChats, getMyData } from '../../scripts/api';
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from '../../components/header';
+import { CreateButton } from '../../components/createButton';
 import { styles } from '../../styles/tabs/messages.jsx';
 
 const ChatItem = ({ chat, currentUserId, otherUser, onPress }) => {
@@ -205,12 +206,7 @@ export default function Messages() {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      <TouchableOpacity 
-        style={styles.newChatButton}
-        onPress={handleNewChat}
-      >
-        <Text style={styles.newChatButtonText}>New Chat</Text>
-      </TouchableOpacity>
+      <CreateButton item="chat" onPress={handleNewChat} />
 
       <NavigationFooter />
     </SafeAreaView>

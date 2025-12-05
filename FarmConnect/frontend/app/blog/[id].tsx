@@ -13,6 +13,9 @@ import { getBlogPost, getMyData, deleteBlogPost } from '../../scripts/api';
 
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
+import { UpdateButton } from "../../components/updateButton";
+import { DeleteButton } from "../../components/deleteButton";
+
 import { styles } from '../../styles/nav/blog.jsx';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -125,18 +128,8 @@ export default function BlogDetail() {
           {/* Edit button - only for the author */}
           {blog.author === user?.id && (
             <View style={styles.actionButtonsContainer}>
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.editButton]}
-                onPress={() => router.replace(`/blog/create?id=${blog.id}`)}
-              >
-                <Text style={styles.actionButtonText}>Edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.deleteButton]}
-                onPress={() => deleteBlog(blog.id)}
-              >
-                <Text style={styles.actionButtonText}>Delete</Text>
-              </TouchableOpacity>
+              <UpdateButton onPress={() => router.replace(`/blog/create?id=${blog.id}`)} />
+              <DeleteButton onPress={() => deleteBlog(blog.id)} />
             </View>
           )}
 

@@ -13,6 +13,7 @@ import { getBlogPosts, getMyData } from "../../scripts/api";
 
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from "../../components/header";
+import { CreateButton } from "../../components/createButton";
 
 import { router } from 'expo-router';
 
@@ -201,10 +202,8 @@ export default function BlogPage () {
       </ScrollView>
 
       {user?.is_superuser && (
-          <TouchableOpacity style={styles.createButton} onPress={() => router.navigate('/blog/create')}>
-            <Text style={styles.createButtonText}>Create New Post</Text>
-          </TouchableOpacity>
-        )}
+        <CreateButton item="blog" onPress={() => router.navigate('/blog/create')} />
+      )}
 
       <NavigationFooter />
     </SafeAreaView>

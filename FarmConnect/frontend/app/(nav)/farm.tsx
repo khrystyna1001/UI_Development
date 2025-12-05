@@ -18,6 +18,8 @@ import { router } from 'expo-router';
 
 import SearchFilterBar from '../../components/searchfilter';
 import FilterModal from '../../components/filtermodal';
+import { CreateButton } from '../../components/createButton';
+
 
 import { styles } from '../../styles/nav/farm';
 
@@ -198,13 +200,8 @@ const FarmListScreen = () => {
       </ScrollView>
 
       {user?.is_superuser && (
-      <TouchableOpacity 
-        style={styles.createButton}
-        onPress={() => router.navigate('/farm/create')}
-      >
-        <Text style={styles.createButtonText}>Add New Farm</Text>
-      </TouchableOpacity>
-      )}
+        <>
+      <CreateButton item="farm" onPress={() => router.navigate('/farm/create')} />
        <FilterModal
         visible={showFilterModal}
         onClose={() => setShowFilterModal(false)}
@@ -216,6 +213,8 @@ const FarmListScreen = () => {
           setShowFilterModal(false);
         }}
       />
+        </>
+      )}
       <NavigationFooter />
     </SafeAreaView>
   );

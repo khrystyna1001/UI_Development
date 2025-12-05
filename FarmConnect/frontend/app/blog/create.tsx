@@ -8,11 +8,13 @@ import {
   Alert, 
   ActivityIndicator,
 } from 'react-native';
-import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { getBlogPost, createBlogPost, updateBlogPost, deleteBlogPost, getMyData } from '../../scripts/api';
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
+import { EditButton } from "../../components/editButton";
+import { DeleteButton } from "../../components/deleteButton";
 import { styles } from '../../styles/nav/blogcreate.jsx';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -189,24 +191,11 @@ const BlogEditor = () => {
         />
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.submitButton]}
-            onPress={handleSubmit}
-            disabled={isSubmitting}
-          >
-            <Text style={styles.buttonText}>
-              {isSubmitting ? 'Saving...' : id ? 'Update Post' : 'Create Post'}
-            </Text>
-          </TouchableOpacity>
-
           {id && (
-            <TouchableOpacity
-              style={[styles.button, styles.deleteButton]}
-              onPress={deleteBlog}
-              disabled={isSubmitting}
-            >
-              <Text style={styles.buttonText}>Delete Post</Text>
-            </TouchableOpacity>
+            <>
+              <EditButton item={formData.title} action={id ? "Update" : "Create"} onPress={handleSubmit} disabled={isSubmitting} />
+              <DeleteButton item={formData.title} onPress={deleteBlog} style={styles.deleteButton} disabled={isSubmitting}  />
+            </>
           )}
         </View>
       </ScrollView>

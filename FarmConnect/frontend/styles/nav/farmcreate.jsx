@@ -55,18 +55,18 @@ export const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-between',
     marginTop: 20,
     marginBottom: 30,
   },
   button: {
-    flex: 1,
+    width: '100%',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 5,
+    marginVertical: 5,
   },
   cancelButton: {
     backgroundColor: '#F0F0F0',

@@ -11,6 +11,7 @@ import {
 
 import NavigationFooter from '../../components/footer';
 import NavigationHeader from '../../components/header';
+import { CreateButton } from '../../components/createButton';
 
 import { getGalleryImages, getMyData } from '../../scripts/api';
 
@@ -107,12 +108,10 @@ export default function GalleryScreen (){
 
                 </View>
                 <View>
-              <TouchableOpacity style={styles.addImageContainer} onPress={() => router.navigate('/gallery/create')}>
-                <Text style={styles.addImageText}>Add Image</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        <NavigationFooter />
-      </SafeAreaView>
+                  <CreateButton item="image" onPress={() => router.navigate('/gallery/create')} />
+                </View>
+              </ScrollView>
+              <NavigationFooter />
+            </SafeAreaView>
   )
 };

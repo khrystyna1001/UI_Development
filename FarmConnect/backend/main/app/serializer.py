@@ -61,11 +61,28 @@ class BlogPostSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at', 'reads']
 
+# Farm
+class FarmSerializer(serializers.ModelSerializer):
+    user_info = UserSerializer(source='user', read_only=True)
+    
+    class Meta:
+        model = Farm
+        fields = [
+            'id',
+            'name',
+            'location',
+            'description',
+            'user',
+            'user_info',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
 
 # Product
 class ProductSerializer(serializers.ModelSerializer):
     author_info = UserSerializer(source='author', read_only=True)
-    farm_info = serializers.StringRelatedField(source='farm', read_only=True)
+    farm_info = FarmSerializer(source='farm', read_only=True)
 
     class Meta:
         model = Product
@@ -166,24 +183,6 @@ class GalleryImageSerializer(serializers.ModelSerializer):
             'image',
             'author',
             'author_info',
-            'created_at',
-            'updated_at'
-        ]
-        read_only_fields = ['created_at', 'updated_at']
-
-
-# Farm
-class FarmSerializer(serializers.ModelSerializer):
-    user_info = UserSerializer(source='user', read_only=True)
-    class Meta:
-        model = Farm
-        fields = [
-            'id',
-            'name',
-            'location',
-            'description',
-            'user',
-            'user_info',
             'created_at',
             'updated_at'
         ]

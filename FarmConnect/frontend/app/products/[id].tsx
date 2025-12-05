@@ -13,6 +13,8 @@ import { getProduct, getMyData, deleteProduct } from '../../scripts/api';
 
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
+import { UpdateButton } from '../../components/updateButton';
+import { DeleteButton } from '../../components/deleteButton';
 import { styles } from '../../styles/tabs/product';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -96,6 +98,7 @@ export default function ProductDetail() {
 
       <View style={styles.detailsContainer}>
         <Text style={styles.name}>{product.name}</Text>
+        <Text style={styles.name}>From {product.farm_info?.name}</Text>
         <Text style={styles.price}>${product.price}</Text>
         
         <View style={styles.section}>
@@ -154,18 +157,8 @@ export default function ProductDetail() {
           {/* Edit button - only for the author */}
           {product?.author === user?.id && (
             <View style={styles.actionButtonsContainer}>
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.editButton]}
-                onPress={() => router.replace(`/products/create?id=${product.id}`)}
-              >
-                <Text style={styles.actionButtonText}>Edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.deleteButton]}
-                onPress={() => deleteProductById(product.id)}
-              >
-                <Text style={styles.actionButtonText}>Delete</Text>
-              </TouchableOpacity>
+              <UpdateButton item={product.name} onPress={() => router.push(`/products/create?id=${product?.id}`)} />
+              <DeleteButton item={product.name} onPress={() => deleteProduct(product?.id)} />
             </View>
           )}
 

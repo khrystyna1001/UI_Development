@@ -12,6 +12,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { getGalleryImage, getMyData, updateGalleryImage, deleteGalleryImage } from '../../scripts/api';
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
+import { DeleteButton } from '../../components/deleteButton';
+import { UpdateButton } from '../../components/updateButton';
 import { styles } from '../../styles/nav/image';
 
 const GalleryImageProfile = () => {
@@ -64,10 +66,10 @@ const GalleryImageProfile = () => {
       <View style={styles.container}>
         <Text style={styles.errorText}>{error || 'Image not found'}</Text>
         <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.back()}
+          style={styles.backButton}
+          onPress={() => router.back() || router.replace('/(nav)/gallery')}
         >
-          <Text style={styles.buttonText}>Go Back</Text>
+          <Text style={styles.backButtonText}>Go Back</Text>
         </TouchableOpacity>
       </View>
     );
@@ -80,7 +82,7 @@ const GalleryImageProfile = () => {
       <ScrollView style={styles.scrollView}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => router.back() || router.replace('/(nav)/gallery')}
         >
           <Text style={styles.backButtonText}>← Back to Gallery</Text>
         </TouchableOpacity>
@@ -112,18 +114,18 @@ const GalleryImageProfile = () => {
         </View>
       </View>
       <View style={styles.actionsContainer}>
-        <TouchableOpacity 
-          style={styles.editButton}
-          onPress={() => router.replace(`/gallery/create?id=${image.id}`)}
-        >
-          <Text style={styles.editButtonText}>Edit Image</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.deleteButton}
-          onPress={() => deleteImage(image.id)}
-        >
-          <Text style={styles.deleteButtonText}>Delete Image</Text>
-        </TouchableOpacity>
+
+        {image?.id && (
+          <UpdateButton 
+            item="image"
+            onPress={() => router.replace(`/gallery/create?id=${image?.id}`)} 
+          />
+        )}
+        <DeleteButton 
+          item="image"
+          onPress={() => deleteImage(image?.id)}
+        />
+        
       </View>
       </ScrollView>
       

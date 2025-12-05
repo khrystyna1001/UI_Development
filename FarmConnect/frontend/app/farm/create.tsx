@@ -7,11 +7,13 @@ import {
   ScrollView, 
   ActivityIndicator,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { createFarm, updateFarm, getFarm, getMyData, deleteFarm } from '../../scripts/api';
+import { router, useLocalSearchParams } from 'expo-router';
+import { createFarm, updateFarm, getFarm, deleteFarm } from '../../scripts/api';
 import NavigationHeader from '../../components/header';
 import NavigationFooter from '../../components/footer';
+import { DeleteButton } from '../../components/deleteButton';
+import { EditButton } from '../../components/editButton';
 import { styles } from '../../styles/nav/farmcreate';
 
 const FarmCreateScreen = () => {
@@ -147,28 +149,15 @@ const FarmCreateScreen = () => {
 
 
         <View style={styles.buttonContainer}>
-            {isEdit && (
-          <TouchableOpacity
-            style={[styles.button, styles.cancelButton]}
-            onPress={handleDelete}
-          >
-            <Text style={styles.cancelButtonText}>Delete Farm</Text>
-          </TouchableOpacity>
-            )}
-
-          <TouchableOpacity
-            style={[styles.button, styles.submitButton, saving && styles.disabledButton]}
-            onPress={handleSubmit}
-            disabled={saving}
-          >
-            {saving ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.submitButtonText}>
-                {isEdit ? 'Update Farm' : 'Create Farm'}
-              </Text>
-            )}
-          </TouchableOpacity>
+          {saving ? (
+            <Text>Saving...</Text>
+          ) : (
+          <EditButton action={isEdit ? "Update" : "Create"} item="farm" onPress={() => handleSubmit()} />
+          )}
+          {isEdit && (
+          <DeleteButton item="farm" onPress={handleDelete} />
+          )}
+          
         </View>
       </ScrollView>
       <NavigationFooter />

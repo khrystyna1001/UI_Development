@@ -12,6 +12,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { getGalleryImage, createGalleryImage, updateGalleryImage, deleteGalleryImage, getMyData } from '../../scripts/api';
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
+import { EditButton } from '../../components/editButton';
+import { DeleteButton } from '../../components/deleteButton';
 import { styles } from '../../styles/nav/gallerycreate';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -130,22 +132,15 @@ const GalleryEditor = () => {
         />
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.submitButton]}
-            onPress={handleSubmit}
-            disabled={isSubmitting}
-          >
-            <Text style={styles.buttonText}>
-              {isSubmitting ? 'Saving...' : id ? 'Update Image' : 'Add to Gallery'}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-              style={[styles.button, styles.deleteButton]}
-              onPress={deleteImage}
-              disabled={isSubmitting}
-            >
-              <Text style={styles.buttonText}>Delete Image</Text>
-            </TouchableOpacity>
+          <EditButton 
+            item="image"
+            action={ id ? "Update" : "Create" }
+            onPress={() => handleSubmit()} 
+          />
+          <DeleteButton 
+            item="image"
+            onPress={() => deleteImage()} 
+          />
         </View>
       </ScrollView>
       <NavigationFooter />

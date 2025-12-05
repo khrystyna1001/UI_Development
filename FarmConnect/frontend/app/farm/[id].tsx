@@ -7,11 +7,16 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
-import { getFarm, deleteFarm, getMyData } from '../../scripts/api';
+
+import { getFarm, deleteFarm, getMyData, getProducts } from '../../scripts/api';
+
 import NavigationHeader from '../../components/header';
 import NavigationFooter from '../../components/footer';
+import { DeleteButton } from '../../components/deleteButton';
+
 import { styles } from '../../styles/nav/farmdetail';
+import { Feather } from '@expo/vector-icons';
+import { UpdateButton } from '@/components/updateButton';
 
 const FarmDetailScreen = () => {
   const { id } = useLocalSearchParams();
@@ -20,6 +25,9 @@ const FarmDetailScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
+
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
 
   useEffect(() => {
     const fetchFarm = async () => {
@@ -39,6 +47,32 @@ const FarmDetailScreen = () => {
 
     if (id) {
       fetchFarm();
+    }
+  }, [id]);
+
+  const fetchProducts = async () => {
+    try {
+      console.log('Fetching products for farm:', id);
+      const productsData = await getProducts();
+
+      if (productsData && Array.isArray(productsData)) {
+        const filteredProducts = productsData.filter((product) => product.farm === id);
+        console.log('Filtered products:', filteredProducts);
+        setProducts(filteredProducts);
+      } else {
+        console.log('No products data received or invalid format');
+        setProducts([]);
+      }
+    } catch (err) {
+      console.error('Error fetching products:', err);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      fetchProducts();
     }
   }, [id]);
 
@@ -66,7 +100,7 @@ const FarmDetailScreen = () => {
         <Text style={styles.errorText}>{error || 'Farm not found'}</Text>
         <TouchableOpacity 
           style={styles.retryButton} 
-          onPress={() => router.back()}
+          onPress={() => router.back() || router.replace('/farm')}
         >
           <Text style={styles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
@@ -77,7 +111,7 @@ const FarmDetailScreen = () => {
   return (
     <View style={styles.container}>
       <NavigationHeader />
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back() || router.replace('/farm')}>
         <Feather name="arrow-left" size={20} color="#333" />
         <Text style={styles.backButtonText}>Back</Text>
       </TouchableOpacity>
@@ -114,26 +148,33 @@ const FarmDetailScreen = () => {
             <Text style={styles.statValue}>{new Date(farm.updated_at || 'N/A').toLocaleDateString()}</Text>
             <Text style={styles.statLabel}>Updated</Text>
           </View>
+        
+        {/* Products */}
+        <View>
+          <Text style={styles.sectionTitle}>Products</Text>
+          {products && products.length > 0 ? (
+            products.map((product) => (
+              <View key={product.id} style={styles.productItem}>
+                <Text style={styles.productName}>{product.name}</Text>
+                <Text style={styles.productCategory}>{product.category}</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.noProducts}>No products available</Text>
+          )}
+        </View>
       </ScrollView>
 
        {/* Action Buttons */}
       {user?.is_superuser && (
       <View style={styles.actionButtons}>
-        <TouchableOpacity 
-          style={[styles.actionButton, { backgroundColor: '#4CAF50' }]}
-          onPress={() => router.push(`/farm/create?id=${farm.id}`)}
-        >
-          <Feather name="edit-2" size={18} color="#FFF" />
-          <Text style={styles.actionButtonText}>Edit Farm</Text>
-        </TouchableOpacity>
+        <UpdateButton
+          item={farm.name}
+          onPress={() => router.push(`/farm/create?id=${farm.id}`)} />
         
-        <TouchableOpacity 
-          style={[styles.actionButton, { backgroundColor: '#f44336' }]}
-          onPress={() => handleDelete()}
-        >
-          <Feather name="trash" size={18} color="#FFF" />
-          <Text style={styles.actionButtonText}>Delete Farm</Text>
-        </TouchableOpacity>
+        <DeleteButton 
+          item={farm.name} 
+          onPress={() => handleDelete()} />
       </View>
       )}
 

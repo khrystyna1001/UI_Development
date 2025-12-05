@@ -12,6 +12,7 @@ import { getProducts, getMyData } from "../../scripts/api";
 
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from "../../components/header";
+import { CreateButton } from "../../components/createButton";
 
 import { router } from 'expo-router';
 
@@ -34,7 +35,7 @@ const ProductCard = ({ product }: { product: any }) => (
   <TouchableOpacity style={styles.productCard} onPress={() => router.navigate(`/products/${product.id}`)}>
     <View style={styles.productImagePlaceholder} />
     <View style={styles.productContent}>
-      <Text style={styles.productName}>{product.name}</Text>
+      <Text style={styles.productName}>{product.name} from {product.farm_info?.name || 'Unknown Farm'}</Text>
       <Text style={styles.productDescription}>{product.description}</Text>
       <View style={styles.productMeta}>
         <Text style={styles.productAuthor}>{product.author_info?.username} | {new Date(product.created_at).toLocaleDateString()} | {product.category}</Text>
@@ -141,7 +142,7 @@ export default function ProductsPage () {
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity 
             style={styles.retryButton} 
-            onPress={fetchBlogs}
+            onPress={fetchProducts}
           >
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
@@ -203,12 +204,13 @@ export default function ProductsPage () {
           </View>
         </View>
 
+        {/* Empty space for visual balance */}
+        <View style={{ height: 80 }} />
+
       </ScrollView>
 
       {user?.is_superuser && (
-        <TouchableOpacity style={styles.createButton} onPress={() => router.navigate(`/products/create`) }>
-          <Text style={styles.createButtonText}>Add Product</Text>
-        </TouchableOpacity>
+        <CreateButton item="product" onPress={() => router.navigate(`/products/create`)} />
       )}
 
       <NavigationFooter />
