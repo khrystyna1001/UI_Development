@@ -3,25 +3,17 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: '#f9f9f9',
   },
   scrollView: {
     flex: 1,
     padding: 16,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFF',
-  },
-  formGroup: {
-    marginBottom: 20,
-  },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#333',
     textAlign: 'center',
   },
   backButton: {
@@ -32,93 +24,63 @@ export const styles = StyleSheet.create({
   backButtonText: {
     marginLeft: 8,
     fontSize: 16,
-    fontWeight: '500',
     color: '#333',
+  },
+  formGroup: {
+    marginBottom: 20,
   },
   label: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
     marginBottom: 8,
     color: '#333',
   },
   input: {
+    backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#DDD',
+    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
     color: '#333',
-    backgroundColor: '#FFF',
   },
   textArea: {
     minHeight: 100,
     textAlignVertical: 'top',
   },
-  buttonContainer: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    marginTop: 20,
-    marginBottom: 30,
-  },
-  button: {
-    width: '100%',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 5,
-  },
-  cancelButton: {
-    backgroundColor: '#F0F0F0',
-  },
-  submitButton: {
-    backgroundColor: '#4CAF50',
-  },
-  disabledButton: {
-    opacity: 0.7,
-  },
-  cancelButtonText: {
-    color: '#666',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  submitButtonText: {
-    color: '#FFF',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  errorText: {
-    color: '#F44336',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  required: {
-    color: '#F44336',
-  },
+  // Products section
   productsContainer: {
+    marginBottom: 20,
+  },
+  productsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     marginTop: 8,
-    maxHeight: 200,
-    borderWidth: 1,
-    borderColor: '#DDD',
-    borderRadius: 8,
-    padding: 8,
+  },
+  productItem: {
+    width: '45%',
+    marginRight: '4%',
+    marginBottom: 12,
   },
   productCheckbox: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   checkbox: {
     width: 20,
     height: 20,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#999',
-    marginRight: 8,
+    borderColor: '#ccc',
+    marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fff',
   },
   checkboxSelected: {
     backgroundColor: '#4CAF50',
@@ -126,16 +88,46 @@ export const styles = StyleSheet.create({
   },
   checkmark: {
     color: '#fff',
+    fontSize: 14,
     fontWeight: 'bold',
   },
   productLabel: {
-    fontSize: 16,
+    flex: 1,
+    fontSize: 14,
     color: '#333',
   },
-  noProducts: {
-    padding: 16,
+  // Buttons
+  buttonContainer: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    marginBottom: 40,
+  },
+  // Loading and error states
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+  },
+  errorText: {
+    color: '#f44336',
+    marginBottom: 16,
     textAlign: 'center',
+  },
+  // Selected products counter
+  selectedCounter: {
+    fontSize: 14,
     color: '#666',
+    marginBottom: 8,
     fontStyle: 'italic',
+  },
+  // Section title
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 16,
+    marginBottom: 12,
   },
 });

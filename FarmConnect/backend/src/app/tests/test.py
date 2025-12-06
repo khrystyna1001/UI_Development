@@ -70,9 +70,9 @@ class APITestCase(TestCase):
             'category': valid_category,
             'quantity': 50,
             'author': self.test_user,
-            'farm': self.farm,
         }
         self.product = Product.objects.create(**self.product_data)
+        self.product.farms.add(self.farm)
         self.product_list_url = reverse('products-list')
         self.product_detail_url = reverse('products-detail', kwargs={'pk': self.product.pk})
 

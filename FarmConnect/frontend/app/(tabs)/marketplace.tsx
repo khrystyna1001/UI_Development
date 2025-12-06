@@ -35,7 +35,7 @@ const ProductCard = ({ product }: { product: any }) => (
   <TouchableOpacity style={styles.productCard} onPress={() => router.navigate(`/products/${product.id}`)}>
     <View style={styles.productImagePlaceholder} />
     <View style={styles.productContent}>
-      <Text style={styles.productName}>{product.name} from {product.farm_info?.name || 'Unknown Farm'}</Text>
+      <Text style={styles.productName}>{product.name} from {product.farms_info?.map((farm) => farm.name).join(', ') || 'Unknown Farm'}</Text>
       <Text style={styles.productDescription}>{product.description}</Text>
       <View style={styles.productMeta}>
         <Text style={styles.productAuthor}>{product.author_info?.username} | {new Date(product.created_at).toLocaleDateString()} | {product.category}</Text>

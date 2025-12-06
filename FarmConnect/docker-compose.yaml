@@ -28,6 +28,7 @@ services:
     command: uv run gunicorn src.main.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
     volumes:
       - ./backend/src:/app/src
+      - ./staticfiles:/app/staticfiles
     working_dir: /app
     env_file:
       - .env

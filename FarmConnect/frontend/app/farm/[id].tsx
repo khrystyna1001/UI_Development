@@ -22,12 +22,10 @@ const FarmDetailScreen = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const [farm, setFarm] = useState(null);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
-
-  const [products, setProducts] = useState([]);
-  const [loadingProducts, setLoadingProducts] = useState(true);
 
   useEffect(() => {
     const fetchFarm = async () => {
@@ -35,8 +33,21 @@ const FarmDetailScreen = () => {
         const data = await getFarm(id);
         setFarm(data);
 
+        console.log('Received farm data:', data);
+
         const myData = await getMyData();
         setUser(myData);
+
+        const productsData = await getProducts();
+        console.log('Received products data:', productsData);
+        
+        if (productsData && Array.isArray(productsData)) {
+          const filteredProducts = productsData.filter(product => 
+            product.farms && product.farms.some(farm => farm.toString() === id)
+          );
+          console.log('Products for this farm:', filteredProducts);
+          setProducts(filteredProducts);
+        }
       } catch (err) {
         console.error('Error fetching farm:', err);
         setError('Failed to load farm details');
@@ -47,30 +58,6 @@ const FarmDetailScreen = () => {
 
     if (id) {
       fetchFarm();
-    }
-  }, [id]);
-
-  const fetchProducts = async () => {
-    try {
-      const productsData = await getProducts();
-
-      if (productsData && Array.isArray(productsData)) {
-        const filteredProducts = productsData.filter((product) => product.farm.toString() === id);
-        setProducts(filteredProducts);
-      } else {
-        console.log('No products data received or invalid format');
-        setProducts([]);
-      }
-    } catch (err) {
-      console.error('Error fetching products:', err);
-    } finally {
-      setLoadingProducts(false);
-    }
-  };
-
-  useEffect(() => {
-    if (id) {
-      fetchProducts();
     }
   }, [id]);
 
@@ -150,7 +137,7 @@ const FarmDetailScreen = () => {
         {/* Products */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Products</Text>
-          {products && products.length > 0 ? (
+          {Array.isArray(products) && products.length > 0 ? (
             products.map((product) => (
               <View key={product.id} style={styles.productItem}>
                 <Text style={styles.productName}>{product.name}</Text>

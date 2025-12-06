@@ -45,10 +45,14 @@ const FarmCreateScreen = () => {
             description: farm.description || '',
           });
 
-          const existingProductIds = farm.products?.map(p => p.id).filter(id => 
-            allProducts.some(p => p.id === id)
-          ) || [];
-          setSelectedProducts(existingProductIds);
+          const productsData = await getProducts();
+          
+          if (productsData && Array.isArray(productsData)) {
+            const filteredProducts = productsData.filter(product => 
+              product.farms && product.farms.some(farm => farm.toString() === id)
+            );
+            setSelectedProducts(filteredProducts.map(p => p.id));
+          }
 
         } catch (err) {
           setError('Failed to load farm data');
@@ -191,6 +195,7 @@ const FarmCreateScreen = () => {
 
        <View style={styles.productsContainer}>
           <Text style={styles.label}>Products</Text> 
+          <View style={styles.productsGrid}>
           {loadingProducts ? (
             <ActivityIndicator size="small" color="#4CAF50" />
           ) : (
@@ -200,8 +205,8 @@ const FarmCreateScreen = () => {
 
               
               return (
+                <View key={product.id} style={styles.productItem}>
                 <TouchableWithoutFeedback 
-                  key={product.id} 
                   onPress={() => toggleProduct(product.id)}
                 >
                   <View style={styles.productCheckbox}>
@@ -216,9 +221,11 @@ const FarmCreateScreen = () => {
                     <Text style={styles.productLabel}>{product.name}</Text>
                   </View>
                 </TouchableWithoutFeedback>
+                </View>
               );
             })
           )}
+          </View>
         </View>
 
 

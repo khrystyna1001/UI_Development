@@ -97,7 +97,9 @@ export default function ProductDetail() {
 
       <View style={styles.detailsContainer}>
         <Text style={styles.name}>{product.name}</Text>
-        <Text style={styles.name}>From {product.farm_info?.name}</Text>
+        {product?.farms_info && product.farms_info.map((farm) => (
+          <Text key={farm.id} style={styles.name}>From {farm.name}</Text>
+        ))}
         <Text style={styles.price}>${product.price}</Text>
         
         <View style={styles.section}>

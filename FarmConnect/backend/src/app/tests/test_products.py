@@ -22,7 +22,7 @@ class ProductViewSetTests(APITestCase):
             'category': valid_category,
             'quantity': 25,
             'author': self.test_user.pk,
-            'farm': self.farm.pk,
+            'farms': [self.farm.pk],
         }
         response = self.client.post(self.product_list_url, new_product_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -44,7 +44,7 @@ class ProductViewSetTests(APITestCase):
             'category': valid_category,
             'quantity': self.product.quantity,
             'author': self.test_user.pk,
-            'farm': self.farm.pk,
+            'farms': [self.farm.pk],
         }
         response = self.client.put(self.product_detail_url, updated_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

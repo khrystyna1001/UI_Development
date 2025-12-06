@@ -125,6 +125,9 @@ export default function ChatDetail() {
   const handleDeleteChat = async () => {
     try {
       setDeleting(true);
+      if (!id || typeof id !== 'string' || id.startsWith('temp-')) {
+          throw new Error('Invalid chat ID');
+        }
       await deleteChat(id);
       setShowDeleteModal(false);
       router.replace('/(tabs)/messages');

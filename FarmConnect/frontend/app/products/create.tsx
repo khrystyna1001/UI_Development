@@ -7,7 +7,7 @@ import {
   ScrollView, 
   Alert, 
   ActivityIndicator,
-  Modal
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { getProduct, createProduct, updateProduct, deleteProduct, getMyData, getFarms } from '../../scripts/api';
@@ -18,7 +18,6 @@ import { DeleteButton } from '../../components/deleteButton';
 import { styles } from '../../styles/tabs/productcreate';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Feather from 'react-native-vector-icons/Feather';
 
 const ProductCategories = [
   "Vegetable",
@@ -34,6 +33,7 @@ const ProductEditor = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuperuser, setIsSuperuser] = useState(false);
   const [isEditMode, setIsEditMode] = useState(!!id);
+  const [farms, setFarms] = useState([]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -42,25 +42,10 @@ const ProductEditor = () => {
     quantity: '1',
     author: '',
     category: ProductCategories[0],
-    farm: ''
+    farms: []
   });
 
-  const [farms, setFarms] = useState<any[]>([]);
-  const [selectedFarm, setSelectedFarm] = useState<any>(null);
-  const [showFarmModal, setShowFarmModal] = useState(false);
-
-  useEffect(() => {
-    const loadFarms = async () => {
-      try {
-        const farmsData = await getFarms();
-        setFarms(farmsData);
-      } catch (error) {
-        console.error('Error loading farms:', error);
-      }
-    };
-
-    loadFarms();
-  }, []);
+  const [selectedFarms, setSelectedFarms] = useState([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -74,6 +59,10 @@ const ProductEditor = () => {
           return;
         }
 
+        // Load farms data
+        const farmsData = await getFarms();
+        setFarms(farmsData);
+
         if (id) {
           const productData = await getProduct(id);
           setFormData({
@@ -83,10 +72,17 @@ const ProductEditor = () => {
             quantity: productData.quantity?.toString() || '1',
             author: userData.id,
             category: productData.category || ProductCategories[0],
-            farm: productData.farm || ''
+            farms: productData.farms || []
           });
-        }
-      } catch (error) {
+          if (productData.farms && productData.farms.length > 0) {
+            setSelectedFarms(productData.farms.map(farm => farm.id || farm));
+          }
+        } else {
+        setFormData(prev => ({
+          ...prev,
+          author: userData.id
+        }));
+      }} catch (error) {
         console.error('Error loading data:', error);
         Alert.alert('Error', 'Failed to load product data');
         router.back();
@@ -105,6 +101,22 @@ const ProductEditor = () => {
     }));
   };
 
+  const toggleFarm = (farmId: string) => {
+    setSelectedFarms(prev => {
+      const newFarms = prev.includes(farmId)
+        ? prev.filter(id => id !== farmId)
+        : [...prev, farmId];
+      
+      // Update the form data with the new farms array
+      setFormData(prev => ({
+        ...prev,
+        farms: newFarms
+      }));
+      
+      return newFarms;
+    });
+  };
+
   const handleSubmit = async () => {
     if (!formData.name.trim() || !formData.description.trim() || !formData.price || !formData.quantity) {
       Alert.alert('Validation Error', 'Please fill in all required fields');
@@ -121,7 +133,7 @@ const ProductEditor = () => {
         quantity: parseInt(formData.quantity, 10),
         author: formData.author,
         category: formData.category,
-        farm: formData.farm,
+        farms: formData.farms,
       };
 
       if (isEditMode && id) {
@@ -258,53 +270,36 @@ const ProductEditor = () => {
           </View>
 
           {/* Farm Selection */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Farm</Text>
-            <TouchableOpacity 
-              style={styles.farmSelector}
-              onPress={() => setShowFarmModal(true)}
-            >
-              <Text style={farms && selectedFarm ? styles.farmSelectedText : styles.farmPlaceholderText}>
-                {selectedFarm ? selectedFarm.name : 'Select a farm'}
-              </Text>
-              <Feather name="chevron-down" size={20} color="#666" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Farm Selection Modal */}
-          <Modal
-            visible={showFarmModal}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setShowFarmModal(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Select Farm</Text>
-                  <TouchableOpacity onPress={() => setShowFarmModal(false)}>
-                    <Feather name="x" size={24} color="#333" />
-                  </TouchableOpacity>
-                </View>
-                <ScrollView style={styles.farmList}>
-                  {farms.map((farm) => (
-                    <TouchableOpacity
-                      key={farm.id}
-                      style={styles.farmItem}
-                      onPress={() => {
-                        setSelectedFarm(farm);
-                        setFormData(prev => ({ ...prev, farm: farm.id.toString() }));
-                        setShowFarmModal(false);
-                      }}
-                    >
-                      <Text style={styles.farmName}>{farm.name}</Text>
-                      <Text style={styles.farmLocation}>{farm.location}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
+          <View>
+            <Text style={styles.label}>Available in Farms *</Text>
+            <Text style={styles.selectedCounter}>
+              {selectedFarms.length} {selectedFarms.length === 1 ? 'farm' : 'farms'} selected
+            </Text>
+            
+            <View style={styles.productsGrid}>
+              {farms.map((farm) => {
+                const isFarmSelected = selectedFarms.includes(farm.id);
+                
+                return (
+                  <View key={farm.id} style={styles.farmItem}>
+                    <TouchableWithoutFeedback onPress={() => toggleFarm(farm.id)}>
+                      <View style={styles.farmCheckbox}>
+                        <View style={[
+                          styles.checkbox, 
+                          isFarmSelected && styles.checkboxSelected
+                        ]}>
+                          {isFarmSelected && (
+                            <Text style={styles.checkmark}>✓</Text>
+                          )}
+                        </View>
+                        <Text style={styles.farmLabel}>{farm.name}</Text>
+                      </View>
+                    </TouchableWithoutFeedback>
+                  </View>
+                );
+              })}
             </View>
-          </Modal>
+          </View>
         </View>
 
         <View style={styles.buttonContainer}>
