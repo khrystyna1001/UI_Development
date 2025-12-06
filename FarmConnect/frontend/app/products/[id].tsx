@@ -85,7 +85,6 @@ export default function ProductDetail() {
         
         <View style={styles.imageContainer}>
           <Image 
-          source={{ uri: product.image || 'https://via.placeholder.com/400x300' }} 
           style={styles.productImage}
           resizeMode="cover"
         />
@@ -154,22 +153,12 @@ export default function ProductDetail() {
             <Text style={styles.priceInfo}>${(product.price * quantity)?.toFixed(2) || '0.00'}</Text>
           </View>
           
-          {/* Edit button - only for the author */}
-          {product?.author === user?.id && (
+          {/* Edit button - only for admin or for the author */}
+          {(user?.is_superuser === true || product?.author === user?.id) && (
             <View style={styles.actionButtonsContainer}>
               <UpdateButton item={product.name} onPress={() => router.push(`/products/create?id=${product?.id}`)} />
               <DeleteButton item={product.name} onPress={() => deleteProduct(product?.id)} />
             </View>
-          )}
-
-          {/* Message button - only for non-authors */}
-          {product?.author !== user?.id && (
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.messageButton]} 
-              onPress={() => router.replace('/(tabs)/messages')}
-            >
-              <Text style={styles.actionButtonText}>Message Author</Text>
-            </TouchableOpacity>
           )}
         </View>
       </View>

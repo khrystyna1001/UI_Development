@@ -77,6 +77,7 @@ export const getProducts = async () => apiFetch(`/app/products/`);
 export const getProduct = async (id) => apiFetch(`/app/products/${id}/`);
 export const createProduct = async (data) => apiFetch(`/app/products/`, { method: 'POST', body: JSON.stringify(data) });
 export const updateProduct = async (id, data) => apiFetch(`/app/products/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
+export const editProduct = async (id, data) => apiFetch(`/app/products/${id}/`, {method: 'PATCH', body: JSON.stringify(data) });
 export const deleteProduct = async (id) => apiFetch(`/app/products/${id}/`, { method: 'DELETE' });
 
 // Farm

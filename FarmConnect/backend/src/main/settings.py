@@ -85,7 +85,7 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
-ROOT_URLCONF = "main.main.urls"
+ROOT_URLCONF = "src.main.urls"
 
 TEMPLATES = [
     {

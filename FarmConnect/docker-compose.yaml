@@ -23,11 +23,11 @@ services:
   app-service:
     build: ./backend
     environment:
-      PYTHONPATH: /app
-      DJANGO_SETTINGS_MODULE: main.main.settings
-    command: uv run gunicorn main.main.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+      PYTHONPATH: /app:/app/src
+      DJANGO_SETTINGS_MODULE: src.main.settings
+    command: uv run gunicorn src.main.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
     volumes:
-      - ./backend:/app
+      - ./backend/src:/app/src
     working_dir: /app
     env_file:
       - .env

@@ -6,10 +6,11 @@ import {
   TouchableOpacity, 
   ScrollView, 
   ActivityIndicator,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { createFarm, updateFarm, getFarm, deleteFarm } from '../../scripts/api';
+import { createFarm, updateFarm, getFarm, deleteFarm, getProducts, editProduct } from '../../scripts/api';
 import NavigationHeader from '../../components/header';
 import NavigationFooter from '../../components/footer';
 import { DeleteButton } from '../../components/deleteButton';
@@ -18,6 +19,9 @@ import { styles } from '../../styles/nav/farmcreate';
 
 const FarmCreateScreen = () => {
   const { id } = useLocalSearchParams();
+  const [allProducts, setAllProducts] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
   const isEdit = !!id;
   
   const [formData, setFormData] = useState({
@@ -38,8 +42,13 @@ const FarmCreateScreen = () => {
           setFormData({
             name: farm.name || '',
             location: farm.location || '',
-            description: farm.description || ''
+            description: farm.description || '',
           });
+
+          const existingProductIds = farm.products?.map(p => p.id).filter(id => 
+            allProducts.some(p => p.id === id)
+          ) || [];
+          setSelectedProducts(existingProductIds);
 
         } catch (err) {
           setError('Failed to load farm data');
@@ -51,6 +60,31 @@ const FarmCreateScreen = () => {
       fetchFarm();
     }
   }, [id]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const products = await getProducts();
+        setAllProducts(products);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const toggleProduct = (productId) => {
+    setSelectedProducts(prev => {
+      const current = Array.isArray(prev) ? prev : [];
+      const productIdNum = Number(productId);
+      
+      return current.includes(productIdNum)
+        ? current.filter(id => id !== productIdNum)
+        : [...current, productIdNum];
+    });
+  };
 
   const handleDelete = async () => {
     try {
@@ -74,18 +108,28 @@ const FarmCreateScreen = () => {
 
     try {
       setSaving(true);
-      setError('');
+      const validProductIds = selectedProducts
+        .map(id => {
+          const numId = Number(id);
+          return isNaN(numId) ? null : numId;
+        })
+      .filter((id): id is number => id !== null && id !== undefined);
+      const data = {
+        ...formData,
+        products: validProductIds,
+      };
 
-      if (isEdit) {
-        await updateFarm(id, formData);
+      if (isEdit && id) {
+        await updateFarm(id, data);
       } else {
-        await createFarm(formData);
+        const newFarm = await createFarm(data);
+        id = newFarm.id;
       }
 
-      router.replace('/farm');
-    } catch (err) {
-      setError('Failed to save farm. Please try again.');
-      console.error(err);
+      router.replace('/(nav)/farm');
+    } catch (error) {
+      setError('Failed to save farm');
+      console.error('Error saving farm:', error);
     } finally {
       setSaving(false);
     }
@@ -144,6 +188,39 @@ const FarmCreateScreen = () => {
             numberOfLines={4}
           />
         </View>
+
+       <View style={styles.productsContainer}>
+          <Text style={styles.label}>Products</Text> 
+          {loadingProducts ? (
+            <ActivityIndicator size="small" color="#4CAF50" />
+          ) : (
+            allProducts.map((product) => {
+              const isProductSelected = selectedProducts.includes(product.id) || 
+                         (product.farm && product.farm === id);
+
+              
+              return (
+                <TouchableWithoutFeedback 
+                  key={product.id} 
+                  onPress={() => toggleProduct(product.id)}
+                >
+                  <View style={styles.productCheckbox}>
+                    <View style={[
+                      styles.checkbox, 
+                      isProductSelected && styles.checkboxSelected
+                    ]}>
+                      {isProductSelected && (
+                        <Text style={styles.checkmark}>✓</Text>
+                      )}
+                    </View>
+                    <Text style={styles.productLabel}>{product.name}</Text>
+                  </View>
+                </TouchableWithoutFeedback>
+              );
+            })
+          )}
+        </View>
+
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 

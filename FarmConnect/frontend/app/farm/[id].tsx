@@ -52,12 +52,10 @@ const FarmDetailScreen = () => {
 
   const fetchProducts = async () => {
     try {
-      console.log('Fetching products for farm:', id);
       const productsData = await getProducts();
 
       if (productsData && Array.isArray(productsData)) {
-        const filteredProducts = productsData.filter((product) => product.farm === id);
-        console.log('Filtered products:', filteredProducts);
+        const filteredProducts = productsData.filter((product) => product.farm.toString() === id);
         setProducts(filteredProducts);
       } else {
         console.log('No products data received or invalid format');
@@ -150,7 +148,7 @@ const FarmDetailScreen = () => {
           </View>
         
         {/* Products */}
-        <View>
+        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Products</Text>
           {products && products.length > 0 ? (
             products.map((product) => (

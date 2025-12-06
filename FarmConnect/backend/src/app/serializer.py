@@ -64,6 +64,11 @@ class BlogPostSerializer(serializers.ModelSerializer):
 # Farm
 class FarmSerializer(serializers.ModelSerializer):
     user_info = UserSerializer(source='user', read_only=True)
+    products = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Product.objects.all(),
+        required=False
+    )
     
     class Meta:
         model = Farm
@@ -74,15 +79,33 @@ class FarmSerializer(serializers.ModelSerializer):
             'description',
             'user',
             'user_info',
+            'products',
             'created_at',
             'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
 
+    def create(self, validated_data):
+        products_data = validated_data.pop('products', [])
+        farm = Farm.objects.create(**validated_data)
+        farm.products.set(products_data)
+        return farm
+
+    def update(self, instance, validated_data):
+        products_data = validated_data.pop('products', None)
+        if products_data is not None:
+            instance.products.set(products_data)
+        return super().update(instance, validated_data)
+
 # Product
 class ProductSerializer(serializers.ModelSerializer):
     author_info = UserSerializer(source='author', read_only=True)
-    farm_info = FarmSerializer(source='farm', read_only=True)
+    farms_info = FarmSerializer(source='farms', many=True, read_only=True)
+    farms = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Farm.objects.all(),
+        required=False
+    )
 
     class Meta:
         model = Product
@@ -95,12 +118,24 @@ class ProductSerializer(serializers.ModelSerializer):
             'category',
             'author',
             'author_info',
-            'farm',
-            'farm_info',
+            'farms',
+            'farms_info',
             'created_at',
             'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
+    
+    def create(self, validated_data):
+        farms_data = validated_data.pop('farms', [])
+        product = Product.objects.create(**validated_data)
+        product.farms.set(farms_data)
+        return product
+
+    def update(self, instance, validated_data):
+        farms_data = validated_data.pop('farms', None)
+        if farms_data is not None:
+            instance.farms.set(farms_data)
+        return super().update(instance, validated_data)
 
 
 # Review

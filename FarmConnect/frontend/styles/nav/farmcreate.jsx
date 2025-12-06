@@ -95,4 +95,47 @@ export const styles = StyleSheet.create({
   required: {
     color: '#F44336',
   },
+  productsContainer: {
+    marginTop: 8,
+    maxHeight: 200,
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 8,
+    padding: 8,
+  },
+  productCheckbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#999',
+    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxSelected: {
+    backgroundColor: '#4CAF50',
+    borderColor: '#4CAF50',
+  },
+  checkmark: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  productLabel: {
+    fontSize: 16,
+    color: '#333',
+  },
+  noProducts: {
+    padding: 16,
+    textAlign: 'center',
+    color: '#666',
+    fontStyle: 'italic',
+  },
 });

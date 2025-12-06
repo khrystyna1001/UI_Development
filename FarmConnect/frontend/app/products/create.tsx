@@ -83,7 +83,7 @@ const ProductEditor = () => {
             quantity: productData.quantity?.toString() || '1',
             author: userData.id,
             category: productData.category || ProductCategories[0],
-            farm: productData.farm?.id?.toString() || ''
+            farm: productData.farm || ''
           });
         }
       } catch (error) {
@@ -121,7 +121,7 @@ const ProductEditor = () => {
         quantity: parseInt(formData.quantity, 10),
         author: formData.author,
         category: formData.category,
-        farm: formData.farm.id,
+        farm: formData.farm,
       };
 
       if (isEditMode && id) {

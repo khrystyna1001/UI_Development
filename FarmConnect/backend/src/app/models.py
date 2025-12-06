@@ -73,11 +73,9 @@ class Product(models.Model):
         default=ProductCategories.GOODS
         )
 
-    farm = models.ForeignKey(
+    farms = models.ManyToManyField(
         Farm, 
-        on_delete=models.SET_NULL, 
         related_name='products',
-        null=True, 
         blank=True
     )
 

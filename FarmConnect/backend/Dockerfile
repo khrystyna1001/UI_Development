@@ -1,37 +1,46 @@
+# Use Python 3.13 slim image
 FROM python:3.13-slim-bookworm
 
-WORKDIR /app
-
+# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    UV_LINK_MODE=copy \
-    UV_PYTHON_DOWNLOADS=never \
-    UV_PROJECT_ENVIRONMENT=/app/.venv
+    PYTHONPATH=/app:/app/src
 
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     netcat-traditional \
     build-essential \
     libpq-dev \
     dos2unix \
-    && rm -rf /var/lib/apt/lists/* 
-    
-COPY --from=ghcr.io/astral-sh/uv:0.8.14 /uv /uvx /bin/
+    && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml uv.lock /_lock/
+# Install uv (faster than pip)
+RUN pip install --no-cache-dir uv
 
-RUN --mount=type=cache,target=/root/.cache \
-    cd /_lock && \
-    uv sync \
-    --frozen \
-    --no-install-project
+# Set working directory
+WORKDIR /app
 
-COPY ./entrypoint.sh .
-RUN sed -i "s/\r$//g" /app/entrypoint.sh
+# Copy only dependency files first for better caching
+COPY pyproject.toml uv.lock ./
+
+# Install Python dependencies
+RUN uv pip install --system --no-cache-dir -e . && \
+    uv pip install --system --no-cache-dir gunicorn uvicorn[standard]
+
+# Copy entrypoint script and make it executable
+COPY ./entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh && \
     dos2unix /app/entrypoint.sh
 
+# Copy the rest of the application
 COPY . .
 
+# Expose the port the app runs on
 EXPOSE 8000
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Command to run the application
+CMD ["uv", "run", "gunicorn", "src.main.asgi:application", \
+     "-k", "uvicorn.workers.UvicornWorker", \
+     "--bind", "0.0.0.0:8000", \
+     "--reload", \
+     "--reload-dir", "/app/src"]
