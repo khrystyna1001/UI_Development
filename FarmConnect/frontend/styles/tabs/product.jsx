@@ -205,4 +205,46 @@ export const styles = StyleSheet.create({
   deleteButton: {
     backgroundColor: '#F44336',
   },
+  
+  farmContainer: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 10,
+    padding: 15,
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  farmHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  farmName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 8,
+    flex: 1,
+  },
+  farmDetail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  farmIcon: {
+    marginRight: 6,
+    width: 20,
+    textAlign: 'center',
+  },
+  farmText: {
+    fontSize: 14,
+    color: '#666',
+    flex: 1,
+  },
+  farmDescription: {
+    fontSize: 13,
+    color: '#6c757d',
+    marginTop: 8,
+    lineHeight: 18,
+  },
 });

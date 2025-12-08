@@ -30,7 +30,6 @@ const BlogEditor = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(!!id);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuperuser, setIsSuperuser] = useState(false);
   const [isEditMode, setIsEditMode] = useState(!!id);
 
   
@@ -45,13 +44,6 @@ const BlogEditor = () => {
     const loadData = async () => {
       try {
         const userData = await getMyData();
-        setIsSuperuser(userData.is_superuser);
-        
-        if (!userData.is_superuser) {
-          Alert.alert('Access Denied', 'Only administrators can manage blog posts.');
-          router.back();
-          return;
-        }
 
         if (id) {
           const post = await getBlogPost(id);

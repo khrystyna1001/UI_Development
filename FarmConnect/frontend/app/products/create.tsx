@@ -31,7 +31,6 @@ const ProductEditor = () => {
   const { id } = useLocalSearchParams();
   const [loading, setLoading] = useState(!!id);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuperuser, setIsSuperuser] = useState(false);
   const [isEditMode, setIsEditMode] = useState(!!id);
   const [farms, setFarms] = useState([]);
 
@@ -51,13 +50,6 @@ const ProductEditor = () => {
     const loadData = async () => {
       try {
         const userData = await getMyData();
-        setIsSuperuser(userData.is_superuser);
-        
-        if (!userData.is_superuser) {
-          Alert.alert('Access Denied', 'Only administrators can manage products.');
-          router.back();
-          return;
-        }
 
         // Load farms data
         const farmsData = await getFarms();
@@ -107,7 +99,6 @@ const ProductEditor = () => {
         ? prev.filter(id => id !== farmId)
         : [...prev, farmId];
       
-      // Update the form data with the new farms array
       setFormData(prev => ({
         ...prev,
         farms: newFarms

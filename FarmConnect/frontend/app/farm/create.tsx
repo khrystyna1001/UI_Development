@@ -127,7 +127,8 @@ const FarmCreateScreen = () => {
         await updateFarm(id, data);
       } else {
         const newFarm = await createFarm(data);
-        id = newFarm.id;
+        router.replace(`/farm/${newFarm.id}`);
+        return;
       }
 
       router.replace('/(nav)/farm');

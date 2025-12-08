@@ -126,7 +126,7 @@ export default function BlogDetail() {
           </View>
           
           {/* Edit button - only for the author */}
-          {blog.author === user?.id && (
+          {blog.author === user?.id || user?.is_superuser && (
             <View style={styles.actionButtonsContainer}>
               <UpdateButton onPress={() => router.replace(`/blog/create?id=${blog.id}`)} />
               <DeleteButton onPress={() => deleteBlog(blog.id)} />
@@ -134,7 +134,7 @@ export default function BlogDetail() {
           )}
 
           {/* Message button - only for non-authors */}
-          {blog.author !== user?.id && (
+          {blog.author !== user?.id || user?.is_superuser && (
             <TouchableOpacity 
               style={[styles.actionButton, styles.messageButton]} 
               onPress={() => router.replace('/(tabs)/messages')}

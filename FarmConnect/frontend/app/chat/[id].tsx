@@ -21,6 +21,7 @@ import { styles } from '../../styles/tabs/chat';
 export default function ChatDetail() {
   const { id } = useLocalSearchParams();
   const scrollViewRef = useRef<ScrollView>(null);
+  const [chatToDelete, setChatToDelete] = useState(null);
 
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
@@ -78,57 +79,74 @@ export default function ChatDetail() {
   }, [id, user]);
 
   const handleSend = async () => {
-    if (!message.trim()) return;
+    if (!message.trim() || !user) return;
 
     try {
       setSending(true);
+      const tempId = `temp-${Date.now()}`;
       const newMessage = {
-          id: `temp-${Date.now()}`,
-          content: message.trim(),
-          sender: user.id,
-          created_at: new Date().toISOString(),
-          isOptimistic: true
+        id: tempId,
+        content: message.trim(),
+        sender: user.id,
+        created_at: new Date().toISOString(),
+        isOptimistic: true,
+        chat: id
       };
 
-      setMessages(prev => [...prev.filter(msg => msg.id !== newMessage.id),
-          { ...newMessage, isOptimistic: false }
-          ].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)));
+      setMessages(prev => {
+        const updated = [...prev, newMessage];
+        return updated.sort((a, b) => 
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      });
       setMessage('');
 
       try {
-          await createMessage({
-              content: newMessage.content,
-              chat: id,
-              sender: user.id,
-              created_at: newMessage.created_at
-          });
+        const response = await createMessage({
+          content: newMessage.content,
+          chat: id,
+          sender: user.id,
+          created_at: newMessage.created_at
+        });
+        
+        if (response && response.id) {
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === tempId 
+                ? { 
+                    ...response, 
+                    isOptimistic: false,
+                    sender: msg.sender
+                  } 
+                : msg
+            )
+          );
+        }
       } catch (error) {
-          console.error('Failed to save message:', error);
-          Alert.alert('Error', 'Failed to save message. Please check your connection.');
-          setMessages(prev => prev.filter(msg => msg.id !== newMessage.id));
-          return;
+        console.error('Failed to save message:', error);
+        setMessages(prev => prev.filter(msg => msg.id !== tempId));
+        Alert.alert('Error', 'Failed to send message. Please try again.');
       }
-
-      setTimeout(() => {
-          scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 100);
-
-  } catch (error) {
-      console.error('Failed to send message:', error);
-      Alert.alert('Error', 'Failed to send message. Please try again.');
-      setMessages(prev => prev.filter(msg => msg.id !== newMessage.id));
-  } finally {
+    } catch (error) {
+      console.error('Error in handleSend:', error);
+    } finally {
       setSending(false);
-  }
+    }
   };
 
-  const handleDeleteChat = async () => {
+  const handleDeleteChat = async (chatId) => {
     try {
       setDeleting(true);
-      if (!id || typeof id !== 'string' || id.startsWith('temp-')) {
+      if (!chatId) {
           throw new Error('Invalid chat ID');
+          return;
         }
-      await deleteChat(id);
+
+      const response = await deleteChat(chatId);
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || 'Failed to delete chat');
+      }
       setShowDeleteModal(false);
       router.replace('/(tabs)/messages');
     } catch (error) {
@@ -137,29 +155,64 @@ export default function ChatDetail() {
       setShowDeleteModal(false);
     } finally {
       setDeleting(false);
+      router.replace('/(tabs)/messages');
     }
 
   };
 
   const handleDeleteMessage = async (messageId) => {
+    if (!messageId) {
+      console.error('Cannot delete message: No message ID provided');
+      Alert.alert('Error', 'Cannot delete message: Invalid message ID');
+      return;
+    }
+
     try {
       setDeleting(true);
+
+      console.log(messageId)
+      
+      const messageToRestore = messages.find(msg => msg.id === messageId);
+      
       setMessages(prev => prev.filter(msg => msg.id !== messageId));
       
-      await deleteMessage(messageId);
-      setShowDeleteModal(false);
+      try {
+        const response = await deleteMessage(messageId);
+        
+        if (response.ok) {
+          console.log(response);
+        }
+        
+      } catch (error) {
+        console.error('API Error deleting message:', error);
+        if (messageToRestore) {
+          setMessages(prev => {
+            const updated = [...prev, messageToRestore];
+            return updated.sort((a, b) => 
+              new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+            );
+          });
+        }
+        throw error;
+      }
     } catch (error) {
       console.error('Failed to delete message:', error);
-      Alert.alert('Error', 'Failed to delete message. Please try again.');
+      Alert.alert(
+        'Error', 
+        error.message || 'Failed to delete message. Please try again.'
+      );
     } finally {
       setDeleting(false);
       setShowDeleteModal(false);
+      setMessages(prev => prev.filter(msg => msg.id !== messageId));
     }
-  }
+  };
 
-  const showDeleteConfirmation = (type: 'chat' | 'message', id?) => {
+  const showDeleteConfirmation = (type: 'chat' | 'message', id = null) => {
     setDeleteType(type);
-    if (type === 'message') {
+    if (type === 'chat') {
+        setChatToDelete({ id: id || id });
+    } else {
         setMessageToDelete(id);
     }
     setShowDeleteModal(true);
@@ -206,7 +259,7 @@ export default function ChatDetail() {
           {otherUser?.first_name} {otherUser?.last_name}
         </Text> 
         <TouchableOpacity 
-          onPress={showDeleteConfirmation}
+          onPress={() => showDeleteConfirmation('chat', id)}
           disabled={deleting}
           style={{ marginLeft: 'auto' }}
         >
@@ -244,7 +297,7 @@ export default function ChatDetail() {
                 style={[styles.modalButton, styles.deleteButton]}
                 onPress={() => {
                     if (deleteType === 'chat') {
-                    handleDeleteChat();
+                    handleDeleteChat(chatToDelete?.id);
                     } else {
                     handleDeleteMessage(messageToDelete);
                     }

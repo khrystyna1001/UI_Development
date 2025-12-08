@@ -201,7 +201,7 @@ export default function BlogPage () {
 
       </ScrollView>
 
-      {user?.is_superuser && (
+      {user && (
         <CreateButton item="blog" onPress={() => router.navigate('/blog/create')} />
       )}
 

@@ -199,7 +199,7 @@ const FarmListScreen = () => {
         </View>
       </ScrollView>
 
-      {user?.is_superuser && (
+      {user && (
         <>
       <CreateButton item="farm" onPress={() => router.navigate('/farm/create')} />
        <FilterModal

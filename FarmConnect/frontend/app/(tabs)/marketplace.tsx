@@ -87,7 +87,12 @@ export default function ProductsPage () {
   
     useEffect(() => {
       fetchProducts();
-    }, [filteredProducts, products, selectedFilter]);
+    }, [selectedFilter]);
+
+    useEffect(() => {
+      const filtered = applyFilters(products, searchQuery, selectedFilter);
+      setFilteredProducts(filtered);
+    }, [searchQuery, products, selectedFilter]);
 
   const applyFilters = (data, query, sortBy) => {
       if (!data || !Array.isArray(data)) {
@@ -98,10 +103,10 @@ export default function ProductsPage () {
       
       if (query) {
         const lowerQuery = query.toLowerCase();
-        result = result.filter(blog => 
-          (blog?.title?.toLowerCase().includes(lowerQuery) || 
-          blog?.content?.toLowerCase().includes(lowerQuery) ||
-          blog?.author?.name?.toLowerCase().includes(lowerQuery)) ?? false
+        result = result.filter(product => 
+          (product?.name?.toLowerCase().includes(lowerQuery) || 
+          product?.description?.toLowerCase().includes(lowerQuery) ||
+          product?.author_info?.name?.toLowerCase().includes(lowerQuery)) ?? false
         );
       }
       
@@ -158,7 +163,7 @@ export default function ProductsPage () {
       {/* Search Bar */}
         <SearchFilterBar
           searchQuery={searchQuery}
-          onSearchChange={(searchQuery) => setSearchQuery(searchQuery)}
+          onSearchChange={handleSearch}
           onFilterPress={() => setShowFilterModal(true)}
           placeholder="Search products..."
         />
@@ -209,7 +214,7 @@ export default function ProductsPage () {
 
       </ScrollView>
 
-      {user?.is_superuser && (
+      {user && (
         <CreateButton item="product" onPress={() => router.navigate(`/products/create`)} />
       )}
 

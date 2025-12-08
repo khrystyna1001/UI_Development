@@ -15,6 +15,7 @@ import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
 import { UpdateButton } from '../../components/updateButton';
 import { DeleteButton } from '../../components/deleteButton';
+import ReviewSection from '../../components/reviewSection';
 import { styles } from '../../styles/tabs/product';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -90,7 +91,7 @@ export default function ProductDetail() {
         />
       </View>
 
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+      <TouchableOpacity onPress={() => router.back() || router.replace('/(tabs)/marketplace')} style={styles.backButton}>
         <Icon name="arrow-back" size={24} color="#333" />
         <Text style={styles.backButtonText}>Back</Text>
       </TouchableOpacity>
@@ -98,7 +99,32 @@ export default function ProductDetail() {
       <View style={styles.detailsContainer}>
         <Text style={styles.name}>{product.name}</Text>
         {product?.farms_info && product.farms_info.map((farm) => (
-          <Text key={farm.id} style={styles.name}>From {farm.name}</Text>
+          <TouchableOpacity 
+            key={farm.id} 
+            style={styles.farmContainer}
+            onPress={() => router.push(`/farm/${farm.id}`)}
+          >
+            <View style={styles.farmHeader}>
+              <Icon name="store" size={20} color="#4CAF50" />
+              <Text style={styles.farmName}>From {farm.name}</Text>
+              <Icon name="chevron-right" size={20} color="#666" />
+            </View>
+            {farm.location && (
+              <View style={styles.farmDetail}>
+                <Icon name="location-on" size={16} color="#666" style={styles.farmIcon} />
+                <Text style={styles.farmText}>{farm.location}</Text>
+              </View>
+            )}
+            {farm.description && (
+              <Text 
+                style={styles.farmDescription} 
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                {farm.description}
+              </Text>
+            )}
+          </TouchableOpacity>
         ))}
         <Text style={styles.price}>${product.price}</Text>
         
@@ -154,9 +180,15 @@ export default function ProductDetail() {
             </View>
             <Text style={styles.priceInfo}>${(product.price * quantity)?.toFixed(2) || '0.00'}</Text>
           </View>
+
+          <ReviewSection 
+            itemId={id} 
+            itemType="product" 
+            userId={user?.id || null} 
+          />
           
           {/* Edit button - only for admin or for the author */}
-          {(user?.is_superuser === true || product?.author === user?.id) && (
+          {(user?.is_superuser || product?.author === user?.id) && (
             <View style={styles.actionButtonsContainer}>
               <UpdateButton item={product.name} onPress={() => router.push(`/products/create?id=${product?.id}`)} />
               <DeleteButton item={product.name} onPress={() => deleteProduct(product?.id)} />

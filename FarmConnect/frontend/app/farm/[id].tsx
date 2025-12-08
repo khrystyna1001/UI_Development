@@ -129,10 +129,12 @@ const FarmDetailScreen = () => {
             <Text style={styles.statLabel}>Products</Text>
           </View>
         </View>
-        <View style={styles.statItem}>
-            <Text style={styles.statValue}>{new Date(farm.updated_at || 'N/A').toLocaleDateString()}</Text>
-            <Text style={styles.statLabel}>Updated</Text>
-          </View>
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+              <Text style={styles.statValue}>{new Date(farm.updated_at || 'N/A').toLocaleDateString()}</Text>
+              <Text style={styles.statLabel}>Updated</Text>
+            </View>
+        </View>
         
         {/* Products */}
         <View style={styles.section}>
@@ -151,7 +153,7 @@ const FarmDetailScreen = () => {
       </ScrollView>
 
        {/* Action Buttons */}
-      {user?.is_superuser && (
+      {user?.id === farm.user || user?.is_superuser && (
       <View style={styles.actionButtons}>
         <UpdateButton
           item={farm.name}
