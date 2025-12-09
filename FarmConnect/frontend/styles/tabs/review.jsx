@@ -30,14 +30,19 @@ export const styles = StyleSheet.create({
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    padding: 10,
+    marginVertical: 10,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginLeft: 16,
   },
   backButtonText: {
-    marginLeft: 8,
+    marginLeft: 5,
     fontSize: 16,
-    fontWeight: '500',
     color: '#333',
-  },
+    fontWeight: '500',
+    },
 
   // --- Main Layout Styles ---
   mainContainer: {
@@ -137,5 +142,56 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
     fontWeight: '400',
+  },
+  // --- Modal ---
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    width: '100%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  modalText: {
+    marginBottom: 20,
+    color: '#555',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+  },
+  modalButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 5,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#f0f0f0',
+  },
+  deleteButton: {
+    backgroundColor: '#ff4444',
+  },
+  deleteButtonText: {
+    color: 'white',
+    fontWeight: '500',
+  },
+  cancelButtonText: {
+    color: '#333',
+    fontWeight: '500',
   },
 });

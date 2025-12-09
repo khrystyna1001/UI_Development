@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, Alert, TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
 import { createReview, getReviews } from '../scripts/api';
+import { styles } from '../styles/components/reviewButton';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const ReviewSection = ({ itemId, itemType, userId }) => {
@@ -112,10 +114,11 @@ const ReviewSection = ({ itemId, itemType, userId }) => {
       <View style={styles.reviewsList}>
         {reviews.length > 0 ? (
           reviews.map((review) => (
+            <TouchableOpacity onPress={() => router.navigate(`reviews/${review.id}`)}>
             <View key={review.id} style={styles.reviewItem}>
               <View style={styles.reviewHeader}>
                 <Text style={styles.reviewAuthor}>
-                  {review.user_details?.username || 'Anonymous'}
+                  {review.author_info?.username || 'Anonymous'}
                 </Text>
                 <View style={styles.reviewRating}>
                   {[...Array(5)].map((_, i) => (
@@ -128,11 +131,12 @@ const ReviewSection = ({ itemId, itemType, userId }) => {
                   ))}
                 </View>
               </View>
-              <Text style={styles.reviewComment}>{review.comment}</Text>
+              <Text style={styles.reviewComment}>{review.content}</Text>
               <Text style={styles.reviewDate}>
                 {new Date(review.created_at).toLocaleDateString()}
               </Text>
             </View>
+            </TouchableOpacity>
           ))
         ) : (
           <Text style={styles.noReviews}>No reviews yet. Be the first to review!</Text>
@@ -141,95 +145,5 @@ const ReviewSection = ({ itemId, itemType, userId }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 20,
-    padding: 15,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
-  },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: '#444',
-  },
-  reviewForm: {
-    marginBottom: 20,
-    padding: 15,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    elevation: 2,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  ratingLabel: {
-    marginRight: 10,
-    fontSize: 16,
-  },
-  starsContainer: {
-    flexDirection: 'row',
-  },
-  star: {
-    marginRight: 5,
-  },
-  commentInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    padding: 10,
-    marginBottom: 15,
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  reviewsList: {
-    marginTop: 10,
-  },
-  reviewItem: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
-    elevation: 1,
-  },
-  reviewHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5,
-  },
-  reviewAuthor: {
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  reviewRating: {
-    flexDirection: 'row',
-  },
-  reviewComment: {
-    color: '#333',
-    marginBottom: 5,
-    lineHeight: 20,
-  },
-  reviewDate: {
-    fontSize: 12,
-    color: '#888',
-    textAlign: 'right',
-  },
-  noReviews: {
-    textAlign: 'center',
-    color: '#888',
-    fontStyle: 'italic',
-    padding: 20,
-  },
-});
 
 export default ReviewSection;

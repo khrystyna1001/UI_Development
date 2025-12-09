@@ -41,12 +41,10 @@ services:
   redis:
     image: redis:alpine
     container_name: redis
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
     labels:
-      - "traefik.enable=false"
+      - "traefik.http.routers.redis.rule=Host(`redis.localhost`)"
 
   pgadmin:
     image: dpage/pgadmin4:9.8

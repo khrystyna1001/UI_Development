@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginLeft: 16,
     },
-    backButtonText: {
+  backButtonText: {
     marginLeft: 5,
     fontSize: 16,
     color: '#333',

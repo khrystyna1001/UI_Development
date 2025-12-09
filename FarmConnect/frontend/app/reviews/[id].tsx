@@ -2,16 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { 
     View, 
     Text, 
-    Image,
     ScrollView, 
     ActivityIndicator, 
-    TouchableOpacity
+    TouchableOpacity,
+    Modal
 } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
-import { getReview } from '../../scripts/api';
+import { deleteReview, getReview } from '../../scripts/api';
+
+import { UpdateButton } from '../../components/updateButton';
+import { DeleteButton } from '../../components/deleteButton';
 
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
+
 import { styles } from '../../styles/tabs/review';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -21,6 +25,7 @@ export default function ReviewDetail() {
   const [review, setReview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     const fetchReview = async () => {
@@ -38,6 +43,18 @@ export default function ReviewDetail() {
     fetchReview();
   }, [id]);
 
+  const handleDeleteReview = async () => {
+    try {
+      const response = await deleteReview(id)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const handleShowDeleteModal = () => {
+    setShowDeleteModal(true);
+  }
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -51,7 +68,7 @@ export default function ReviewDetail() {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>{error || 'Review not found'}</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back() || router.replace('home')}>
             <Text style={styles.backButtonText}>Go Back</Text>
         </TouchableOpacity>
       </View>
@@ -113,6 +130,44 @@ export default function ReviewDetail() {
                     {formatDate(review.updated_at || review.created_at)}
                     </Text>
                 </View>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={styles.actionButtons}>
+              {/* <UpdateButton item={review.title} onPress={} /> */}
+              <DeleteButton item={review.title} onPress={handleShowDeleteModal} />
+              <Modal
+              visible={showDeleteModal}
+              transparent={true}
+              animationType="fade"
+              onRequestClose={() => setShowDeleteModal(false)}
+              >
+              <View style={styles.modalOverlay}>
+                  <View style={styles.modalContainer}>
+                  <Text style={styles.modalTitle}>
+                      {'Delete Review'}
+                  </Text>
+                  <Text style={styles.modalText}>
+                      {'Are you sure you want to delete this review? This action cannot be undone.'}
+                  </Text>
+                  <View style={styles.modalButtons}>
+                      <TouchableOpacity
+                      style={[styles.modalButton, styles.cancelButton]}
+                      onPress={() => setShowDeleteModal(false)}
+                      >
+                      <Text style={styles.cancelButtonText}>Cancel</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                      style={[styles.modalButton, styles.deleteButton]}
+                      onPress={() => {
+                          handleDeleteReview();
+                      }}
+                      > Delete
+                      </TouchableOpacity>
+                  </View>
+                  </View>
+              </View>
+              </Modal>
             </View>
 
         </View>
