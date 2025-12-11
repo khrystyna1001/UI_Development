@@ -1,40 +1,22 @@
 from rest_framework import serializers
 from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm, Chat
 from django.contrib.auth.models import User
-
+from dj_rest_auth.registration.serializers import RegisterSerializer
 
 # User
-class UserSerializer(serializers.ModelSerializer):
+class UserDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [
-            'id',
-            'username',
-            'is_superuser',
-        ]
-        extra_kwargs = {
-            'password': {'write_only': True, 'required': False}
-        }
+        fields = ('id', 'username', 'email')
+        read_only_fields = ('email',)
 
-
-class UserRegistrationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = [
-            'id',
-            'username',
-            'password',
-        ]
-        extra_kwargs = {
-            'password': {'write_only': True}
+class UserRegisterSerializer(RegisterSerializer):
+    def get_cleaned_data(self):
+        return {
+            'username': self.validated_data.get('username', ''),
+            'password1': self.validated_data.get('password1', ''),
+            'email': self.validated_data.get('email', ''),
         }
-    
-    def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            password=validated_data['password']
-        )
-        return user
 
 
 # BlogPost

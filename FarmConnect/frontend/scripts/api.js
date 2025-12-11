@@ -123,9 +123,10 @@ export const updateMessage = async (id, data) => apiFetch(`/app/messages/${id}/`
 export const deleteMessage = async (id) => apiFetch(`/app/messages/${id}/`, { method: 'DELETE' });
 
 // Authentication
+// Login
 export const login = async (username, password) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/login/`, {
+        const response = await fetch(`${API_BASE_URL}/dj-rest-auth/login/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -135,60 +136,41 @@ export const login = async (username, password) => {
                 password: password
             }),
         });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.detail || 'Login failed');
-        }
-
         const data = await response.json();
-
-        if (data.token) {
-            if (Platform.OS === 'web') {
-                window.localStorage.setItem('userToken', data.token);
-            } else {
-                await SecureStore.setItemAsync('userToken', data.token);
-            }
+        if (response.ok) {
+            localStorage.setItem('accessToken', data.access);
+            localStorage.setItem('refreshToken', data.refresh);
+            return data;
         }
-
-        return data;
+        throw new Error(data.detail || 'Login failed');
     } catch (error) {
-        console.error('Login API error:', error);
+        console.error('Login error:', error);
         throw error;
     }
 };
 
-export const signup = async (username, password) => {
+// Signup
+export const signup = async (username, email, password1, password2) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/signup/`, {
+        const response = await fetch(`${API_BASE_URL}/dj-rest-auth/registration/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                username: username,
-                password: password
+                username,
+                email,
+                password1,
+                password2
             }),
         });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.detail || 'Sign up failed');
-        }
-
         const data = await response.json();
-
-        if (data.token) {
-            if (Platform.OS === 'web') {
-                window.localStorage.setItem('userToken', data.token);
-            } else {
-                await SecureStore.setItemAsync('userToken', data.token);
-            }
+        if (response.ok) {
+            return data;
         }
-
-        return data;
+        throw new Error(data.detail || 'Registration failed');
     } catch (error) {
-        console.error('Sign up API error:', error);
+        console.error('Signup error:', error);
         throw error;
     }
 };

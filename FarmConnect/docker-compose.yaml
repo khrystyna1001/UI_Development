@@ -38,14 +38,6 @@ services:
     labels:
       - "traefik.http.routers.app-service.rule=Host(`localhost`)"
 
-  redis:
-    image: redis:alpine
-    container_name: redis
-    volumes:
-      - redis_data:/data
-    labels:
-      - "traefik.http.routers.redis.rule=Host(`redis.localhost`)"
-
   pgadmin:
     image: dpage/pgadmin4:9.8
     environment:
@@ -91,6 +83,75 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-kalo}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-kalo}
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  valkey:
+    image: valkey/valkey:7.2
+    command: valkey-server --save 60 1 --loglevel notice
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+  celery-worker:
+    build: ./backend
+    command: celery -A src.main.celery worker --loglevel=info
+    volumes:
+      - ./backend/src:/app/src
+    env_file:
+      - .env
+    environment:
+      - C_FORCE_ROOT=1
+    depends_on:
+      - rabbitmq
+      - valkey
+      - db
+      - app-service
+  celery-beat:
+    build: ./backend
+    command: celery -A src.main.celery beat --loglevel=info
+    volumes:
+      - ./backend/src:/app/src
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - valkey
+      - db
+      - app-service
+  flower:
+    build: ./backend
+    command: celery -A src.main.celery flower --port=5555
+    volumes:
+      - ./backend/src:/app/src
+    env_file:
+      - .env
+    ports:
+      - "5555:5555"
+    depends_on:
+      - rabbitmq
+      - celery-worker
+
 volumes:
   postgres_data:
-  redis_data:
+  rabbitmq-data:
+  valkey-data:

@@ -133,14 +133,9 @@ class MyDataView(generics.RetrieveAPIView):
 class LogoutView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
-    def post(self, request, *args, **kwargs):
-        request.user.auth_token.delete()
-        return Response(status=status.HTTP_200_OK)
-
 @method_decorator(csrf_exempt, name='dispatch')
 class SignupView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
-
 

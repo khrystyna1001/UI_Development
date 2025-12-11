@@ -1,13 +1,13 @@
 from celery import shared_task
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from django.core.cache import cache
 
 @shared_task
-def send_email(user_pk):
-    try:
-        user = User.objects.get(pk=user_pk)
-        print(f"Sending email to {user.email}")
-        return f"Email sent to {user.email}"
-    except User.DoesNotExist:
-        return f"User with pk={user_pk} does not exist"
+def debug_task():
+    cache.set('celery_test', 'Hello from Celery!', 60)
+    value = cache.get('celery_test')
+    print(f"Cache test: {value}")
+    return "Task completed successfully!"
+
+@shared_task
+def add_numbers(x, y):
+    return x + y
