@@ -183,12 +183,10 @@ const BlogEditor = () => {
         />
 
         <View style={styles.buttonContainer}>
-          {id && (
             <>
-              <EditButton item={formData.title} action={id ? "Update" : "Create"} onPress={handleSubmit} disabled={isSubmitting} />
+              <EditButton item={formData.title} action={isEditMode ? "Update" : "Create"} onPress={handleSubmit} disabled={isSubmitting} />
               <DeleteButton item={formData.title} onPress={deleteBlog} style={styles.deleteButton} disabled={isSubmitting}  />
             </>
-          )}
         </View>
       </ScrollView>
       <NavigationFooter />

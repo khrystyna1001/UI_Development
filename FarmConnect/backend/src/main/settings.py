@@ -57,11 +57,15 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+
     'drf_spectacular',
+
     'corsheaders',
+
     'dj_rest_auth',
     'dj_rest_auth.registration',
     'django_redis',
+    
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -84,6 +88,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -191,7 +196,13 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
-# Update dj-rest-auth settings
+# JWT Settings
+REST_USE_JWT = True
+JWT_AUTH_COOKIE = 'access'
+JWT_AUTH_REFRESH_COOKIE = 'refresh'
+JWT_AUTH_HTTPONLY = True
+
+# dj-rest-auth settings
 REST_AUTH = {
     'USE_JWT': True,
     'JWT_AUTH_COOKIE': 'access',
@@ -201,7 +212,7 @@ REST_AUTH = {
     'JWT_AUTH_COOKIE_USE_CSRF': True,
     'JWT_AUTH_SAMESITE': 'Lax',
     'REGISTER_SERIALIZER': 'dj_rest_auth.registration.serializers.RegisterSerializer',
-    'USER_DETAILS_SERIALIZER': 'app.serializers.UserDetailsSerializer'
+    'USER_DETAILS_SERIALIZER': 'app.serializer.UserSerializer'
 }
 
 # RABBITMQ
@@ -209,7 +220,7 @@ RABBITMQ_USER = env("RABBITMQ_USER")
 RABBITMQ_PASSWORD = env("RABBITMQ_PASSWORD")
 
 # CELERY
-CELERY_BROKER_URL = 'amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672//'
+CELERY_BROKER_URL = f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@rabbitmq:5672//'
 CELERY_RESULT_BACKEND = 'redis://valkey:6379/0'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'

@@ -10,7 +10,14 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { createFarm, updateFarm, getFarm, deleteFarm, getProducts, editProduct } from '../../scripts/api';
+import { 
+  createFarm, 
+  updateFarm, 
+  getFarm, 
+  deleteFarm, 
+  getProducts, 
+  getMyData 
+} from '../../scripts/api';
 import NavigationHeader from '../../components/header';
 import NavigationFooter from '../../components/footer';
 import { DeleteButton } from '../../components/deleteButton';
@@ -19,59 +26,77 @@ import { styles } from '../../styles/nav/farmcreate';
 
 const FarmCreateScreen = () => {
   const { id } = useLocalSearchParams();
+  const farmId = id ? String(id) : null;
   const [allProducts, setAllProducts] = useState([]);
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
-  const isEdit = !!id;
+  const [myData, setMyData] = useState(null);
+  const isEdit = !!farmId;
   
   const [formData, setFormData] = useState({
     name: '',
     location: '',
-    description: ''
+    description: '',
+    user: null,
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isEdit) {
+    if (isEdit && farmId) {
       const fetchFarm = async () => {
         try {
           setLoading(true);
-          const farm = await getFarm(id);
+          const [farm, user] = await Promise.all([getFarm(farmId), getMyData()]);
+          
+          setMyData(user);
           setFormData({
             name: farm.name || '',
             location: farm.location || '',
             description: farm.description || '',
+            user: user.id || null,
           });
 
-          const productsData = await getProducts();
-          
-          if (productsData && Array.isArray(productsData)) {
-            const filteredProducts = productsData.filter(product => 
-              product.farms && product.farms.some(farm => farm.toString() === id)
-            );
-            setSelectedProducts(filteredProducts.map(p => p.id));
+          if (farm.products && Array.isArray(farm.products)) {
+            setSelectedProducts(farm.products.map(Number)); 
+          } 
+          else if (farm.products && Array.isArray(farm.products) && farm.products[0]?.id) {
+             setSelectedProducts(farm.products.map(p => Number(p.id))); 
           }
 
         } catch (err) {
-          setError('Failed to load farm data');
+          setError('Failed to load farm data or user data');
           console.error(err);
         } finally {
           setLoading(false);
         }
       };
       fetchFarm();
+    } else {
+        const fetchUserData = async () => {
+            try {
+                const user = await getMyData();
+                setMyData(user);
+                setFormData(prev => ({ ...prev, user: user.id || null }));
+            } catch (err) {
+                console.error('Error fetching user data for new farm:', err);
+            }
+        };
+        fetchUserData();
     }
-  }, [id]);
+  }, [farmId, isEdit]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const products = await getProducts();
-        setAllProducts(products);
+        if (products && Array.isArray(products)) {
+            setAllProducts(products.map(p => ({ ...p, id: Number(p.id) })));
+        }
       } catch (err) {
         console.error('Error fetching products:', err);
+        setError('Failed to load products list.');
       } finally {
         setLoadingProducts(false);
       }
@@ -79,20 +104,21 @@ const FarmCreateScreen = () => {
     fetchProducts();
   }, []);
 
-  const toggleProduct = (productId) => {
+  const toggleProduct = (productId: number) => {
     setSelectedProducts(prev => {
       const current = Array.isArray(prev) ? prev : [];
-      const productIdNum = Number(productId);
       
-      return current.includes(productIdNum)
-        ? current.filter(id => id !== productIdNum)
-        : [...current, productIdNum];
+      return current.includes(productId)
+        ? current.filter(id => id !== productId)
+        : [...current, productId];
     });
   };
 
   const handleDelete = async () => {
     try {
-      await deleteFarm(id);
+      if (farmId) {
+        await deleteFarm(farmId);
+      }
     } catch (err) {
       console.error('Error deleting farm:', err);
       setError('Failed to delete farm');
@@ -109,31 +135,30 @@ const FarmCreateScreen = () => {
       setError('Name and location are required');
       return;
     }
+    if (!myData || !myData.id) {
+        setError('User data not loaded. Please try refreshing.');
+        return;
+    }
 
     try {
       setSaving(true);
-      const validProductIds = selectedProducts
-        .map(id => {
-          const numId = Number(id);
-          return isNaN(numId) ? null : numId;
-        })
-      .filter((id): id is number => id !== null && id !== undefined);
+      const validProductIds = Array.from(new Set(selectedProducts.map(Number))).filter(id => !isNaN(id));
+      
       const data = {
         ...formData,
         products: validProductIds,
+        user: myData.id,
       };
 
-      if (isEdit && id) {
-        await updateFarm(id, data);
+      if (isEdit && farmId) {
+        await updateFarm(farmId, data);
+        router.replace('/(nav)/farm');
       } else {
         const newFarm = await createFarm(data);
         router.replace(`/farm/${newFarm.id}`);
-        return;
       }
-
-      router.replace('/(nav)/farm');
     } catch (error) {
-      setError('Failed to save farm');
+      setError('Failed to save farm. Check server logs.');
       console.error('Error saving farm:', error);
     } finally {
       setSaving(false);
@@ -159,6 +184,8 @@ const FarmCreateScreen = () => {
             <Icon name="arrow-back" size={24} color="#333" />
             <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
+        
+        {/* Farm Inputs */}
         <View style={styles.formGroup}>
           <Text style={styles.label}>Farm Name *</Text>
           <TextInput
@@ -196,15 +223,14 @@ const FarmCreateScreen = () => {
 
        <View style={styles.productsContainer}>
           <Text style={styles.label}>Products</Text> 
+          <Text style={styles.subLabel}>Select products managed by this farm.</Text>
           <View style={styles.productsGrid}>
           {loadingProducts ? (
             <ActivityIndicator size="small" color="#4CAF50" />
           ) : (
             allProducts.map((product) => {
-              const isProductSelected = selectedProducts.includes(product.id) || 
-                         (product.farm && product.farm === id);
+              const isProductSelected = selectedProducts.includes(product.id);
 
-              
               return (
                 <View key={product.id} style={styles.productItem}>
                 <TouchableWithoutFeedback 
@@ -237,9 +263,9 @@ const FarmCreateScreen = () => {
           {saving ? (
             <Text>Saving...</Text>
           ) : (
-          <EditButton action={isEdit ? "Update" : "Create"} item="farm" onPress={() => handleSubmit()} />
+          <EditButton action={isEdit ? "Update" : "Create"} item="farm" onPress={handleSubmit} />
           )}
-          {isEdit && (
+          {isEdit && farmId && (
           <DeleteButton item="farm" onPress={handleDelete} />
           )}
           

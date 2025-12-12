@@ -59,28 +59,30 @@ export default function GalleryScreen (){
     }, []);
     
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
         <NavigationHeader />
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
-
-          <View style={styles.galleryContainer}>
-            {images.filter((image) => image.author === user?.id).map((image, index) => {
-              if (index % 3 === 0) {
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+      <View style={styles.galleryContainer}>
+        {images
+          .filter((image) => image.author === user?.id)
+          .map((image, index, filteredImages) => {
+            if (index === 0) {
+              return (
+                <TouchableOpacity 
+                  key={image.id} 
+                  onPress={() => router.navigate(`/gallery/${image.id}`)}
+                  style={styles.largeImageContainer}
+                >
+                  <GalleryItem label={image.title} size="large" />
+                </TouchableOpacity>
+              );
+            }
+            
+            if (index === 1 || index === 2) {
+              if (index === 1) {
+                const nextImage = filteredImages[2] || null;
                 return (
-                  <TouchableOpacity 
-                    key={image.id} 
-                    onPress={() => router.navigate(`/gallery/${image.id}`)}
-                    style={styles.largeImageContainer}
-                  >
-                    <GalleryItem label={image.title} size="large" />
-                  </TouchableOpacity>
-                );
-              }
-              
-              if (index % 3 === 1) {
-                const nextImage = images[index + 1];
-                return (
-                  <View key={image.id} style={styles.smallImagesContainer}>
+                  <View key={`pair-${image.id}`} style={styles.smallImagesContainer}>
                     <TouchableOpacity 
                       onPress={() => router.navigate(`/gallery/${image.id}`)}
                       style={styles.smallImageContainer}
@@ -93,25 +95,55 @@ export default function GalleryScreen (){
                         onPress={() => router.navigate(`/gallery/${nextImage.id}`)}
                         style={styles.smallImageContainer}
                       >
-                        <GalleryItem 
-                          label={nextImage.title} 
-                          size="small" 
-                        />
+                        <GalleryItem label={nextImage.title} size="small" />
                       </TouchableOpacity>
                     )}
                   </View>
-                      );
-                    }
-
-                    return null;
-                  })}
-
+                );
+              }
+              return null;
+            }
+            if ((index - 3) % 4 === 0) {
+              return (
+                <TouchableOpacity 
+                  key={image.id} 
+                  onPress={() => router.navigate(`/gallery/${image.id}`)}
+                  style={styles.largeImageContainer}
+                >
+                  <GalleryItem label={image.title} size="large" />
+                </TouchableOpacity>
+              );
+            }
+            if ((index - 3) % 4 === 1 || (index - 3) % 4 === 2) {
+              const nextImage = filteredImages[index + 1] || null;
+              return (
+                <View key={`pair-${image.id}`} style={styles.smallImagesContainer}>
+                  <TouchableOpacity 
+                    onPress={() => router.navigate(`/gallery/${image.id}`)}
+                    style={styles.smallImageContainer}
+                  >
+                    <GalleryItem label={image.title} size="small" />
+                  </TouchableOpacity>
+                  
+                  {nextImage && (
+                    <TouchableOpacity 
+                      onPress={() => router.navigate(`/gallery/${nextImage.id}`)}
+                      style={styles.smallImageContainer}
+                    >
+                      <GalleryItem label={nextImage.title} size="small" />
+                    </TouchableOpacity>
+                  )}
                 </View>
-                <View>
-                  <CreateButton item="image" onPress={() => router.navigate('/gallery/create')} />
-                </View>
-              </ScrollView>
-              <NavigationFooter />
-            </SafeAreaView>
+              );
+            }
+            return null;
+          })}
+      </View>
+      </ScrollView>
+      <View>
+        <CreateButton item="image" onPress={() => router.navigate('/gallery/create')} />
+      </View>
+    <NavigationFooter />
+    </View>
   )
 };

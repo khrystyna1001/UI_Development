@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   View, 
   Text, 
@@ -18,11 +18,24 @@ import { getChat, deleteChat, deleteMessage, createMessage, getMyData, updateMes
 
 import { styles } from '../../styles/tabs/chat';
 
+const sortMessagesByTime = (messages) => {
+    const validMessages = messages.filter(msg => msg.created_at);
+    return validMessages.sort((a, b) => {
+        const timeA = new Date(a.created_at).getTime();
+        const timeB = new Date(b.created_at).getTime();
+        
+        if (isNaN(timeA) || isNaN(timeB)) {
+            return 0; 
+        }
+        return timeA - timeB;
+    });
+};
+
 export default function ChatDetail() {
   const { id } = useLocalSearchParams();
-  const scrollViewRef = useRef<ScrollView>(null);
-  const [chatToDelete, setChatToDelete] = useState(null);
-
+  const chatId = id ? String(id) : null;
+  const scrollViewRef = useRef(null);
+  
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [messageToDelete, setMessageToDelete] = useState(null);
@@ -33,6 +46,7 @@ export default function ChatDetail() {
   const [otherUser, setOtherUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [user, setUser] = useState(null);
+  const [chatToDelete, setChatToDelete] = useState(null);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -46,37 +60,63 @@ export default function ChatDetail() {
     loadUser();
   }, []);
 
-  useEffect(() => {
-    const loadChat = async () => {
-      try {
-        setLoading(true);
-        const chatData = await getChat(id);
-        setMessages(chatData.messages || []);
-        const other = chatData.user1.id === user?.id ? chatData.user2 : chatData.user1;
-        setOtherUser(other);
+  const handleRead = useCallback(async (messageId) => {
+    if (!user || !chatId) return;
+
+    setMessages(prevMessages => {
+        const messageToUpdate = prevMessages.find(msg => msg.id === messageId);
+        if (!messageToUpdate || messageToUpdate.read) return prevMessages;
+
+        const messageData = {
+           content: messageToUpdate.content, 
+           sender: messageToUpdate.sender,
+           read: true,
+           chat: chatId 
+        };
+
+        updateMessage(messageId, messageData)
+            .catch(error => {
+                console.error('Failed to mark message as read on API:', error);
+            });
         
-        if (chatData.messages && user) {
-          const unreadMessages = chatData.messages.filter(
-          msg => msg.sender !== user.id && !msg.read
+        return prevMessages.map(msg => 
+            msg.id === messageId ? { ...msg, read: true } : msg
         );
-          
-          await Promise.all(
-            unreadMessages.map(async msg => await handleRead(msg.id).catch(console.error))
-          );
-        }
-      } catch (error) {
-        console.error('Error loading chat:', error);
-        Alert.alert('Error', 'Failed to load chat. Please try again.');
-      } finally {
-        setLoading(false);
+    });
+
+  }, [user, chatId]); 
+
+  const loadChat = useCallback(async () => {
+    if (!chatId || !user) return;
+    try {
+      setLoading(true);
+      const chatData = await getChat(chatId);
+      
+      setMessages(sortMessagesByTime(chatData.messages || [])); 
+      
+      const other = chatData.user1.id === user?.id ? chatData.user2 : chatData.user1;
+      setOtherUser(other);
+      
+      if (chatData.messages && user) {
+        const unreadMessages = chatData.messages.filter(
+        msg => msg.sender !== user.id && !msg.read
+      );
+        
+        await Promise.all(
+          unreadMessages.map(async msg => await handleRead(msg.id).catch(console.error))
+        );
       }
-    };
-
-    if (user) {
-      loadChat();
+    } catch (error) {
+      console.error('Error loading chat:', error);
+      Alert.alert('Error', 'Failed to load chat. Please try again.');
+    } finally {
+      setLoading(false);
     }
+  }, [chatId, user, handleRead]);
 
-  }, [id, user]);
+  useEffect(() => {
+    loadChat();
+  }, [loadChat]);
 
   const handleSend = async () => {
     if (!message.trim() || !user) return;
@@ -84,47 +124,52 @@ export default function ChatDetail() {
     try {
       setSending(true);
       const tempId = `temp-${Date.now()}`;
+      const messageContent = message.trim();
+      const clientTimestamp = new Date().toISOString(); 
+
       const newMessage = {
         id: tempId,
-        content: message.trim(),
+        content: messageContent,
         sender: user.id,
-        created_at: new Date().toISOString(),
+        created_at: clientTimestamp, 
         isOptimistic: true,
-        chat: id
+        chat: chatId
       };
 
       setMessages(prev => {
         const updated = [...prev, newMessage];
-        return updated.sort((a, b) => 
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        );
+        return sortMessagesByTime(updated); 
       });
       setMessage('');
 
       try {
         const response = await createMessage({
-          content: newMessage.content,
-          chat: id,
+          content: messageContent,
+          chat: chatId,
           sender: user.id,
-          created_at: newMessage.created_at
+          created_at: clientTimestamp 
         });
         
         if (response && response.id) {
-          setMessages(prev => 
-            prev.map(msg => 
+          setMessages(prev => {
+            const updatedMessages = prev.map(msg => 
               msg.id === tempId 
                 ? { 
                     ...response, 
                     isOptimistic: false,
-                    sender: msg.sender
+                    sender: user.id 
                   } 
                 : msg
-            )
-          );
+            );
+            
+            return sortMessagesByTime(updatedMessages);
+          });
+        } else {
+             throw new Error('Invalid response from server.');
         }
       } catch (error) {
         console.error('Failed to save message:', error);
-        setMessages(prev => prev.filter(msg => msg.id !== tempId));
+        setMessages(prev => sortMessagesByTime(prev.filter(msg => msg.id !== tempId)));
         Alert.alert('Error', 'Failed to send message. Please try again.');
       }
     } catch (error) {
@@ -134,30 +179,30 @@ export default function ChatDetail() {
     }
   };
 
-  const handleDeleteChat = async (chatId) => {
+  const handleDeleteChat = async (chatIdToDelete) => {
+    if (!chatIdToDelete) {
+        Alert.alert('Error', 'Invalid chat ID');
+        return;
+    }
     try {
       setDeleting(true);
-      if (!chatId) {
-          throw new Error('Invalid chat ID');
-          return;
-        }
 
-      const response = await deleteChat(chatId);
-      if (!response.ok) {
+      const response = await deleteChat(chatIdToDelete);
+      
+      if (response.ok || response.status === 204) {
+        setShowDeleteModal(false);
+        router.replace('/(tabs)/messages');
+      } else {
         const error = await response.text();
         throw new Error(error || 'Failed to delete chat');
       }
-      setShowDeleteModal(false);
-      router.replace('/(tabs)/messages');
     } catch (error) {
       console.error('Failed to delete chat:', error);
       Alert.alert('Error', 'Failed to delete chat. Please try again.');
       setShowDeleteModal(false);
     } finally {
       setDeleting(false);
-      router.replace('/(tabs)/messages');
     }
-
   };
 
   const handleDeleteMessage = async (messageId) => {
@@ -170,8 +215,6 @@ export default function ChatDetail() {
     try {
       setDeleting(true);
 
-      console.log(messageId)
-      
       const messageToRestore = messages.find(msg => msg.id === messageId);
       
       setMessages(prev => prev.filter(msg => msg.id !== messageId));
@@ -179,19 +222,14 @@ export default function ChatDetail() {
       try {
         const response = await deleteMessage(messageId);
         
-        if (response.ok) {
-          console.log(response);
+        if (!response.ok) {
+          throw new Error(await response.text() || 'API failed to delete message');
         }
         
       } catch (error) {
         console.error('API Error deleting message:', error);
         if (messageToRestore) {
-          setMessages(prev => {
-            const updated = [...prev, messageToRestore];
-            return updated.sort((a, b) => 
-              new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-            );
-          });
+          setMessages(prev => sortMessagesByTime([...prev, messageToRestore]));
         }
         throw error;
       }
@@ -208,38 +246,15 @@ export default function ChatDetail() {
     }
   };
 
-  const showDeleteConfirmation = (type: 'chat' | 'message', id = null) => {
+  const showDeleteConfirmation = (type, deleteId = null) => {
     setDeleteType(type);
     if (type === 'chat') {
-        setChatToDelete({ id: id || id });
+        setChatToDelete({ id: deleteId || chatId });
     } else {
-        setMessageToDelete(id);
+        setMessageToDelete(deleteId);
     }
     setShowDeleteModal(true);
     };
-
-  const handleRead = async (messageId) => {
-    if (!messages) return;
-    if (!user) return;
-
-    const message = messages.find(msg => msg.id === id);
-    if (!message) return;
-
-    const messageData = {
-       id,
-       sender: user?.id,
-       content: message.content,
-       read: true,
-    }
-    try {
-      await updateMessage(messageId, messageData);
-      setMessages(prev => prev.map(msg => msg.id === id ? { ...msg, read: true } : msg));
-      console.log('Message read:', messageData);
-    } catch (error) {
-      console.error('Failed to read chat:', error);
-      Alert.alert('Error', 'Failed to read chat. Please try again.');
-    }
-  };
 
   if (loading) {
     return (
@@ -259,7 +274,7 @@ export default function ChatDetail() {
           {otherUser?.first_name} {otherUser?.last_name}
         </Text> 
         <TouchableOpacity 
-          onPress={() => showDeleteConfirmation('chat', id)}
+          onPress={() => showDeleteConfirmation('chat', chatId)}
           disabled={deleting}
           style={{ marginLeft: 'auto' }}
         >
@@ -333,7 +348,7 @@ export default function ChatDetail() {
                 style={[
                   styles.messageBubble,
                   isCurrentUser ? styles.currentUserBubble : styles.otherUserBubble,
-                  message.isSending && styles.sendingMessage,
+                  message.isOptimistic && styles.sendingMessage, 
                   message.error && styles.errorMessage
                 ]}
               >
@@ -357,9 +372,14 @@ export default function ChatDetail() {
                   styles.messageTime,
                   isCurrentUser ? styles.currentUserTime : styles.otherUserTime
                 ]}>
-                  {format(new Date(message.created_at), 'h:mm a')}
-                  {message.isSending && ' · Sending...'}
+                  {message.created_at ? format(new Date(message.created_at), 'h:mm a') : '...'}
+                  {message.isOptimistic && ' · Sending...'}
                   {message.error && ' · Failed to send'}
+                  {isCurrentUser && !message.isOptimistic && (
+                    <Text style={styles.readStatus}>
+                      {message.read ? ' ✓✓' : ' ✓'}
+                    </Text>
+                  )}
                 </Text>
             </View>
           );

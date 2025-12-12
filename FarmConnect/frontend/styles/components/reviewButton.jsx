@@ -89,4 +89,15 @@ export const styles = StyleSheet.create({
     fontStyle: 'italic',
     padding: 20,
   },
+  seeAllButton: {
+    marginTop: 10,
+    padding: 10,
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
+  },
+  seeAllText: {
+    color: '#007AFF',
+    fontWeight: '500',
+  },
 });

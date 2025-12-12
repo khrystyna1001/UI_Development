@@ -15,6 +15,7 @@ import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
 import { UpdateButton } from "../../components/updateButton";
 import { DeleteButton } from "../../components/deleteButton";
+import ReviewSection from '../../components/reviewSection';
 
 import { styles } from '../../styles/nav/blog.jsx';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -35,6 +36,8 @@ export default function BlogDetail() {
           
           const userData = await getMyData();
           setUser(userData);
+
+          console.log(blogData);
       } catch (err) {
           setError('Failed to load data');
           console.error(err);
@@ -126,7 +129,7 @@ export default function BlogDetail() {
           </View>
           
           {/* Edit button - only for the author */}
-          {blog.author === user?.id || user?.is_superuser && (
+          {(blog.author === user?.id || user?.is_superuser) && (
             <View style={styles.actionButtonsContainer}>
               <UpdateButton onPress={() => router.replace(`/blog/create?id=${blog.id}`)} />
               <DeleteButton onPress={() => deleteBlog(blog.id)} />
@@ -134,7 +137,7 @@ export default function BlogDetail() {
           )}
 
           {/* Message button - only for non-authors */}
-          {blog.author !== user?.id || user?.is_superuser && (
+          {(blog.author !== user?.id || user?.is_superuser) && (
             <TouchableOpacity 
               style={[styles.actionButton, styles.messageButton]} 
               onPress={() => router.replace('/(tabs)/messages')}
@@ -142,6 +145,14 @@ export default function BlogDetail() {
               <Text style={styles.actionButtonText}>Message Author</Text>
             </TouchableOpacity>
           )}
+
+          {/* Review Section */}
+          <ReviewSection 
+            itemId={id} 
+            itemType="blog" 
+            userId={user?.id || null}
+            itemAuthorId={blog?.author || null}
+          />
         </View>
       </View>
     </ScrollView>

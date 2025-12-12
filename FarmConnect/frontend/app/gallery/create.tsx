@@ -23,19 +23,23 @@ const GalleryEditor = () => {
   const [loading, setLoading] = useState(!!id);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditMode, setIsEditMode] = useState(!!id);
+  const [myData, setMyData] = useState({});
 
   const [formData, setFormData] = useState({
     title: '',
+    author: '',
   });
 
   useEffect(() => {
     const loadData = async () => {
       try {
-
+        const myData = await getMyData();
+        setMyData(myData);
         if (id) {
           const imageData = await getGalleryImage(id);
           setFormData({
             title: imageData.title,
+            author: imageData.author,
           });
         }
       } catch (error) {
@@ -53,7 +57,7 @@ const GalleryEditor = () => {
   const handleChange = (name, value) => {
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -68,6 +72,7 @@ const GalleryEditor = () => {
     try {
       const galleryItem = {
         title: formData.title,
+        author: myData.id,
       };
 
       if (isEditMode && id) {

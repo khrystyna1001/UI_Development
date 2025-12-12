@@ -8,7 +8,7 @@ import {
     Modal
 } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
-import { deleteReview, getReview } from '../../scripts/api';
+import { deleteReview, getReview, getMyData } from '../../scripts/api';
 
 import { UpdateButton } from '../../components/updateButton';
 import { DeleteButton } from '../../components/deleteButton';
@@ -26,12 +26,16 @@ export default function ReviewDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchReview = async () => {
       try {
         const data = await getReview(id);
         setReview(data);
+
+        const userData = await getMyData();
+        setUser(userData);
       } catch (err) {
         setError('Failed to fetch review');
         console.error(err);
@@ -45,10 +49,13 @@ export default function ReviewDetail() {
 
   const handleDeleteReview = async () => {
     try {
-      const response = await deleteReview(id)
+      const response = await deleteReview(id);
+      console.log(response);
     } catch (e) {
       console.error(e)
     }
+    setShowDeleteModal(false);
+    router.replace('/(tabs)');
   }
 
   const handleShowDeleteModal = () => {
@@ -91,7 +98,7 @@ export default function ReviewDetail() {
         <Stack.Screen options={{ title: reviewTitle }} />
         
         {/* Back Button */}
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => router.back() || router.replace('/(tabs)')} style={styles.backButton}>
             <Icon name="arrow-back" size={24} color="#333" />
             <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
@@ -133,8 +140,9 @@ export default function ReviewDetail() {
             </View>
 
             {/* Action Buttons */}
+            {(review.author === user?.id || user?.is_superuser) && (
             <View style={styles.actionButtons}>
-              {/* <UpdateButton item={review.title} onPress={} /> */}
+              <UpdateButton item={review.title} onPress={() => router.push(`/reviews/create?id=${review?.id}`)} />
               <DeleteButton item={review.title} onPress={handleShowDeleteModal} />
               <Modal
               visible={showDeleteModal}
@@ -155,21 +163,20 @@ export default function ReviewDetail() {
                       style={[styles.modalButton, styles.cancelButton]}
                       onPress={() => setShowDeleteModal(false)}
                       >
-                      <Text style={styles.cancelButtonText}>Cancel</Text>
+                      <Text style={[styles.modalButtonText, styles.cancelButtonText]}>Cancel</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                       style={[styles.modalButton, styles.deleteButton]}
-                      onPress={() => {
-                          handleDeleteReview();
-                      }}
-                      > Delete
+                      onPress={handleDeleteReview}
+                      >
+                      <Text style={[styles.modalButtonText, styles.deleteButtonText]}>Delete</Text>
                       </TouchableOpacity>
                   </View>
                   </View>
               </View>
               </Modal>
             </View>
-
+            )}
         </View>
       </ScrollView>
       

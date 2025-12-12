@@ -26,34 +26,45 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!username || !password) {
-        setError('Please enter both username and password');
-        return;
+      setError('Please enter both username and password');
+      return;
     }
-
     setIsLoading(true);
     setError('');
-
     try {
-        const data = await login(username, password);
-        
-        if (data.token) {
-            const token = data.token;
-            if (Platform.OS === 'web') {
-              window.localStorage.setItem('userToken', token);
-            } else {
-              await SecureStore.setItemAsync('userToken', token);
-            }
-            router.replace('/(tabs)');
+      console.log('Attempting login with:', { username });
+      const data = await login(username, password);
+      console.log('Login response:', data);  // Add this line to see the actual response
+      
+      // Check for both 'key' and 'access' token in the response
+      const token = data.key || data.access;
+      
+      if (token) {
+        console.log('Token received, storing...');
+        if (Platform.OS === 'web') {
+          window.localStorage.setItem('userToken', token);
+          // Also store the refresh token if available
+          if (data.refresh) {
+            window.localStorage.setItem('refreshToken', data.refresh);
+          }
         } else {
-            setError('Invalid response from server');
+          await SecureStore.setItemAsync('userToken', token);
+          if (data.refresh) {
+            await SecureStore.setItemAsync('refreshToken', data.refresh);
+          }
         }
+        router.replace('/(tabs)');
+      } else {
+        console.error('No token in response:', data);
+        setError('Invalid response from server. No token received.');
+      }
     } catch (err) {
-        console.error('Login error:', err);
-        setError(err.message || 'Login failed. Please try again.');
+      console.error('Login error:', err);
+      setError(err.message || 'Login failed. Please try again.');
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
-};
+  };
 
   return (
     <KeyboardAvoidingView

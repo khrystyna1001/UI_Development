@@ -179,19 +179,24 @@ export const styles = StyleSheet.create({
     borderRadius: 5,
     minWidth: 80,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalButtonText: { 
+    fontSize: 16,
+    fontWeight: '500',
   },
   cancelButton: {
     backgroundColor: '#f0f0f0',
   },
+  cancelButtonText: { 
+    color: '#333',
+    fontWeight: '500',
+  },
   deleteButton: {
     backgroundColor: '#ff4444',
   },
-  deleteButtonText: {
-    color: 'white',
-    fontWeight: '500',
-  },
-  cancelButtonText: {
-    color: '#333',
+  deleteButtonText: {  
+    color: '#fff',
     fontWeight: '500',
   },
 });

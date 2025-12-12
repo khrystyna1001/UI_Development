@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
-from rest_framework import generics, status, serializers
+from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 
 from app.models import BlogPost, Product, Farm, GalleryImage, Review, Message, User, Chat
-from app.serializer import BlogPostSerializer, ProductSerializer, FarmSerializer, GalleryImageSerializer, ReviewSerializer, MessageSerializer, UserRegistrationSerializer, UserSerializer, ChatSerializer
+from app.serializer import BlogPostSerializer, ProductSerializer, FarmSerializer, GalleryImageSerializer, ReviewSerializer, MessageSerializer, UserRegisterSerializer, UserSerializer, ChatSerializer
 
 import logging
 
@@ -136,6 +136,6 @@ class LogoutView(generics.CreateAPIView):
 @method_decorator(csrf_exempt, name='dispatch')
 class SignupView(generics.CreateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserRegistrationSerializer
+    serializer_class = UserRegisterSerializer
     permission_classes = [AllowAny]
 

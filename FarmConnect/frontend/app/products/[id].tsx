@@ -181,12 +181,13 @@ export default function ProductDetail() {
             <Text style={styles.priceInfo}>${(product.price * quantity)?.toFixed(2) || '0.00'}</Text>
           </View>
 
-          <ReviewSection 
+            <ReviewSection 
             itemId={id} 
             itemType="product" 
             userId={user?.id || null} 
+            itemAuthorId={product?.author || null} 
           />
-          
+
           {/* Edit button - only for admin or for the author */}
           {(user?.is_superuser || product?.author === user?.id) && (
             <View style={styles.actionButtonsContainer}>

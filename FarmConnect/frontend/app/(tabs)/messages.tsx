@@ -19,7 +19,10 @@ import { styles } from '../../styles/tabs/messages.jsx';
 
 const ChatItem = ({ chat, currentUserId, otherUser, onPress }) => {
   const lastMessage = chat.messages?.[chat.messages.length - 1];
-  const unreadCount = chat.messages?.filter(m => !m.read).length || 0;
+  const unreadMessages = chat.messages?.filter(m => 
+    m.read === false
+  ) || [];
+  const unreadCount = unreadMessages.length;
   const hasUnread = unreadCount > 0;
 
   return (

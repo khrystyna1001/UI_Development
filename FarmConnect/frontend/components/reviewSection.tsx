@@ -5,11 +5,12 @@ import { createReview, getReviews } from '../scripts/api';
 import { styles } from '../styles/components/reviewButton';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const ReviewSection = ({ itemId, itemType, userId }) => {
+const ReviewSection = ({ itemId, itemType, userId, itemAuthorId }) => {
   const [reviews, setReviews] = useState([]);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
+  const [seeAllReviews, setSeeAllReviews] = useState(false);
 
   const loadReviews = async () => {
     try {
@@ -84,36 +85,10 @@ const ReviewSection = ({ itemId, itemType, userId }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Reviews</Text>
-      
-      {userId && (
-        <View style={styles.reviewForm}>
-          <Text style={styles.subtitle}>Write a Review</Text>
-          <View style={styles.ratingContainer}>
-            <Text style={styles.ratingLabel}>Rating: </Text>
-            <View style={styles.starsContainer}>
-              {renderStars(rating)}
-            </View>
-          </View>
-          <TextInput
-            style={styles.commentInput}
-            placeholder="Share your thoughts..."
-            value={comment}
-            onChangeText={setComment}
-            multiline
-            numberOfLines={4}
-          />
-          <Button
-            title={loading ? 'Submitting...' : 'Submit Review'}
-            onPress={handleSubmit}
-            disabled={loading}
-            color="#4CAF50"
-          />
-        </View>
-      )}
 
       <View style={styles.reviewsList}>
         {reviews.length > 0 ? (
-          reviews.map((review) => (
+          reviews.slice(0, seeAllReviews ? reviews.length : 3).map((review) => (
             <TouchableOpacity onPress={() => router.navigate(`reviews/${review.id}`)}>
             <View key={review.id} style={styles.reviewItem}>
               <View style={styles.reviewHeader}>
@@ -139,9 +114,39 @@ const ReviewSection = ({ itemId, itemType, userId }) => {
             </TouchableOpacity>
           ))
         ) : (
-          <Text style={styles.noReviews}>No reviews yet. Be the first to review!</Text>
+          <Text style={styles.noReviews}>No reviews yet.</Text>
         )}
       </View>
+      {(userId !== itemAuthorId) && (
+        <View style={styles.reviewForm}>
+          <Text style={styles.subtitle}>Write a Review</Text>
+          <View style={styles.ratingContainer}>
+            <Text style={styles.ratingLabel}>Rating: </Text>
+            <View style={styles.starsContainer}>
+              {renderStars(rating)}
+            </View>
+          </View>
+          <TextInput
+            style={styles.commentInput}
+            placeholder="Share your thoughts..."
+            value={comment}
+            onChangeText={setComment}
+            multiline
+            numberOfLines={4}
+          />
+          <Button
+            title={loading ? 'Submitting...' : 'Submit Review'}
+            onPress={handleSubmit}
+            disabled={loading}
+            color="#4CAF50"
+          />
+        </View>
+      )}
+      {reviews.length > 3 && (
+        <TouchableOpacity style={styles.seeAllButton} onPress={() => setSeeAllReviews(!seeAllReviews)}>
+          <Text style={styles.seeAllText}>{seeAllReviews ? 'Show Less Reviews' : 'Show All Reviews'}</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

@@ -23,35 +23,45 @@ const Icon = ({ name, size, color }) => (
 );
 
 export default function SignupScreen () {
-  const [login, setLogin] = useState('');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSignup = async (e) => {
-      e.preventDefault();
-      if (!login || !password || !confirmPassword) {
-          alert("All fields are required for sign up.");
-          return;
-      }
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-      if (password !== confirmPassword) {
-        alert("Error: Passwords do not match!");
-        return;
-      }
-
-      if (password.length < 8) {
-          alert("Password must be at least 8 characters long.");
-          return;
-      }
-
-      try {
-        await signup(login, password);
+  const handleSignup = async () => {
+    // Basic validation
+    if (!username || !email || !password || !confirmPassword) {
+      setError('All fields are required');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
+    setIsLoading(true);
+    setError('');
+    try {
+      const data = await signup(username, email, password, confirmPassword);
+      
+      if (data.key) {
         router.replace('/login');
-      } catch (error) {
-        console.error('Sign up error:', error);
-        alert("Sign Up failed. Please try again.");
+      } else {
+        setError('Registration successful but no authentication token received');
       }
-    };
+    } catch (err) {
+      console.error('Signup error:', err);
+      setError(err.message || 'Signup failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -67,10 +77,22 @@ export default function SignupScreen () {
             style={styles.input}
             placeholder="Username"
             placeholderTextColor="#999"
-            value={login}
-            onChangeText={setLogin}
+            value={username}
+            onChangeText={setUsername}
             keyboardType="email-address"
             autoCapitalize="none"
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.inputLabel}>Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor="#999"
+            value={email}
+            onChangeText={setEmail}
+            secureTextEntry
           />
         </View>
 
@@ -83,7 +105,7 @@ export default function SignupScreen () {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-          />
+            />
         </View>
 
         <View style={styles.formGroup}>
@@ -97,6 +119,8 @@ export default function SignupScreen () {
             secureTextEntry
             />
         </View>
+
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <Pressable style={styles.button} onPress={handleSignup}>
           <Text style={styles.buttonText}>Sign Up</Text>

@@ -292,4 +292,25 @@ export const styles = StyleSheet.create({
     includeFontPadding: false,
     letterSpacing: 0,
   },
+
+  ownerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  ownerAvatar: {
+    marginRight: 15,
+  },
+  ownerInfo: {
+    flex: 1,
+  },
+  ownerName: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+    color: '#333',
+  },
 });

@@ -5,64 +5,130 @@ import { Platform } from 'react-native';
 const API_BASE_URL = 'http://localhost';
 
 
-const getToken = async () => {
-    const tokenKey = 'userToken'; 
+export const setToken = async (key, value) => {
+    const tokenKey = key; 
     try {
         if (Platform.OS === 'web') {
-            const token = window.localStorage.getItem(tokenKey);
+            window.localStorage.setItem(tokenKey, value);
+        } else {
+            await SecureStore.setItemAsync(tokenKey, value);
+        }
+    } catch (error) {
+        console.error(`Error storing token ${key}:`, error);
+    }
+};
+
+const getToken = async (key = 'accessToken') => {
+    try {
+        if (Platform.OS === 'web') {
+            const token = window.localStorage.getItem(key);
             return token;
         } else {
-            const token = await SecureStore.getItemAsync(tokenKey);
+            const token = await SecureStore.getItemAsync(key);
             return token;
         }
     } catch (error) {
-        console.error("Error retrieving token:", error);
+        console.error(`Error retrieving token ${key}:`, error);
         return null;
     }
 };
 
 export const clearToken = async () => {
     if (Platform.OS === 'web') {
-        window.localStorage.removeItem('userToken');
+        window.localStorage.removeItem('accessToken');
+        window.localStorage.removeItem('refreshToken');
     } else {
-        await SecureStore.deleteItemAsync('userToken');
+        await SecureStore.deleteItemAsync('accessToken');
+        await SecureStore.deleteItemAsync('refreshToken');
     }
 }
 
-const apiFetch = async (endpoint, options = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`;
-  const headers = {
-      'Content-Type': 'application/json',
-  };
-
-  const token = await getToken();
-
-  if (token) {
-      headers['Authorization'] = `Token ${token}`;
-  }
-
-  const finalOptions = {
-      ...options,
-      headers: {
-          ...headers,
-          ...options.headers,
-      }
-  };
-
+const refreshAccessToken = async () => {
   try {
-    const response = await fetch(url, finalOptions);
+    const refreshToken = await getToken('refreshToken');
+    if (!refreshToken) {
+      await clearToken();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      throw new Error('No refresh token available. User logged out.');
+    }
+    
+    const response = await fetch(`${API_BASE_URL}/api/token/refresh/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refresh: refreshToken }),
+    });
 
     if (!response.ok) {
-      let errorDetail = await response.text().catch(() => response.statusText);
-      throw new Error(`API call failed with status ${response.status}: ${errorDetail}`);
+        await clearToken();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+      throw new Error('Failed to refresh token. User logged out.');
     }
-
+    
     const data = await response.json();
-    return data;
+    await setToken('accessToken', data.access);
+    return data.access;
   } catch (error) {
-    console.error(`Error fetching ${url}:`, error);
+    console.error('Error refreshing token:', error);
     throw error;
   }
+};
+
+const apiFetch = async (endpoint, options = {}) => {
+  const url = `${API_BASE_URL}${endpoint}`;
+  
+  const executeFetch = async (accessToken) => {
+      const headers = {
+          'Content-Type': 'application/json',
+          ...options.headers,
+      };
+
+      if (accessToken) {
+          headers['Authorization'] = `Bearer ${accessToken}`;
+      }
+
+      const finalOptions = {
+          ...options,
+          headers,
+      };
+
+      return await fetch(url, finalOptions);
+  };
+  
+  let currentToken = await getToken();
+  let response = await executeFetch(currentToken);
+
+  if (response.status === 401) {
+    console.warn('Access token expired. Attempting refresh...');
+    
+    try {
+      const newToken = await refreshAccessToken();
+      
+      response = await executeFetch(newToken);
+      
+    } catch (error) {
+      console.error('Failed to retry request after refresh:', error);
+      throw error;
+    }
+  }
+
+  if (!response.ok) {
+    let errorDetail;
+    try {
+      errorDetail = (await response.json()).detail || response.statusText;
+    } catch {
+      errorDetail = await response.text().catch(() => response.statusText);
+    }
+    throw new Error(`API call failed with status ${response.status}: ${errorDetail}`);
+  }
+
+  const data = await response.json();
+  return data;
 };
 
 // Blog
@@ -125,77 +191,98 @@ export const deleteMessage = async (id) => apiFetch(`/app/messages/${id}/`, { me
 // Authentication
 // Login
 export const login = async (username, password) => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/dj-rest-auth/login/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username: username,
-                password: password
-            }),
-        });
-        const data = await response.json();
-        if (response.ok) {
-            localStorage.setItem('accessToken', data.access);
-            localStorage.setItem('refreshToken', data.refresh);
-            return data;
-        }
-        throw new Error(data.detail || 'Login failed');
-    } catch (error) {
-        console.error('Login error:', error);
-        throw error;
+  try {
+    const response = await fetch(`${API_BASE_URL}/dj-rest-auth/login/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      const errorMessage = data.detail || 
+                           data.non_field_errors?.[0] || 
+                           'Login failed. Please check your credentials.';
+      throw new Error(errorMessage);
     }
+    
+    const { access, refresh } = data;
+    
+    if (access) {
+      await setToken('accessToken', access);
+    }
+    
+    if (refresh) {
+      await setToken('refreshToken', refresh);
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
+  }
 };
 
 // Signup
 export const signup = async (username, email, password1, password2) => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/dj-rest-auth/registration/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username,
-                email,
-                password1,
-                password2
-            }),
-        });
-        const data = await response.json();
-        if (response.ok) {
-            return data;
-        }
-        throw new Error(data.detail || 'Registration failed');
-    } catch (error) {
-        console.error('Signup error:', error);
-        throw error;
+  try {
+    const response = await fetch(`${API_BASE_URL}/dj-rest-auth/registration/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username,
+        email,
+        password1,
+        password2,
+      }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = Object.values(errorData).flat().join(' ') || 'Signup failed. Please try again.';
+      throw new Error(errorMessage);
     }
+    return await response.json();
+  } catch (error) {
+    console.error('Signup error:', error);
+    throw error;
+  }
 };
 
 export const logout = async () => {
     try {
-        const token = await getToken();
+        const refreshToken = await getToken('refreshToken');
+        const accessToken = await getToken('accessToken');
+        
+        if (!refreshToken) {
+            await clearToken();
+            return true;
+        }
+
         const response = await fetch(`${API_BASE_URL}/api/logout/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Token ${token}`,
+                'Authorization': `Bearer ${accessToken}`,
             },
+            body: JSON.stringify({ refresh: refreshToken }),
         });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.detail || 'Logout failed');
-        }
 
         await clearToken();
 
-        return true
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.warn('Logout warning:', errorData.detail || 'Logout request failed but tokens have been cleared');
+        }
+
+        return true;
     } catch (error) {
         console.error('Logout API error:', error);
+        await clearToken();
         throw error;
     }
 };

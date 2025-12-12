@@ -33,19 +33,17 @@ const FarmDetailScreen = () => {
         const data = await getFarm(id);
         setFarm(data);
 
-        console.log('Received farm data:', data);
+        console.log(data)
 
         const myData = await getMyData();
         setUser(myData);
 
         const productsData = await getProducts();
-        console.log('Received products data:', productsData);
         
         if (productsData && Array.isArray(productsData)) {
           const filteredProducts = productsData.filter(product => 
             product.farms && product.farms.some(farm => farm.toString() === id)
           );
-          console.log('Products for this farm:', filteredProducts);
           setProducts(filteredProducts);
         }
       } catch (err) {
@@ -112,9 +110,21 @@ const FarmDetailScreen = () => {
           </View>
         </View>
 
+        {/* Owner Container */}
+        <View style={styles.ownerContainer}>
+          <View style={styles.ownerAvatar}>
+            <Feather name="user" size={40} color="#4CAF50" />
+          </View>
+          <View style={styles.ownerInfo}>
+            <Text style={styles.ownerName}>
+              {farm.user_info?.username || farm.user_info?.email || 'Unknown User'}
+            </Text>
+          </View>
+        </View>
+
         {/* Farm Details */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
+          <Text style={styles.sectionTitle}>Description</Text>
           <Text style={styles.description}>{farm.description}</Text>
         </View>
 
@@ -153,7 +163,7 @@ const FarmDetailScreen = () => {
       </ScrollView>
 
        {/* Action Buttons */}
-      {user?.id === farm.user || user?.is_superuser && (
+      {(user?.id === farm.user || user?.is_superuser) && (
       <View style={styles.actionButtons}>
         <UpdateButton
           item={farm.name}

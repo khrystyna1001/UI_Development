@@ -137,7 +137,7 @@ export default function BlogPage () {
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity 
             style={styles.retryButton} 
-            onPress={fetchBlogs}
+            onPress={() => router.replace('/blogs') || fetchBlogs()}
           >
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>

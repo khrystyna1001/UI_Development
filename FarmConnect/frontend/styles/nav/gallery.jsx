@@ -4,13 +4,17 @@ const PADDING_HORIZONTAL = 16;
 const ITEM_MARGIN = 8;
 
 export const styles = StyleSheet.create({
-    safeArea: {
+    container: {
       flex: 1,
       backgroundColor: '#fff',
     },
 
     scrollView: {
       flex: 1,
+    },
+
+    scrollViewContent: {
+      margin: 20,
     },
 
     contentContainer: {
