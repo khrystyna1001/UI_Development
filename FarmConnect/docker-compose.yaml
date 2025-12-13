@@ -90,9 +90,6 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-kalo}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-kalo}
       RABBITMQ_DEFAULT_VHOST: /
-    ports:
-      - "5672:5672"
-      - "15672:15672"
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     healthcheck:
@@ -100,11 +97,11 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    labels:
+      - traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.localhost`)"
   valkey:
     image: valkey/valkey:7.2
     command: valkey-server --save 60 1 --loglevel notice
-    ports:
-      - "6379:6379"
     volumes:
       - valkey-data:/data
     healthcheck:
@@ -112,6 +109,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 3
+    labels:
+      - traefik.http.routers.valkey.rule=Host(`valkey.localhost`)"
   celery-worker:
     build: ./backend
     command: celery -A src.main.celery worker --loglevel=info
@@ -145,11 +144,11 @@ services:
       - ./backend/src:/app/src
     env_file:
       - .env
-    ports:
-      - "5555:5555"
     depends_on:
       - rabbitmq
       - celery-worker
+    labels:
+      - traefik.http.routers.flower.rule=Host(`flower.localhost`)"
 
 volumes:
   postgres_data:
