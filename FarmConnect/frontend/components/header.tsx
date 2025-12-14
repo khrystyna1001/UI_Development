@@ -5,17 +5,19 @@ import {
   Text,
   Image,
   Pressable,
+  TouchableOpacity,
 } from 'react-native';
 import { router } from 'expo-router';
 import { logout } from '../scripts/api';
 import { getMyData } from '../scripts/api';
 
-import { AntDesign, Feather } from '@expo/vector-icons';
+import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 
 import { styles } from '../styles/components/navigation.jsx';
 
 export default function NavigationHeader() {
     const [myData, setMyData] = useState(null);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
     
     useEffect(() => {
         const fetchMyData = async () => {
@@ -55,6 +57,14 @@ export default function NavigationHeader() {
           <Text style={styles.profileName}>{myData?.username}</Text>
           <Text style={styles.profileRole}>{myData?.is_superuser ? 'Organic Farmer' : 'User'}</Text>
         </View>
+        <TouchableOpacity 
+          onPress={() => router.push('/(nav)/notifications')}
+          style={styles.notificationButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="notifications-outline" size={24} color="#000000" />
+          {hasUnreadNotifications && <View style={styles.notificationBadge} />}
+        </TouchableOpacity>
         <Pressable onPress={handleLogout} style={styles.profileButton}>
           <Feather name="log-out" size={16} color="#fff" />
         </Pressable>

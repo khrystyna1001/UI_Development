@@ -58,7 +58,6 @@ export default function Cart() {
               total: parseFloat(singleCart.total_price) || 0,
           };
           setCart(normalizedCart);
-          console.log("Cart fetched:", normalizedCart);
       } else {
           setCart({ items: [], total: 0 }); 
       }
@@ -99,9 +98,11 @@ export default function Cart() {
     return (
     <View key={i.id.toString()} style={styles.card}>
       <View style={styles.itemDetails}>
-        <Text style={styles.name}>{i.product?.name || 'Product'}</Text>
-        <Text style={styles.price}>${i.product?.price || 0} x {i.quantity}</Text>
-        <Text style={styles.total}>${((i.product?.price || 0) * i.quantity).toFixed(2)}</Text>
+        <TouchableOpacity onPress={() => router.push(`/products/${i.product?.id}`)}>
+          <Text style={styles.name}>{i.product?.name || 'Product'}</Text>
+          <Text style={styles.price}>${i.product?.price || 0} x {i.quantity}</Text>
+          <Text style={styles.total}>${((i.product?.price || 0) * i.quantity).toFixed(2)}</Text>
+        </TouchableOpacity>
       </View>
       <TouchableOpacity 
         onPress={() => handleRemoveItem(i.product?.id)}

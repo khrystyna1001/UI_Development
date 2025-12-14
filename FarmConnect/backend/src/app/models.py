@@ -2,6 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
+import logging
+
+# Logging
+logger = logging.getLogger('farmconnect')
 
 # Create your models here.
 
@@ -357,3 +361,25 @@ class FavoriteBlog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} favorited {self.blog_post.title}"
+
+
+class LogEntry(models.Model):
+    LOG_LEVELS = (
+        ('DEBUG', 'Debug'),
+        ('INFO', 'Info'),
+        ('WARNING', 'Warning'),
+        ('ERROR', 'Error'),
+        ('CRITICAL', 'Critical'),
+    )
+    
+    level = models.CharField(max_length=10, choices=LOG_LEVELS, default='INFO')
+    message = models.TextField()
+    module = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name_plural = 'Log Entries'
+    
+    def __str__(self):
+        return f"{self.get_level_display()}: {self.message[:100]}"

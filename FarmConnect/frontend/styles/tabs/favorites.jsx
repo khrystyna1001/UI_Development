@@ -24,6 +24,7 @@ export const styles = StyleSheet.create({
   },
   header: {
     fontSize: 24,
+    marginHorizontal: 12,
     fontWeight: 'bold',
     marginBottom: 20,
     color: '#2c3e50',
@@ -35,6 +36,7 @@ export const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 10,
     marginBottom: 12,
+    marginHorizontal: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

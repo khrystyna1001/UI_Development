@@ -9,7 +9,7 @@ import {
     Alert
 } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
-import { getBlogPost, getMyData, deleteBlogPost, getFavoriteBlogs, addToFavorites, removeFromFavorites } from '../../scripts/api';
+import { getBlogPost, getMyData, deleteBlogPost, getFavorites, toggleFavorite } from '../../scripts/api';
 
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
@@ -53,9 +53,10 @@ export default function BlogDetail() {
 
   const checkIfFavorite = async () => {
     try {
-      const favorites = await getFavoriteBlogs();
+      const favorites = await getFavorites();
       const isFav = favorites.some(fav => fav.blog_post.id === parseInt(id));
       setIsFavorite(isFav);
+      return isFav;
     } catch (error) {
       console.error("Error checking for favorites: ", error)
     }
@@ -64,14 +65,13 @@ export default function BlogDetail() {
   const handleFavoriteAction = async () => {
     try {
       if (isFavorite) {
-        const favorites = await getFavoriteBlogs();
-        const favorite = favorites.find(fav => fav.blog_post.id === parseInt(id));
-        if (favorite) {
-          await removeFromFavorites(favorite.id);
+        const isFav = await checkIfFavorite();
+        if (isFav) {
+          await toggleFavorite(isFav);
           Alert.alert('Success', 'Removed from favorites');
         }
       } else {
-        await addToFavorites({ blog_post: id });
+        await toggleFavorite(id);
         Alert.alert('Success', 'Added to favorites');
       }
       setIsFavorite(!isFavorite);

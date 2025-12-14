@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from app.views import BlogPostViewSet, ProductViewSet, ReviewViewSet, MessageViewSet, GalleryViewSet, FarmViewSet, SignupView, MyDataView, LogoutView, UserViewSet, ChatViewSet, CartViewSet, FavoriteBlogViewSet
+from app.views import BlogPostViewSet, ProductViewSet, ReviewViewSet, MessageViewSet, GalleryViewSet, FarmViewSet, SignupView, MyDataView, LogoutView, UserViewSet, ChatViewSet, CartViewSet, FavoriteBlogViewSet, CartItemViewSet
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import (
@@ -38,13 +38,14 @@ router.register(r'farms', FarmViewSet, basename='farms')
 router.register(r'users', UserViewSet, basename='users')
 router.register(r'chats', ChatViewSet, basename='chats')
 router.register(r'carts', CartViewSet, basename='cart')
+router.register(r'cart-items', CartItemViewSet, basename='cart-item')
 router.register(r'favorites', FavoriteBlogViewSet, basename='favorite-blog')
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('app/', include(router.urls)),
     path('auth/', include('django.contrib.auth.urls')),
     path('api/signup/', SignupView.as_view()),
-    path('api/mydata/', MyDataView.as_view()),
+    path('api/mydata/', MyDataView.as_view(), name='my-data'),
     path('api/logout/', LogoutView.as_view()),
 
     # API Documentation
@@ -59,7 +60,7 @@ urlpatterns = [
     
     # Update dj-rest-auth URLs to use JWT
     path('dj-rest-auth/', include('dj_rest_auth.urls')),
-    path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
+    path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls'), name='rest_register'),
 ] 
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

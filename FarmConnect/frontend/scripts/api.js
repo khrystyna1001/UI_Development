@@ -190,27 +190,12 @@ export const deleteMessage = async (id) => apiFetch(`/app/messages/${id}/`, { me
 
 // Favorite Blogs
 export const getFavorites = async () => apiFetch(`/app/favorites/`);
-export const toggleFavorite = async (blog_id) => {
-    return apiFetch(`/app/favorites/toggle/`, { 
-        method: 'POST',
-        body: JSON.stringify({ blog_id })
-    });
-};
+export const toggleFavorite = async (blog_id) => apiFetch(`/app/favorites/toggle/`, { method: 'POST', body: JSON.stringify({ blog_id }) });
 
 // Cart
 export const getCart = async () => apiFetch(`/app/carts/`);
-export const addToCart = async (product_id, quantity = 1) => {
-    return apiFetch(`/app/carts/add/`, {
-        method: 'POST',
-        body: JSON.stringify({ product_id, quantity })
-    });
-};
-export const removeFromCart = async (product_id) => {
-    return apiFetch(`/app/carts/remove/`, { 
-        method: 'POST',
-        body: JSON.stringify({ product_id }) 
-    });
-};
+export const addToCart = async (product_id, quantity = 1) => apiFetch(`/app/carts/add/`, {method: 'POST',body: JSON.stringify({ product_id, quantity })});
+export const removeFromCart = async (product_id) => apiFetch(`/app/carts/remove/`, { method: 'POST', body: JSON.stringify({ product_id }) });
 export const checkout = async () => apiFetch(`/app/carts/checkout/`, { method: 'POST' });
 
 // Authentication
@@ -252,7 +237,7 @@ export const login = async (username, password) => {
 };
 
 // Signup
-export const signup = async (username, email, password1, password2) => {
+export const signup = async (data) => {
   try {
     const response = await fetch(`${API_BASE_URL}/dj-rest-auth/registration/`, {
       method: 'POST',
@@ -260,10 +245,10 @@ export const signup = async (username, email, password1, password2) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        username,
-        email,
-        password1,
-        password2,
+        username: data.username,
+        email: data.email,
+        password1: data.password1,
+        password2: data.password2,
       }),
     });
     if (!response.ok) {

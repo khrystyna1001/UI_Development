@@ -31,6 +31,7 @@ export default function ProductDetail() {
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [user, setUser] = useState(null);
+  const [cart, setCart] = useState({ items: [], total: 0 });
 
 
   useEffect(() => {
@@ -55,13 +56,44 @@ export default function ProductDetail() {
     }
   };
 
+  const fetchCart = async () => {
+    try {
+      setLoading(true);
+      const response = await getCart(); 
+      
+      const singleCart = (Array.isArray(response) && response.length > 0) 
+                          ? response[0] 
+                          : null;
+                          
+      if (singleCart) {
+          const normalizedCart = {
+              ...singleCart,
+              total: parseFloat(singleCart.total_price) || 0,
+          };
+          setCart(normalizedCart);
+          return normalizedCart;
+      } else {
+          setCart({ items: [], total: 0 }); 
+          return { items: [], total: 0 };
+      }
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      setCart({ items: [], total: 0 });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const checkIfInCart = async () => {
     try {
-      const cart = await getCart();
-      const cartItems = cart?.items || []; 
-      
-      const itemInCart = cartItems.some(item => item.product.id === parseInt(id));
-      setIsInCart(itemInCart);
+      const cart = await fetchCart();
+      if (cart) {
+        const cartItems = cart?.items || []; 
+        const itemInCart = cartItems.some(item => item.product.id === parseInt(id));
+        setIsInCart(itemInCart);
+        console.log("Item in cart:", itemInCart);
+        console.log("Cart items:", cartItems);
+      }
     } catch (error) {
       console.error('Error checking cart:', error);
     }

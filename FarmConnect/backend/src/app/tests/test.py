@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from faker import Faker
 from django.contrib.auth.models import User
-from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm, Chat
+from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm, Chat, CartItem, Cart, FavoriteBlog, LogEntry
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -14,27 +14,63 @@ class APITestCase(TestCase):
     Base test case for setting up the API client and common data,
     including a Faker instance.
     """
+    def _register_and_login_user(self, user_data, password, is_main_user=True):
+        response = self.client.post(self.signup_url, user_data, format='json')
+        if response.status_code != 201:
+            raise Exception(f"Failed to register user: {response.data}")
+        
+        login_response = self.client.post(
+            self.token_obtain_pair_url,
+            {'username': user_data['username'], 'password': password},
+            format='json'
+        )
+        if login_response.status_code != 200:
+            raise Exception(f"Failed to login user: {login_response.data}")
+        
+        tokens = login_response.data
+        
+        if is_main_user:
+            self.access_token1 = tokens['access']
+            self.refresh_token1 = tokens['refresh']
+            self.test_user = User.objects.get(username=user_data['username'])
+            self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.access_token1}')
+        else:
+            self.access_token2 = tokens['access']
+            self.refresh_token2 = tokens['refresh']
+            return User.objects.get(username=user_data['username'])
+        
+        return tokens
+
     def setUp(self):
         self.client = APIClient()
         self.fake = Faker()
 
-        # --- CREATE USER ---
-        self.test_user = User.objects.create_user(
-            username=self.fake.user_name(),
-            password=self.fake.password(),
-        )
-        self.second_user = User.objects.create_user(
-            username=self.fake.user_name(),
-            password=self.fake.password(),
-        )
+        self.signup_url = reverse('rest_register')
+        self.token_obtain_pair_url = reverse('token_obtain_pair')
 
-        # --- INTIALIZE TOKENS ---
-        self.token1 = RefreshToken.for_user(self.test_user)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token1.access}')
-
-        self.token2 = RefreshToken.for_user(self.second_user)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token2.access}')
-
+        # --- User 1 Credentials and Registration ---
+        self.user1_password = self.fake.password()
+        self.user1_data = {
+            'username': self.fake.user_name(),
+            'email': self.fake.email(),
+            'password1': self.user1_password,
+            'password2': self.user1_password,
+        }
+        
+        self._register_and_login_user(self.user1_data, self.user1_password, is_main_user=True)
+        
+        # --- User 2 Credentials and Registration ---
+        self.user2_password = self.fake.password()
+        self.user2_data = {
+            'username': self.fake.user_name(),
+            'email': self.fake.email(),
+            'password1': self.user2_password,
+            'password2': self.user2_password,
+        }
+        
+        self.second_user = self._register_and_login_user(self.user2_data, self.user2_password, is_main_user=False)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.access_token1}')
+        
         # --- Farm Setup ---
         self.farm_data = {
             'name': self.fake.company(),
@@ -121,6 +157,55 @@ class APITestCase(TestCase):
         self.gallery_image = GalleryImage.objects.create(**self.gallery_data)
         self.gallery_list_url = reverse('gallery-list')
         self.gallery_detail_url = reverse('gallery-detail', kwargs={'pk': self.gallery_image.pk})
+
+        # --- MyData Setup ---
+        self.my_data = self.test_user
+        self.my_data_url = reverse('my-data')
+
+        # --- Cart Setup ---
+        self.cart = Cart.objects.create(user=self.test_user)
+        self.cart_item_data = {
+            'cart': self.cart.id,
+            'product': self.product.id, 
+            'quantity': 1
+        }
+        self.cart_item = CartItem.objects.create(
+            cart=self.cart,
+            product=self.product,
+            quantity=1
+        )
+        self.cart_list_url = reverse('cart-list')
+        self.cart_detail_url = reverse('cart-detail', kwargs={'pk': self.cart.id})
+        self.cart_item_list_url = reverse('cart-item-list')
+        self.cart_item_detail_url = reverse('cart-item-detail', kwargs={'pk': self.cart_item.pk})
+
+        # --- Favorite Blog Setup ---
+        self.favorite_blog_data = {
+            'user': self.test_user.id,
+            'blog_post': self.blog_post.id
+        }
+        self.favorite_blog = FavoriteBlog.objects.create(
+            user=self.second_user,
+            blog_post=self.blog_post
+        )
+        self.favorite_blog_list_url = reverse('favorite-blog-list')
+        self.favorite_blog_detail_url = reverse('favorite-blog-detail', kwargs={'pk': self.favorite_blog.pk})
+
+        # --- LogEntry Setup ---
+        from django.contrib.admin.models import LogEntry, ADDITION
+        from django.contrib.contenttypes.models import ContentType
+        content_type = ContentType.objects.get_for_model(BlogPost)
+        self.log_entry = LogEntry.objects.create(
+            user=self.test_user,
+            content_type=content_type,
+            object_id=self.blog_post.id,
+            object_repr=str(self.blog_post),
+            action_flag=ADDITION,
+            change_message='Test log entry'
+        )
+
+        # --- Logout Setup ---
+        self.logout_url = reverse('logout')
 
 
     def tearDown(self):

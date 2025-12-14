@@ -45,7 +45,8 @@ export const styles = StyleSheet.create({
   },
 
   profileTextContainer: {
-      flex: 1
+      flex: 1,
+      justifyContent: 'center'
   },
 
   profileName: {
@@ -91,6 +92,27 @@ export const styles = StyleSheet.create({
       color: "#000",
       fontSize: 10,
       textAlign: 'center'
+  },
+  
+  // Notification Bell Styles
+  notificationButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 40,
+    height: 40,
+    marginRight: 12,
+    borderRadius: 20,
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: '#FF3B30',
+    borderRadius: 8,
+    width: 8,
+    height: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   
   // Logout Button Styles

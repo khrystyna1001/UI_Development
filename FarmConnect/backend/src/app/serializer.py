@@ -11,12 +11,27 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ('email',)
 
 class UserRegisterSerializer(RegisterSerializer):
+    username = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+    password1 = serializers.CharField(required=True, write_only=True)
+    password2 = serializers.CharField(required=True, write_only=True) 
+
     def get_cleaned_data(self):
         return {
             'username': self.validated_data.get('username', ''),
             'password1': self.validated_data.get('password1', ''),
+            'password2': self.validated_data.get('password2', ''),
             'email': self.validated_data.get('email', ''),
         }
+    
+    def validate(self, data):
+        data = super().validate(data)
+        if data.get('password1') != data.get('password2'):
+             raise serializers.ValidationError({"password2": "The two password fields didn't match."})
+        return data
+
+    def save(self, request):
+        return super().save(request)
 
 
 # BlogPost

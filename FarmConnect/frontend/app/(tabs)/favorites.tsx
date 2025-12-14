@@ -5,7 +5,7 @@ import { SafeAreaView,
     FlatList, 
     Image, 
     TouchableOpacity } from "react-native";
-import { getFavoriteBlogs, removeFromFavorites } from "../../scripts/api";
+import { getFavorites, toggleFavorite } from "../../scripts/api";
 import { styles } from "../../styles/tabs/favorites";
 
 import NavigationFooter from '../../components/footer';
@@ -24,19 +24,22 @@ export default function Favorites() {
 
   const fetchFavorites = async () => {
     try {
-      const response = await getFavoriteBlogs();
+      const response = await getFavorites();
       setFavorites(response);
     } catch (error) {
       console.error("Error fetching favorites:", error);
     }
   };
 
-  const handleRemoveFavorite = async (blogId) => {
+  const handleRemoveFavorite = async (favoriteId) => {
     try {
-      await removeFromFavorites(blogId);
-      fetchFavorites(); // Refresh the list
+      const favorite = favorites.find(fav => fav.id === favoriteId);
+      if (favorite) {
+        await toggleFavorite(favorite.blog_post.id);
+        fetchFavorites(); 
+      }
     } catch (error) {
-      console.error("Error removing favorite:", error);
+    console.error("Error removing favorite:", error);
     }
   };
 
@@ -46,20 +49,16 @@ export default function Favorites() {
         onPress={() => router.push(`/blog/${item.blog_post.id}`)}
         style={styles.cardContent}
       >
-        <Image 
-          source={{ uri: item.blog_post.image || 'https://via.placeholder.com/100' }} 
-          style={styles.image}
-        />
         <View style={styles.textContainer}>
           <Text style={styles.title}>{item.blog_post.title}</Text>
-          <Text style={styles.author}>By {item.blog_post.author?.username}</Text>
+          <Text style={styles.author}>By {item.blog_post.author_info?.username}</Text>
         </View>
       </TouchableOpacity>
       <TouchableOpacity 
         onPress={() => handleRemoveFavorite(item.id)}
         style={styles.removeButton}
       >
-        <Text style={styles.removeButtonText}>Remove</Text>
+        <Text style={styles.removeButtonText}>Remove from favorites</Text>
       </TouchableOpacity>
     </View>
   );

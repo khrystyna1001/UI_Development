@@ -10,13 +10,9 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import action
 from django.db import transaction
 
-from app.models import BlogPost, Product, Farm, GalleryImage, Review, Message, User, Chat, FavoriteBlog, Cart
-from app.serializer import BlogPostSerializer, ProductSerializer, FarmSerializer, GalleryImageSerializer, ReviewSerializer, MessageSerializer, UserRegisterSerializer, UserSerializer, ChatSerializer, FavoriteBlogSerializer, CartSerializer
-
-import logging
-
-
-logger = logging.getLogger(__name__)
+from app.models import BlogPost, Product, Farm, GalleryImage, Review, Message, User, Chat, FavoriteBlog, Cart, CartItem
+from app.serializer import BlogPostSerializer, ProductSerializer, FarmSerializer, GalleryImageSerializer, ReviewSerializer, MessageSerializer, UserRegisterSerializer, UserSerializer, ChatSerializer, FavoriteBlogSerializer, CartSerializer, CartItemSerializer
+from app.logger import logger
 
 # Create your views here.
 
@@ -42,12 +38,14 @@ class MessageViewSet(ModelViewSet):
     queryset = Message.objects.all()
 
     def get_queryset(self):
+        logger.info(f"User {self.request.user.id} retrieved their messages")
         return Message.objects.filter(
             Q(chat__user1=self.request.user) | 
             Q(chat__user2=self.request.user)
         ).select_related('chat', 'sender').order_by('-updated_at')
 
     def perform_create(self, serializer):
+        logger.info(f"User {self.request.user.id} sent a message")
         chat_id = self.request.data.get('chat')
         chat = get_object_or_404(
             Chat.objects.filter(
@@ -62,6 +60,7 @@ class ChatViewSet(ModelViewSet):
     queryset = Chat.objects.all()
 
     def get_queryset(self):
+        logger.info(f"User {self.request.user.id} retrieved their chats")
         user = self.request.user
         return Chat.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-updated_at')
 
@@ -76,6 +75,7 @@ class ChatViewSet(ModelViewSet):
     )
 
     def create(self, request, *args, **kwargs):
+        logger.info(f"User {self.request.user.id} created a chat")
         user1 = request.user
         user2_id = request.data.get('user2')
 
@@ -126,6 +126,14 @@ class FarmViewSet(ModelViewSet):
     serializer_class = FarmSerializer
     queryset = Farm.objects.all()
 
+class CartItemViewSet(ModelViewSet):
+    serializer_class = CartItemSerializer
+    queryset = CartItem.objects.all()
+
+    @action(detail=False, methods=['post'], url_path='add')
+    def add(self, request):
+        logger.info(f"User {self.request.user.id} added a product to cart")
+
 class CartViewSet(ModelViewSet):
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated]
@@ -138,6 +146,7 @@ class CartViewSet(ModelViewSet):
         return cart
 
     def retrieve(self, request, *args, **kwargs):
+        logger.info(f"User {self.request.user.id} retrieved their cart")
         cart = self.get_object()
         serializer = self.get_serializer(cart)
         return Response(serializer.data)
@@ -188,6 +197,7 @@ class CartViewSet(ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='remove')
     def remove(self, request):
+        logger.info(f"User {self.request.user.id} removed a product from cart")
         product_id = request.data.get('product_id')
         
         if not product_id:
@@ -212,6 +222,7 @@ class CartViewSet(ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def checkout(self, request):
+        logger.info(f"User {self.request.user.id} checked out")
         cart = self.get_object()
         
         if not cart.items.exists():
@@ -241,19 +252,19 @@ class CartViewSet(ModelViewSet):
 class FavoriteBlogViewSet(ModelViewSet):
     serializer_class = FavoriteBlogSerializer
     permission_classes = [IsAuthenticated]
-    
-    http_method_names = ['get'] 
 
     def get_queryset(self):
-        return FavoriteBlog.objects.filter(user=self.request.user).select_related('blog')
-
+        return FavoriteBlog.objects.filter(user=self.request.user).select_related('blog_post')
 
     @action(detail=False, methods=['post'], url_path='toggle')
     def toggle(self, request):
         blog_post_id = request.data.get('blog_id')
         blog_post = get_object_or_404(BlogPost, id=blog_post_id)
+        logger.info(f"Toggling favorite for blog post {blog_post_id} by user {request.user.id}")
+
         
         if blog_post.author == request.user:
+            logger.info(f"User {request.user.id} cannot favorite their own blog post {blog_post_id}")
             return Response(
                 {"error": "You cannot favorite your own blog post"}, 
                 status=status.HTTP_400_BAD_REQUEST
@@ -266,17 +277,19 @@ class FavoriteBlogViewSet(ModelViewSet):
         
         if not created:
             favorite.delete()
+            logger.info(f"User {request.user.id} unfavorited blog post {blog_post_id}")
             return Response(
                 {"message": "Blog post removed from favorites"}, 
                 status=status.HTTP_200_OK
             )
             
         serializer = self.get_serializer(favorite)
+        logger.info(f"User {request.user.id} favorited blog post {blog_post_id}")
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class MyDataView(generics.RetrieveAPIView):
-    serializer_class = UserSerializer 
+    serializer_class = UserSerializer
 
     def get_object(self):
         return self.request.user

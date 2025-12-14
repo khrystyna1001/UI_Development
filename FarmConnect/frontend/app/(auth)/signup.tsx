@@ -1,8 +1,6 @@
 import { View,
     Text,
     TextInput,
-    TouchableOpacity,
-    SafeAreaView,
     KeyboardAvoidingView,
     Platform,
     Pressable,
@@ -48,7 +46,13 @@ export default function SignupScreen () {
     setIsLoading(true);
     setError('');
     try {
-      const data = await signup(username, email, password, confirmPassword);
+      const signUpData = {
+        username: username.toString(),
+        email: email.toString(),
+        password1: password.toString(),
+        password2: confirmPassword.toString(),
+      }
+      const data = await signup(signUpData);
       
       if (data.key) {
         router.replace('/login');
@@ -92,7 +96,6 @@ export default function SignupScreen () {
             placeholderTextColor="#999"
             value={email}
             onChangeText={setEmail}
-            secureTextEntry
           />
         </View>
 
