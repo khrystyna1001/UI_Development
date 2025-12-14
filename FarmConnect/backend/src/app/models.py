@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -34,6 +36,43 @@ class BlogPost(models.Model):
 
     def __str__(self):
         return self.title
+
+class FavoriteBlog(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorite_blogs',
+        help_text='The user who favorited the blog post.'
+    )
+    blog_post = models.ForeignKey(
+        'BlogPost',
+        on_delete=models.CASCADE,
+        related_name='favorited_by',
+        help_text='The blog post that was favorited.'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    class Meta:
+        unique_together = ('user', 'blog_post')
+        verbose_name = 'Favorite Blog'
+        verbose_name_plural = 'Favorite Blogs'
+        ordering = ['-created_at']
+    def clean(self):
+        """Validate that user is not favoriting their own blog post."""
+        if hasattr(self, 'blog_post') and self.blog_post.author == self.user:
+            raise ValidationError("You cannot favorite your own blog post.")
+    def save(self, *args, **kwargs):
+        """Override save to include validation."""
+        self.full_clean()
+        super().save(*args, **kwargs)
+    def __str__(self):
+        return f"{self.user.username} favorited '{self.blog_post.title}'"
+    @classmethod
+    def is_favorited_by_user(cls, blog_post, user):
+        """Check if a blog post is favorited by a specific user."""
+        if not user.is_authenticated:
+            return False
+        return cls.objects.filter(blog_post=blog_post, user=user).exists()
 
 # Farm
 class Farm(models.Model):
@@ -194,4 +233,105 @@ class GalleryImage(models.Model):
     
     def __str__(self):
         return self.title
+
+
+class Cart(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='cart',
+        help_text='The user who owns this cart.'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def total_price(self):
+        return sum(item.total_price for item in self.items.all())
+
+    @property
+    def item_count(self):
+        return self.items.count()
+
+    def __str__(self):
+        return f"Cart for {self.user.username} ({self.item_count} items)"
+
+    def add_item(self, product, quantity=1):
+        if product.author == self.user:
+            raise ValidationError("You cannot add your own product to cart")
         
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=self,
+            product=product,
+            defaults={'quantity': quantity}
+        )
+        
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
+        
+        return cart_item
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(
+        Cart,
+        on_delete=models.CASCADE,
+        related_name='items',
+    )
+    product = models.ForeignKey(
+        'Product',
+        on_delete=models.CASCADE,
+        related_name='cart_items',
+    )
+    quantity = models.PositiveIntegerField(
+        default=1,
+        validators=[MinValueValidator(1)],
+    )
+    added_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def total_price(self):
+        return self.product.price * self.quantity
+
+    def clean(self):
+        if not hasattr(self, 'product') or not self.product:
+            return
+        if self.quantity > self.product.quantity:
+            raise ValidationError(f'Only {self.product.quantity} items available in stock')
+        
+        if hasattr(self.cart, 'user') and self.product.author == self.cart.user:
+            raise ValidationError("You cannot add your own product to cart")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.quantity}x {self.product.name} in cart (${self.total_price})"
+
+
+class FavoriteBlog(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorite_blogs',
+    )
+    blog_post = models.ForeignKey(
+        'BlogPost',
+        on_delete=models.CASCADE,
+        related_name='favorited_by',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def clean(self):
+        if self.blog_post.author == self.user:
+            raise ValidationError("You cannot favorite your own blog post.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.user.username} favorited {self.blog_post.title}"

@@ -9,46 +9,88 @@ import {
     Alert
 } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
-import { getProduct, getMyData, deleteProduct } from '../../scripts/api';
+import { getProduct, getMyData, deleteProduct, getCart, addToCart, removeFromCart } from '../../scripts/api';
 
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
+
 import { UpdateButton } from '../../components/updateButton';
 import { DeleteButton } from '../../components/deleteButton';
 import ReviewSection from '../../components/reviewSection';
+
 import { styles } from '../../styles/tabs/product';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 
 export default function ProductDetail() {
   const { id } = useLocalSearchParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isInCart, setIsInCart] = useState(false);
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [user, setUser] = useState(null);
 
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const data = await getProduct(id);
-        setProduct(data);
-
-        const user = await getMyData();
-        setUser(user);
-
-      } catch (err) {
-        setError('Failed to fetch product');
-        console.error(err);
-        setLoading(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProduct();
+    checkIfInCart();
   }, [id]);
+
+  const fetchProduct = async () => {
+    try {
+      const data = await getProduct(id);
+      setProduct(data);
+
+      const user = await getMyData();
+      setUser(user);
+
+    } catch (err) {
+      setError('Failed to fetch product');
+      console.error(err);
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkIfInCart = async () => {
+    try {
+      const cart = await getCart();
+      const itemInCart = cart.items.some(item => item.product.id === parseInt(id));
+      setIsInCart(itemInCart);
+    } catch (error) {
+      console.error('Error checking cart:', error);
+    }
+  };
+
+  const handleCartAction = async () => {
+  try {
+    if (isInCart) {
+      const cart = await getCart();
+      const cartItem = cart.items.find(item => item.product.id === parseInt(id));
+      if (cartItem) {
+        await removeFromCart(cartItem.id);
+        Alert.alert('Success', 'Item removed from cart');
+      }
+    } else {
+      await addToCart({ 
+        product_id: parseInt(id), 
+        quantity: 1 
+      });
+      Alert.alert('Success', 'Item added to cart');
+    }
+    setIsInCart(!isInCart);
+  } catch (error) {
+      if (error.message.includes('Only')) {
+          Alert.alert('Out of Stock', error.message);
+      } else {
+          console.error('Error updating cart:', error);
+          Alert.alert('Error', error.message || 'Failed to update cart. Please try again.');
+      }
+  }
+};
 
   const deleteProductById = async (id) => {
       try {
@@ -181,7 +223,7 @@ export default function ProductDetail() {
             <Text style={styles.priceInfo}>${(product.price * quantity)?.toFixed(2) || '0.00'}</Text>
           </View>
 
-            <ReviewSection 
+          <ReviewSection 
             itemId={id} 
             itemType="product" 
             userId={user?.id || null} 
@@ -192,8 +234,25 @@ export default function ProductDetail() {
           {(user?.is_superuser || product?.author === user?.id) && (
             <View style={styles.actionButtonsContainer}>
               <UpdateButton item={product.name} onPress={() => router.push(`/products/create?id=${product?.id}`)} />
-              <DeleteButton item={product.name} onPress={() => deleteProduct(product?.id)} />
+              <DeleteButton item={product.name} onPress={() => deleteProductById(product?.id)} />
             </View>
+          )}
+
+          {user?.id !== product?.author && (
+            <TouchableOpacity 
+              style={[styles.cartButton, isInCart && styles.removeFromCartButton]}
+              onPress={handleCartAction}
+            >
+              <Ionicons 
+                name='cart'
+                size={24} 
+                color="white" 
+                style={styles.cartIcon} 
+              />
+              <Text style={styles.cartButtonText}>
+                {isInCart ? 'Remove from Cart' : 'Add to Cart'}
+              </Text>
+            </TouchableOpacity>
           )}
         </View>
       </View>

@@ -24,9 +24,6 @@ const ReviewSection = ({ itemId, itemType, userId, itemAuthorId }) => {
         }
         return false;
       });
-
-      console.log('All reviews:', allReviews);
-      console.log('Filtered reviews:', filteredReviews);
       setReviews(filteredReviews);
     } catch (error) {
       console.error('Error loading reviews:', error);

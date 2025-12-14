@@ -5,7 +5,7 @@ from faker import Faker
 from django.contrib.auth.models import User
 from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm, Chat
 from django.core.files.uploadedfile import SimpleUploadedFile
-from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.tokens import RefreshToken
 
 # Create your tests here.
 
@@ -29,11 +29,11 @@ class APITestCase(TestCase):
         )
 
         # --- INTIALIZE TOKENS ---
-        self.token1, created = Token.objects.get_or_create(user=self.test_user)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token1.key}')
+        self.token1 = RefreshToken.for_user(self.test_user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token1.access}')
 
-        self.token2, created = Token.objects.get_or_create(user=self.second_user)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token2.key}')
+        self.token2 = RefreshToken.for_user(self.second_user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token2.access}')
 
         # --- Farm Setup ---
         self.farm_data = {

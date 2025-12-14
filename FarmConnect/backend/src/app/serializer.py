@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm, Chat
+from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm, Chat, Cart, CartItem, FavoriteBlog
 from django.contrib.auth.models import User
 from dj_rest_auth.registration.serializers import RegisterSerializer
 
@@ -204,3 +204,54 @@ class GalleryImageSerializer(serializers.ModelSerializer):
             'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
+
+# Cart
+class CartItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(),
+        source='product',
+        write_only=True
+    )
+    
+    class Meta:
+        model = CartItem
+        fields = ['id', 'product', 'product_id', 'quantity', 'added_at', 'updated_at']
+        read_only_fields = ['added_at', 'updated_at']
+    
+    def create(self, validated_data):
+        cart = self.context['request'].user.cart
+        product = validated_data['product']
+        quantity = validated_data.get('quantity', 1)
+        
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product=product,
+            defaults={'quantity': quantity}
+        )
+        
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
+            
+        return cart_item
+
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, read_only=True)
+    total_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Cart
+        fields = ['id', 'user', 'items', 'total_price', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+# FavoriteBlog
+class FavoriteBlogSerializer(serializers.ModelSerializer):
+    blog_post = BlogPostSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = FavoriteBlog
+        fields = ['id', 'user', 'blog_post', 'created_at']
+        read_only_fields = ['id', 'created_at']

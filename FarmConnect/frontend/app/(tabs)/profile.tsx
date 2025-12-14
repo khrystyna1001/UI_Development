@@ -14,6 +14,8 @@ import NavigationHeader from '../../components/header';
 import { router } from 'expo-router';
 
 import { styles } from '../../styles/tabs/profile.jsx';
+import { Ionicons } from '@expo/vector-icons';
+
 
 export default function Profile () {
   const [blogPosts, setBlogPosts] = useState([]);
@@ -63,19 +65,18 @@ export default function Profile () {
     fetchBlogPosts();
     fetchUserData();
   }, []);
+
+  const navigateToFavorites = () => {
+    router.push('/(tabs)/favorites');
+  };
+  const navigateToCart = () => {
+    router.push('/(tabs)/cart');
+  };
 	
 	return (
 		<SafeAreaView style={styles.container}>
       {/* Header */}
       <NavigationHeader />
-      <View style={styles.detailsContainer}>
-          {/* Review Header (Author & Rating) */}
-          <View style={styles.detailsHeader}>
-              <Text style={styles.userName}>— {user?.username || 'Anonymous'}</Text>
-              <Text style={styles.userName}> {user?.is_superuser ? 'Organic Farmer' : 'User'} </Text>
-          </View>
-          <View style={styles.divider} />
-      </View>
 
         <ScrollView
           style={{
@@ -83,6 +84,28 @@ export default function Profile () {
             backgroundColor: "#FFFFFF",
             margin: 20
           }}>
+          <View style={styles.profileHeader}>
+            <Text style={styles.userName}>{user.username || 'User'}</Text>
+            <Text style={styles.userEmail}>{user.email || ''}</Text>
+          </View>
+          {/* Quick Actions */}
+          <View style={styles.quickActions}>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={navigateToFavorites}
+            >
+              <Ionicons name="heart" size={24} color="#e74c3c" />
+              <Text style={styles.actionText}>Favorites</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={navigateToCart}
+            >
+              <Ionicons name="cart" size={24} color="#2ecc71" />
+              <Text style={styles.actionText}>My Cart</Text>
+            </TouchableOpacity>
+          </View>
           <Text style={styles.sectionTitle}>Available Products</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
             {Array.isArray(products) && products.slice(0, 4).map((item, index) => (

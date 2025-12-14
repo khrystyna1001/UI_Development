@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from app.views import BlogPostViewSet, ProductViewSet, ReviewViewSet, MessageViewSet, GalleryViewSet, FarmViewSet, SignupView, MyDataView, LogoutView, UserViewSet, ChatViewSet 
+from app.views import BlogPostViewSet, ProductViewSet, ReviewViewSet, MessageViewSet, GalleryViewSet, FarmViewSet, SignupView, MyDataView, LogoutView, UserViewSet, ChatViewSet, CartViewSet, CartItemViewSet, FavoriteBlogViewSet
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import (
@@ -37,6 +37,9 @@ router.register(r'gallery', GalleryViewSet, basename='gallery')
 router.register(r'farms', FarmViewSet, basename='farms')
 router.register(r'users', UserViewSet, basename='users')
 router.register(r'chats', ChatViewSet, basename='chats')
+router.register(r'carts', CartViewSet, basename='cart')
+router.register(r'cart-items', CartItemViewSet, basename='cart-item')
+router.register(r'favorites', FavoriteBlogViewSet, basename='favorite-blog')
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('app/', include(router.urls)),
@@ -45,6 +48,7 @@ urlpatterns = [
     path('api/mydata/', MyDataView.as_view()),
     path('api/logout/', LogoutView.as_view()),
 
+    # API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

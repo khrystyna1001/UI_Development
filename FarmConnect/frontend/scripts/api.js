@@ -188,6 +188,17 @@ export const createMessage = async (data) => apiFetch(`/app/messages/`, { method
 export const updateMessage = async (id, data) => apiFetch(`/app/messages/${id}/`, { method: 'PUT', body: JSON.stringify(data) });
 export const deleteMessage = async (id) => apiFetch(`/app/messages/${id}/`, { method: 'DELETE' });
 
+// Favorite Blogs
+export const getFavoriteBlogs = async () => apiFetch(`/app/favorites/`);
+export const addToFavorites = async (data) => apiFetch(`/app/favorites/`, { method: 'POST', body: JSON.stringify(data) });
+export const removeFromFavorites = async (id) => apiFetch(`/app/favorites/${id}/`, { method: 'DELETE' });
+
+// Cart
+export const getCart = async () => apiFetch(`/app/carts/`);
+export const addToCart = async (data) => apiFetch(`/app/cart-items/`, { method: 'POST', body: JSON.stringify(data) });
+export const removeFromCart = async (id) => apiFetch(`/app/cart-items/${id}/`, { method: 'DELETE' });
+export const checkout = async () => apiFetch(`/app/carts/checkout/`, { method: 'POST' });
+
 // Authentication
 // Login
 export const login = async (username, password) => {

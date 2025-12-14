@@ -247,4 +247,25 @@ export const styles = StyleSheet.create({
     marginTop: 8,
     lineHeight: 18,
   },
+  cartButton: {
+    flexDirection: 'row',
+    backgroundColor: '#2ecc71',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  removeFromCartButton: {
+    backgroundColor: '#e74c3c',
+  },
+  cartButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  cartIcon: {
+    marginRight: 5,
+  },
 });

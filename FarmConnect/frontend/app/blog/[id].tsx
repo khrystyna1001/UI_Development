@@ -9,7 +9,7 @@ import {
     Alert
 } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
-import { getBlogPost, getMyData, deleteBlogPost } from '../../scripts/api';
+import { getBlogPost, getMyData, deleteBlogPost, getFavoriteBlogs, addToFavorites, removeFromFavorites } from '../../scripts/api';
 
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
@@ -26,28 +26,60 @@ export default function BlogDetail() {
   const [blog, setBlog] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-          const blogData = await getBlogPost(id);
-          setBlog(blogData);
-          
-          const userData = await getMyData();
-          setUser(userData);
-
-          console.log(blogData);
-      } catch (err) {
-          setError('Failed to load data');
-          console.error(err);
-      } finally {
-          setLoading(false);
-      }
-    };
-
     loadData();
+    checkIfFavorite();
   }, [id]);
+
+  const loadData = async () => {
+    try {
+        const blogData = await getBlogPost(id);
+        setBlog(blogData);
+        
+        const userData = await getMyData();
+        setUser(userData);
+
+        console.log(blogData);
+    } catch (err) {
+        setError('Failed to load data');
+        console.error(err);
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  const checkIfFavorite = async () => {
+    try {
+      const favorites = await getFavoriteBlogs();
+      const isFav = favorites.some(fav => fav.blog_post.id === parseInt(id));
+      setIsFavorite(isFav);
+    } catch (error) {
+      console.error("Error checking for favorites: ", error)
+    }
+  }
+
+  const handleFavoriteAction = async () => {
+    try {
+      if (isFavorite) {
+        const favorites = await getFavoriteBlogs();
+        const favorite = favorites.find(fav => fav.blog_post.id === parseInt(id));
+        if (favorite) {
+          await removeFromFavorites(favorite.id);
+          Alert.alert('Success', 'Removed from favorites');
+        }
+      } else {
+        await addToFavorites({ blog_post: id });
+        Alert.alert('Success', 'Added to favorites');
+      }
+      setIsFavorite(!isFavorite);
+    } catch (error) {
+      console.error('Error updating favorites:', error);
+      Alert.alert('Error', 'Failed to update favorites. Please try again.');
+    }
+  };
 
   const deleteBlog = async (id) => {
     try {
@@ -127,7 +159,14 @@ export default function BlogDetail() {
               {new Date(blog.updated_at || blog.created_at).toLocaleDateString()}
             </Text>
           </View>
-          
+          {/* Review Section */}
+          <ReviewSection 
+            itemId={id} 
+            itemType="blog" 
+            userId={user?.id || null}
+            itemAuthorId={blog?.author || null}
+          />
+
           {/* Edit button - only for the author */}
           {(blog.author === user?.id || user?.is_superuser) && (
             <View style={styles.actionButtonsContainer}>
@@ -136,23 +175,23 @@ export default function BlogDetail() {
             </View>
           )}
 
-          {/* Message button - only for non-authors */}
+          {/* Message and favorite button - only for non-authors */}
           {(blog.author !== user?.id || user?.is_superuser) && (
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.messageButton]} 
-              onPress={() => router.replace('/(tabs)/messages')}
-            >
-              <Text style={styles.actionButtonText}>Message Author</Text>
-            </TouchableOpacity>
+            <React.Fragment>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.messageButton]} 
+                onPress={() => router.replace('/(tabs)/messages')}
+              >
+                <Text style={styles.actionButtonText}>Message Author</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={handleFavoriteAction}
+              >
+                <Text style={styles.actionButtonText}>{isFavorite ? 'Remove From Favorites': 'Add to Favorites'}</Text>
+              </TouchableOpacity>
+            </React.Fragment>
           )}
-
-          {/* Review Section */}
-          <ReviewSection 
-            itemId={id} 
-            itemType="blog" 
-            userId={user?.id || null}
-            itemAuthorId={blog?.author || null}
-          />
         </View>
       </View>
     </ScrollView>

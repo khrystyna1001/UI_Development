@@ -1,15 +1,17 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.db.models import Q
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
+from rest_framework.decorators import action
+from django.db import transaction
 
-from app.models import BlogPost, Product, Farm, GalleryImage, Review, Message, User, Chat
-from app.serializer import BlogPostSerializer, ProductSerializer, FarmSerializer, GalleryImageSerializer, ReviewSerializer, MessageSerializer, UserRegisterSerializer, UserSerializer, ChatSerializer
+from app.models import BlogPost, Product, Farm, GalleryImage, Review, Message, User, Chat, FavoriteBlog, Cart, CartItem
+from app.serializer import BlogPostSerializer, ProductSerializer, FarmSerializer, GalleryImageSerializer, ReviewSerializer, MessageSerializer, UserRegisterSerializer, UserSerializer, ChatSerializer, FavoriteBlogSerializer, CartSerializer, CartItemSerializer
 
 import logging
 
@@ -123,6 +125,137 @@ class GalleryViewSet(ModelViewSet):
 class FarmViewSet(ModelViewSet):
     serializer_class = FarmSerializer
     queryset = Farm.objects.all()
+
+class CartViewSet(ModelViewSet):
+    serializer_class = CartSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Cart.objects.prefetch_related('items__product').filter(user=self.request.user)
+
+    def get_object(self):
+        cart, _ = Cart.objects.get_or_create(user=self.request.user)
+        return cart
+
+    @action(detail=True, methods=['post'])
+    def add_item(self, request, pk=None):
+        cart = self.get_object()
+        product_id = request.data.get('product_id')
+        quantity = int(request.data.get('quantity', 1))
+
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response(
+                {"error": "Product not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if product.author == request.user:
+            return Response(
+                {"error": "You cannot add your own product to cart"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if product.quantity < quantity:
+            return Response(
+                {"error": "Not enough stock available"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product=product,
+            defaults={'quantity': quantity}
+        )
+
+        if not created:
+            cart_item.quantity += quantity
+            if cart_item.quantity > product.quantity:
+                return Response(
+                    {"error": "Adding this quantity would exceed available stock"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            cart_item.save()
+
+        serializer = CartItemSerializer(cart_item)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'])
+    def checkout(self, request, pk=None):
+        cart = self.get_object()
+        
+        with transaction.atomic():
+            for item in cart.items.all():
+                if item.quantity > item.product.quantity:
+                    return Response(
+                        {"error": f"Not enough stock for {item.product.name}"}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            for item in cart.items.all():
+                item.product.quantity -= item.quantity
+                item.product.save()
+            
+            cart.items.all().delete()
+        
+        return Response({"message": "Checkout successful"}, status=status.HTTP_200_OK)
+
+
+class CartItemViewSet(ModelViewSet):
+    serializer_class = CartItemSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return CartItem.objects.filter(cart__user=self.request.user)
+
+    def perform_destroy(self, instance):
+        if instance.cart.user != self.request.user:
+            logger.error("You don't have permission to delete this item.")
+        instance.delete()
+
+
+class FavoriteBlogViewSet(ModelViewSet):
+    serializer_class = FavoriteBlogSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return FavoriteBlog.objects.filter(user=self.request.user).select_related('blog_post')
+
+    def create(self, request, *args, **kwargs):
+        blog_post_id = request.data.get('blog_post')
+        blog_post = get_object_or_404(BlogPost, id=blog_post_id)
+        
+        if blog_post.author == request.user:
+            return Response(
+                {"error": "You cannot favorite your own blog post"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        favorite, created = FavoriteBlog.objects.get_or_create(
+            user=request.user,
+            blog_post=blog_post
+        )
+        
+        if not created:
+            return Response(
+                {"message": "Blog post already in favorites"}, 
+                status=status.HTTP_200_OK
+            )
+            
+        serializer = self.get_serializer(favorite)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, *args, **kwargs):
+        blog_post_id = kwargs.get('pk')
+        favorite = get_object_or_404(
+            FavoriteBlog, 
+            user=request.user, 
+            blog_post_id=blog_post_id
+        )
+        self.perform_destroy(favorite)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class MyDataView(generics.RetrieveAPIView):
     serializer_class = UserSerializer 

@@ -14,6 +14,56 @@ export const styles = StyleSheet.create({
     marginTop: 16,
   },
 
+  // --- Profile ---
+  profileHeader: {
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 10,
+  },
+  userName: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    marginBottom: 5,
+  },
+  userEmail: {
+    fontSize: 16,
+    color: '#7f8c8d',
+  },
+  quickActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 15,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  actionButton: {
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: '#f8f9fa',
+    width: '45%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  actionText: {
+    marginTop: 5,
+    fontSize: 14,
+    color: '#2c3e50',
+  },
+
   // --- Product List ---
   horizontalScroll: {
     flexDirection: "row",
