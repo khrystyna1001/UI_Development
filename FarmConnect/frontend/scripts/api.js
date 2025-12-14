@@ -189,14 +189,28 @@ export const updateMessage = async (id, data) => apiFetch(`/app/messages/${id}/`
 export const deleteMessage = async (id) => apiFetch(`/app/messages/${id}/`, { method: 'DELETE' });
 
 // Favorite Blogs
-export const getFavoriteBlogs = async () => apiFetch(`/app/favorites/`);
-export const addToFavorites = async (data) => apiFetch(`/app/favorites/`, { method: 'POST', body: JSON.stringify(data) });
-export const removeFromFavorites = async (id) => apiFetch(`/app/favorites/${id}/`, { method: 'DELETE' });
+export const getFavorites = async () => apiFetch(`/app/favorites/`);
+export const toggleFavorite = async (blog_id) => {
+    return apiFetch(`/app/favorites/toggle/`, { 
+        method: 'POST',
+        body: JSON.stringify({ blog_id })
+    });
+};
 
 // Cart
 export const getCart = async () => apiFetch(`/app/carts/`);
-export const addToCart = async (data) => apiFetch(`/app/cart-items/`, { method: 'POST', body: JSON.stringify(data) });
-export const removeFromCart = async (id) => apiFetch(`/app/cart-items/${id}/`, { method: 'DELETE' });
+export const addToCart = async (product_id, quantity = 1) => {
+    return apiFetch(`/app/carts/add/`, {
+        method: 'POST',
+        body: JSON.stringify({ product_id, quantity })
+    });
+};
+export const removeFromCart = async (product_id) => {
+    return apiFetch(`/app/carts/remove/`, { 
+        method: 'POST',
+        body: JSON.stringify({ product_id }) 
+    });
+};
 export const checkout = async () => apiFetch(`/app/carts/checkout/`, { method: 'POST' });
 
 // Authentication

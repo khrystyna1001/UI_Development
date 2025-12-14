@@ -58,7 +58,9 @@ export default function ProductDetail() {
   const checkIfInCart = async () => {
     try {
       const cart = await getCart();
-      const itemInCart = cart.items.some(item => item.product.id === parseInt(id));
+      const cartItems = cart?.items || []; 
+      
+      const itemInCart = cartItems.some(item => item.product.id === parseInt(id));
       setIsInCart(itemInCart);
     } catch (error) {
       console.error('Error checking cart:', error);
@@ -66,31 +68,39 @@ export default function ProductDetail() {
   };
 
   const handleCartAction = async () => {
-  try {
-    if (isInCart) {
-      const cart = await getCart();
-      const cartItem = cart.items.find(item => item.product.id === parseInt(id));
-      if (cartItem) {
-        await removeFromCart(cartItem.id);
-        Alert.alert('Success', 'Item removed from cart');
+    try {
+      const productId = parseInt(id);
+      
+      if (user?.id === product?.author) {
+          Alert.alert('Error', 'You cannot purchase your own product.');
+          return; 
       }
-    } else {
-      await addToCart({ 
-        product_id: parseInt(id), 
-        quantity: 1 
-      });
-      Alert.alert('Success', 'Item added to cart');
-    }
-    setIsInCart(!isInCart);
-  } catch (error) {
-      if (error.message.includes('Only')) {
-          Alert.alert('Out of Stock', error.message);
+
+      if (isInCart) {
+        await removeFromCart(productId);
+        Alert.alert('Success', 'Item removed from cart.');
+        
       } else {
-          console.error('Error updating cart:', error);
-          Alert.alert('Error', error.message || 'Failed to update cart. Please try again.');
+        await addToCart(productId, quantity);
+        Alert.alert('Success', `${quantity}x ${product.name} added to cart!`);
       }
-  }
-};
+      
+      setIsInCart(prev => !prev);
+      await checkIfInCart(); 
+      
+    } catch (error) {
+        let errorMessage = error.message || 'Failed to update cart. Please try again.';
+        
+        if (errorMessage.includes("You cannot add your own product")) {
+            errorMessage = "You cannot purchase your own product.";
+        } else if (errorMessage.includes("Insufficient stock")) {
+            errorMessage = "There is not enough stock for your requested quantity.";
+        }
+        
+        console.error('Error updating cart:', error);
+        Alert.alert('Error', errorMessage);
+    }
+  };
 
   const deleteProductById = async (id) => {
       try {

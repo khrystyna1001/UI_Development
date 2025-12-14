@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { SafeAreaView, 
     View, 
     Text, 
-    FlatList, 
     Image, 
     TouchableOpacity, 
-    ActivityIndicator 
+    ActivityIndicator,
+    ScrollView
 } from "react-native";
 
-import { getCart, removeFromCart, checkout } from "../../scripts/api";
+import { getCart, removeFromCart, checkout, getMyData } from "../../scripts/api";
 import { router } from 'expo-router';
 
 import { styles } from "../../styles/tabs/cart";
@@ -21,16 +21,47 @@ import NavigationHeader from '../../components/header';
 
 export default function Cart() {
   const [cart, setCart] = useState({ items: [], total: 0 });
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+
   useEffect(() => {
-    fetchCart();
+    const fetchMyData = async () => {
+      try {
+        const response = await getMyData();
+        setUser(response)
+      } catch (error) {
+        console.error("Error fetching my data", error)
+      }
+    }
+    fetchMyData();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchCart();
+    }
+  }, [user]);
+
   const fetchCart = async () => {
     try {
       setLoading(true);
-      const response = await getCart();
-      setCart(response || { items: [], total: 0 });
+      const response = await getCart(); 
+      
+      const singleCart = (Array.isArray(response) && response.length > 0) 
+                         ? response[0] 
+                         : null;
+                         
+      if (singleCart) {
+          const normalizedCart = {
+              ...singleCart,
+              total: parseFloat(singleCart.total_price) || 0,
+          };
+          setCart(normalizedCart);
+          console.log("Cart fetched:", normalizedCart);
+      } else {
+          setCart({ items: [], total: 0 }); 
+      }
     } catch (error) {
       console.error("Error fetching cart:", error);
       setCart({ items: [], total: 0 });
@@ -38,14 +69,16 @@ export default function Cart() {
       setLoading(false);
     }
   };
-  const handleRemoveItem = async (itemId) => {
+
+  const handleRemoveItem = async (productId) => {
     try {
-      await removeFromCart(itemId);
+      await removeFromCart(productId);
       fetchCart();
     } catch (error) {
       console.error("Error removing item:", error);
     }
   };
+
   const handleCheckout = async () => {
     setCheckoutLoading(true);
     try {
@@ -59,25 +92,27 @@ export default function Cart() {
       setCheckoutLoading(false);
     }
   };
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <Image 
-        source={{ uri: item.product?.image || 'https://via.placeholder.com/80' }} 
-        style={styles.image}
-      />
+
+  const renderItem = (i) => { 
+    if (!i || !i.product) return null;
+
+    return (
+    <View key={i.id.toString()} style={styles.card}>
       <View style={styles.itemDetails}>
-        <Text style={styles.name}>{item.product?.name || 'Product'}</Text>
-        <Text style={styles.price}>${item.product?.price || 0} x {item.quantity}</Text>
-        <Text style={styles.total}>${((item.product?.price || 0) * item.quantity).toFixed(2)}</Text>
+        <Text style={styles.name}>{i.product?.name || 'Product'}</Text>
+        <Text style={styles.price}>${i.product?.price || 0} x {i.quantity}</Text>
+        <Text style={styles.total}>${((i.product?.price || 0) * i.quantity).toFixed(2)}</Text>
       </View>
       <TouchableOpacity 
-        onPress={() => handleRemoveItem(item.id)}
+        onPress={() => handleRemoveItem(i.product?.id)}
         style={styles.removeButton}
       >
         <Text style={styles.removeButtonText}>×</Text>
       </TouchableOpacity>
     </View>
-  );
+    );
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={[styles.container, styles.loadingContainer]}>
@@ -85,41 +120,48 @@ export default function Cart() {
       </SafeAreaView>
     );
   }
+
   return (
     <SafeAreaView style={styles.container}>
-        <NavigationHeader />
-        <TouchableOpacity onPress={() => router.back() || router.replace('/(tabs)/profile')} style={styles.backButton}>
-            <Icon name="arrow-back" size={24} color="#333" />
-            <Text style={styles.backButtonText}>Back</Text>
+      <NavigationHeader />
+      
+      <ScrollView style={styles.mainContentArea}>
+        <TouchableOpacity 
+          onPress={() => router.back() || router.replace('/(tabs)/profile')} 
+          style={styles.backButton}
+        >
+          <Icon name="arrow-back" size={24} color="#333" />
+          <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
-      <Text style={styles.header}>My Cart</Text>
-      {cart?.items?.length > 0 ? (
-        <>
-          <FlatList
-            data={cart.items}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id.toString()}
-            contentContainerStyle={styles.list}
-          />
-          <View style={styles.summary}>
-            <Text style={styles.total}>Total: ${cart.total?.toFixed(2) || '0.00'}</Text>
-            <TouchableOpacity 
-              style={[styles.checkoutButton, checkoutLoading && styles.disabledButton]}
-              onPress={handleCheckout}
-              disabled={checkoutLoading}
-            >
-              <Text style={styles.checkoutButtonText}>
-                {checkoutLoading ? "Processing..." : "Proceed to Checkout"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      ) : (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="cart-outline" size={64} color="#bdc3c7" />
-          <Text style={styles.emptyText}>Your cart is empty</Text>
+        
+        <View style={styles.content}>
+          <Text style={styles.header}>My Cart</Text>
+          {cart?.items?.length > 0 ? (
+            cart.items.map((item) => renderItem(item)) 
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="cart-outline" size={64} color="#bdc3c7" />
+              <Text style={styles.emptyText}>Your cart is empty</Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+      
+      {cart?.items?.length > 0 && (
+        <View style={styles.summaryFixed}>
+          <Text style={styles.totalSummary}>Total: ${cart.total?.toFixed(2) || '0.00'}</Text>
+          <TouchableOpacity 
+            style={[styles.checkoutButton, checkoutLoading && styles.disabledButton]}
+            onPress={handleCheckout}
+            disabled={checkoutLoading}
+          >
+            <Text style={styles.checkoutButtonText}>
+              {checkoutLoading ? "Processing..." : "Proceed to Checkout"}
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
+      
       <NavigationFooter />
     </SafeAreaView>
   );

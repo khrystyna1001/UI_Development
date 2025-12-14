@@ -38,41 +38,37 @@ class BlogPost(models.Model):
         return self.title
 
 class FavoriteBlog(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='favorite_blogs',
-        help_text='The user who favorited the blog post.'
-    )
-    blog_post = models.ForeignKey(
-        'BlogPost',
-        on_delete=models.CASCADE,
-        related_name='favorited_by',
-        help_text='The blog post that was favorited.'
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
+    blog_post = models.ForeignKey(BlogPost, on_delete=models.CASCADE)
+    favorited_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
-        unique_together = ('user', 'blog_post')
-        verbose_name = 'Favorite Blog'
-        verbose_name_plural = 'Favorite Blogs'
-        ordering = ['-created_at']
-    def clean(self):
-        """Validate that user is not favoriting their own blog post."""
-        if hasattr(self, 'blog_post') and self.blog_post.author == self.user:
-            raise ValidationError("You cannot favorite your own blog post.")
-    def save(self, *args, **kwargs):
-        """Override save to include validation."""
-        self.full_clean()
-        super().save(*args, **kwargs)
+        unique_together = ('user', 'blog_post') 
+
+    def toggle_favorite(request, blog_id):
+        blog = BlogPost.objects.get(id=blog_id)
+        user = request.user
+
+        if blog.author == user:
+            return {'error': "You cannot favorite your own blog."}, 403
+
+        favorite, created = FavoriteBlog.objects.get_or_create(user=user, blog_post=blog)
+        
+        if not created:
+            favorite.delete()
+            return {'success': 'Blog removed from favorites.'}
+        else:
+            return {'success': 'Blog added to favorites.'}
+
+    def view_favorites(request):
+        user = request.user
+        
+        favorited_blogs = BlogPost.objects.filter(favorite__user=user).order_by('-favorite__favorited_at')
+
+        return {'blogs': [blog.title for blog in favorited_blogs]}
+
     def __str__(self):
-        return f"{self.user.username} favorited '{self.blog_post.title}'"
-    @classmethod
-    def is_favorited_by_user(cls, blog_post, user):
-        """Check if a blog post is favorited by a specific user."""
-        if not user.is_authenticated:
-            return False
-        return cls.objects.filter(blog_post=blog_post, user=user).exists()
+        return f"{self.user.username} favorited {self.blog_post.title}"
 
 # Farm
 class Farm(models.Model):
@@ -256,21 +252,60 @@ class Cart(models.Model):
     def __str__(self):
         return f"Cart for {self.user.username} ({self.item_count} items)"
 
-    def add_item(self, product, quantity=1):
-        if product.author == self.user:
-            raise ValidationError("You cannot add your own product to cart")
+    def add_to_cart(request, product_id):
+        product = Product.objects.get(id=product_id)
+        user = request.user
+
+        if product.owner == user:
+            return {'error': "You cannot add your own product to the cart."}, 403
         
-        cart_item, created = CartItem.objects.get_or_create(
-            cart=self,
-            product=product,
-            defaults={'quantity': quantity}
-        )
-        
-        if not created:
-            cart_item.quantity += quantity
+        try:
+            cart_item = CartItem.objects.get(user=user, product=product)
+            cart_item.quantity += 1
             cart_item.save()
+        except CartItem.DoesNotExist:
+            CartItem.objects.create(user=user, product=product, quantity=1)
+
+        return {'success': 'Product added to cart.'}
+    
+    def remove_from_cart(request, product_id):
+        user = request.user
         
-        return cart_item
+        CartItem.objects.filter(user=user, product_id=product_id).delete()
+
+        return {'success': 'Product removed from cart.'}
+
+    def make_purchase(request):
+        user = request.user
+        cart_items = CartItem.objects.filter(user=user).select_related('product')
+        
+        if not cart_items.exists():
+            return {'error': 'Your cart is empty.'}, 400
+
+        products_to_update = []
+        
+        try:
+            for item in cart_items:
+                product = item.product
+                
+                if product.owner == user:
+                    raise Exception(f"Product ID {product.id} is owned by user and cannot be purchased.")
+
+                if product.quantity < item.quantity:
+                    raise Exception(f"Insufficient stock for {product.name}. Only {product.quantity} remaining.")
+
+                product.quantity -= item.quantity
+                products_to_update.append(product)
+
+            for product in products_to_update:
+                product.save()
+
+            cart_items.delete()
+            
+            return {'success': 'Purchase complete!'}, 200
+
+        except Exception as e:
+            return {'error': f'Purchase failed: {str(e)}'}, 500
 
 
 class CartItem(models.Model):
@@ -294,19 +329,6 @@ class CartItem(models.Model):
     @property
     def total_price(self):
         return self.product.price * self.quantity
-
-    def clean(self):
-        if not hasattr(self, 'product') or not self.product:
-            return
-        if self.quantity > self.product.quantity:
-            raise ValidationError(f'Only {self.product.quantity} items available in stock')
-        
-        if hasattr(self.cart, 'user') and self.product.author == self.cart.user:
-            raise ValidationError("You cannot add your own product to cart")
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.quantity}x {self.product.name} in cart (${self.total_price})"

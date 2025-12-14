@@ -10,8 +10,8 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import action
 from django.db import transaction
 
-from app.models import BlogPost, Product, Farm, GalleryImage, Review, Message, User, Chat, FavoriteBlog, Cart, CartItem
-from app.serializer import BlogPostSerializer, ProductSerializer, FarmSerializer, GalleryImageSerializer, ReviewSerializer, MessageSerializer, UserRegisterSerializer, UserSerializer, ChatSerializer, FavoriteBlogSerializer, CartSerializer, CartItemSerializer
+from app.models import BlogPost, Product, Farm, GalleryImage, Review, Message, User, Chat, FavoriteBlog, Cart
+from app.serializer import BlogPostSerializer, ProductSerializer, FarmSerializer, GalleryImageSerializer, ReviewSerializer, MessageSerializer, UserRegisterSerializer, UserSerializer, ChatSerializer, FavoriteBlogSerializer, CartSerializer
 
 import logging
 
@@ -137,8 +137,13 @@ class CartViewSet(ModelViewSet):
         cart, _ = Cart.objects.get_or_create(user=self.request.user)
         return cart
 
-    @action(detail=True, methods=['post'])
-    def add_item(self, request, pk=None):
+    def retrieve(self, request, *args, **kwargs):
+        cart = self.get_object()
+        serializer = self.get_serializer(cart)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'], url_path='add')
+    def add(self, request):
         cart = self.get_object()
         product_id = request.data.get('product_id')
         quantity = int(request.data.get('quantity', 1))
@@ -159,7 +164,7 @@ class CartViewSet(ModelViewSet):
 
         if product.quantity < quantity:
             return Response(
-                {"error": "Not enough stock available"}, 
+                {"error": f"Not enough stock available. Only {product.quantity} remaining."}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -172,7 +177,7 @@ class CartViewSet(ModelViewSet):
         if not created:
             cart_item.quantity += quantity
             if cart_item.quantity > product.quantity:
-                return Response(
+                 return Response(
                     {"error": "Adding this quantity would exceed available stock"}, 
                     status=status.HTTP_400_BAD_REQUEST
                 )
@@ -181,15 +186,47 @@ class CartViewSet(ModelViewSet):
         serializer = CartItemSerializer(cart_item)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=['post'])
-    def checkout(self, request, pk=None):
+    @action(detail=False, methods=['post'], url_path='remove')
+    def remove(self, request):
+        product_id = request.data.get('product_id')
+        
+        if not product_id:
+            return Response(
+                {"error": "product_id is required"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        deleted_count, _ = CartItem.objects.filter(
+            cart__user=request.user, 
+            product_id=product_id
+        ).delete()
+        
+        if deleted_count == 0:
+            return Response(
+                {"error": "Product not found in cart"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+            
+        return Response({"message": "Item removed from cart"}, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['post'])
+    def checkout(self, request):
         cart = self.get_object()
         
+        if not cart.items.exists():
+            return Response({"error": "Cart is empty"}, status=status.HTTP_400_BAD_REQUEST)
+            
         with transaction.atomic():
-            for item in cart.items.all():
-                if item.quantity > item.product.quantity:
+            for item in cart.items.select_related('product', 'product__author'):
+                product = item.product
+                
+                if product.author == request.user:
+                     raise Exception(f"Product ID {product.id} is owned by user and cannot be purchased.")
+
+                if item.quantity > product.quantity:
                     return Response(
-                        {"error": f"Not enough stock for {item.product.name}"}, 
+                        {"error": f"Not enough stock for {product.name} (only {product.quantity} available)"}, 
                         status=status.HTTP_400_BAD_REQUEST
                     )
             
@@ -199,31 +236,21 @@ class CartViewSet(ModelViewSet):
             
             cart.items.all().delete()
         
-        return Response({"message": "Checkout successful"}, status=status.HTTP_200_OK)
-
-
-class CartItemViewSet(ModelViewSet):
-    serializer_class = CartItemSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return CartItem.objects.filter(cart__user=self.request.user)
-
-    def perform_destroy(self, instance):
-        if instance.cart.user != self.request.user:
-            logger.error("You don't have permission to delete this item.")
-        instance.delete()
-
+        return Response({"message": "Checkout successful. Products purchased and quantity updated."}, status=status.HTTP_200_OK)
 
 class FavoriteBlogViewSet(ModelViewSet):
     serializer_class = FavoriteBlogSerializer
     permission_classes = [IsAuthenticated]
+    
+    http_method_names = ['get'] 
 
     def get_queryset(self):
-        return FavoriteBlog.objects.filter(user=self.request.user).select_related('blog_post')
+        return FavoriteBlog.objects.filter(user=self.request.user).select_related('blog')
 
-    def create(self, request, *args, **kwargs):
-        blog_post_id = request.data.get('blog_post')
+
+    @action(detail=False, methods=['post'], url_path='toggle')
+    def toggle(self, request):
+        blog_post_id = request.data.get('blog_id')
         blog_post = get_object_or_404(BlogPost, id=blog_post_id)
         
         if blog_post.author == request.user:
@@ -238,23 +265,14 @@ class FavoriteBlogViewSet(ModelViewSet):
         )
         
         if not created:
+            favorite.delete()
             return Response(
-                {"message": "Blog post already in favorites"}, 
+                {"message": "Blog post removed from favorites"}, 
                 status=status.HTTP_200_OK
             )
             
         serializer = self.get_serializer(favorite)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def destroy(self, request, *args, **kwargs):
-        blog_post_id = kwargs.get('pk')
-        favorite = get_object_or_404(
-            FavoriteBlog, 
-            user=request.user, 
-            blog_post_id=blog_post_id
-        )
-        self.perform_destroy(favorite)
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class MyDataView(generics.RetrieveAPIView):

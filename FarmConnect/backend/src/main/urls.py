@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from app.views import BlogPostViewSet, ProductViewSet, ReviewViewSet, MessageViewSet, GalleryViewSet, FarmViewSet, SignupView, MyDataView, LogoutView, UserViewSet, ChatViewSet, CartViewSet, CartItemViewSet, FavoriteBlogViewSet
+from app.views import BlogPostViewSet, ProductViewSet, ReviewViewSet, MessageViewSet, GalleryViewSet, FarmViewSet, SignupView, MyDataView, LogoutView, UserViewSet, ChatViewSet, CartViewSet, FavoriteBlogViewSet
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import (
@@ -38,7 +38,6 @@ router.register(r'farms', FarmViewSet, basename='farms')
 router.register(r'users', UserViewSet, basename='users')
 router.register(r'chats', ChatViewSet, basename='chats')
 router.register(r'carts', CartViewSet, basename='cart')
-router.register(r'cart-items', CartItemViewSet, basename='cart-item')
 router.register(r'favorites', FavoriteBlogViewSet, basename='favorite-blog')
 urlpatterns = [
     path("admin/", admin.site.urls),

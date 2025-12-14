@@ -4,7 +4,10 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
-    padding: 16,
+  },
+  mainContentArea: {
+    flex: 1,
+    paddingHorizontal: 16,
   },
   backButton: {
     flexDirection: 'row',
@@ -14,7 +17,6 @@ export const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     borderRadius: 8,
     alignSelf: 'flex-start',
-    marginLeft: 16,
   },
   backButtonText: {
     marginLeft: 5,
@@ -22,14 +24,13 @@ export const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '500',
   },
+  content: {
+  },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
     color: '#2c3e50',
-  },
-  list: {
-    paddingBottom: 100,
   },
   card: {
     backgroundColor: 'white',
@@ -77,15 +78,19 @@ export const styles = StyleSheet.create({
     color: '#e74c3c',
     fontWeight: 'bold',
   },
-  summary: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+  summaryFixed: {
     backgroundColor: 'white',
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: '#ecf0f1',
+    width: '100%',
+  },
+  totalSummary: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    textAlign: 'right',
+    marginBottom: 10,
   },
   checkoutButton: {
     backgroundColor: '#2ecc71',
@@ -99,13 +104,22 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+  disabledButton: {
+    backgroundColor: '#95a5a6',
+  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 50,
   },
   emptyText: {
     fontSize: 16,
     color: '#7f8c8d',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
