@@ -70,6 +70,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
 
+    'django_celery_results',
+
 ]
 
 MIDDLEWARE = [
@@ -232,6 +234,9 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 30.0,
     },
 }
+
+CELERY_RESULT_BACKEND = 'django-cache'
+CELERY_CACHE_BACKEND = 'default'
 
 CACHES = {
     'default': {

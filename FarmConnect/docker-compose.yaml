@@ -98,7 +98,7 @@ services:
       timeout: 10s
       retries: 3
     labels:
-      - traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.localhost`)"
+      - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.localhost`)"
   valkey:
     image: valkey/valkey:7.2
     command: valkey-server --save 60 1 --loglevel notice
