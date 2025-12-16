@@ -12,7 +12,7 @@ from django.db import transaction
 
 from app.models import BlogPost, Product, Farm, GalleryImage, Review, Message, User, Chat, FavoriteBlog, Cart, CartItem
 from app.serializer import BlogPostSerializer, ProductSerializer, FarmSerializer, GalleryImageSerializer, ReviewSerializer, MessageSerializer, UserRegisterSerializer, UserSerializer, ChatSerializer, FavoriteBlogSerializer, CartSerializer, CartItemSerializer
-from app.logger import logger
+from app.tasks import send_notification, process_heavy_data
 
 # Create your views here.
 
@@ -38,14 +38,12 @@ class MessageViewSet(ModelViewSet):
     queryset = Message.objects.all()
 
     def get_queryset(self):
-        logger.info(f"User {self.request.user.id} retrieved their messages")
         return Message.objects.filter(
             Q(chat__user1=self.request.user) | 
             Q(chat__user2=self.request.user)
         ).select_related('chat', 'sender').order_by('-updated_at')
 
     def perform_create(self, serializer):
-        logger.info(f"User {self.request.user.id} sent a message")
         chat_id = self.request.data.get('chat')
         chat = get_object_or_404(
             Chat.objects.filter(
@@ -53,14 +51,18 @@ class MessageViewSet(ModelViewSet):
                 id=chat_id
             )
         )
-        serializer.save(sender=self.request.user, chat=chat)
+        message_instance = serializer.save(sender=self.request.user, chat=chat)
+        recipient = chat.user2 if chat.user1 == self.request.user else chat.user1
+        send_notification.apply_async(
+            args=[recipient.id, f"You have a new message from {self.request.user.username} in chat {chat.id}: '{message_instance.content[:30]}...'"],
+            queue='short'
+        )
 
 class ChatViewSet(ModelViewSet):
     serializer_class = ChatSerializer
     queryset = Chat.objects.all()
 
     def get_queryset(self):
-        logger.info(f"User {self.request.user.id} retrieved their chats")
         user = self.request.user
         return Chat.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-updated_at')
 
@@ -75,7 +77,6 @@ class ChatViewSet(ModelViewSet):
     )
 
     def create(self, request, *args, **kwargs):
-        logger.info(f"User {self.request.user.id} created a chat")
         user1 = request.user
         user2_id = request.data.get('user2')
 
@@ -115,6 +116,12 @@ class ChatViewSet(ModelViewSet):
             user2=User.objects.get(id=u2_pk)
         )
 
+        recipient = User.objects.get(id=user2_id)
+        send_notification.apply_async(
+            args=[recipient.id, f"A new chat was created with you by {request.user.username}."],
+            queue='short'
+        )
+
         serializer = self.get_serializer(new_chat)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -132,7 +139,10 @@ class CartItemViewSet(ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='add')
     def add(self, request):
-        logger.info(f"User {self.request.user.id} added a product to cart")
+        send_notification.delay(
+            recipient_id=request.user.id,
+            message="Product added to cart"
+        )
 
 class CartViewSet(ModelViewSet):
     serializer_class = CartSerializer
@@ -146,7 +156,6 @@ class CartViewSet(ModelViewSet):
         return cart
 
     def retrieve(self, request, *args, **kwargs):
-        logger.info(f"User {self.request.user.id} retrieved their cart")
         cart = self.get_object()
         serializer = self.get_serializer(cart)
         return Response(serializer.data)
@@ -197,7 +206,6 @@ class CartViewSet(ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='remove')
     def remove(self, request):
-        logger.info(f"User {self.request.user.id} removed a product from cart")
         product_id = request.data.get('product_id')
         
         if not product_id:
@@ -222,7 +230,6 @@ class CartViewSet(ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def checkout(self, request):
-        logger.info(f"User {self.request.user.id} checked out")
         cart = self.get_object()
         
         if not cart.items.exists():
@@ -246,6 +253,11 @@ class CartViewSet(ModelViewSet):
                 item.product.save()
             
             cart.items.all().delete()
+
+        process_heavy_data.apply_async(
+            args=[request.user.id, [item.product.id for item in cart.items.all()]],
+            queue='long'
+        )
         
         return Response({"message": "Checkout successful. Products purchased and quantity updated."}, status=status.HTTP_200_OK)
 
@@ -260,11 +272,9 @@ class FavoriteBlogViewSet(ModelViewSet):
     def toggle(self, request):
         blog_post_id = request.data.get('blog_id')
         blog_post = get_object_or_404(BlogPost, id=blog_post_id)
-        logger.info(f"Toggling favorite for blog post {blog_post_id} by user {request.user.id}")
 
         
         if blog_post.author == request.user:
-            logger.info(f"User {request.user.id} cannot favorite their own blog post {blog_post_id}")
             return Response(
                 {"error": "You cannot favorite your own blog post"}, 
                 status=status.HTTP_400_BAD_REQUEST
@@ -277,14 +287,12 @@ class FavoriteBlogViewSet(ModelViewSet):
         
         if not created:
             favorite.delete()
-            logger.info(f"User {request.user.id} unfavorited blog post {blog_post_id}")
             return Response(
                 {"message": "Blog post removed from favorites"}, 
                 status=status.HTTP_200_OK
             )
             
         serializer = self.get_serializer(favorite)
-        logger.info(f"User {request.user.id} favorited blog post {blog_post_id}")
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

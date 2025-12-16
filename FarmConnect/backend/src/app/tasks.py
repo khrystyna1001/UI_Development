@@ -1,13 +1,25 @@
-from celery import shared_task
-from django.core.cache import cache
+from src.main.celery import app
+import time
 
-@shared_task
-def debug_task():
-    cache.set('celery_test', 'Hello from Celery!', 60)
-    value = cache.get('celery_test')
-    print(f"Cache test: {value}")
-    return "Task completed successfully!"
+@app.task(name='send_notification')
+def send_notification(recipient_id: int, message: str):
+    """
+    Handles fast, user-facing tasks like sending an email,
+    a push notification, or an in-app alert.
+    """
+    print(f"Processing notification for User ID {recipient_id}")
+    time.sleep(0.5) 
+    print(f"Notification SENT to User {recipient_id}: '{message}'")
+    return f"Notification task complete for User {recipient_id}"
 
-@shared_task
-def add_numbers(x, y):
-    return x + y
+
+@app.task(name='process_heavy_data')
+def process_heavy_data(file_url: str):
+    """
+    Handles time-consuming, backend-only tasks like video encoding,
+    large file processing, or complex report generation.
+    """
+    print(f"STARTING heavy process for file: {file_url}")
+    time.sleep(300) 
+    print(f"COMPLETED heavy process for file: {file_url}")
+    return "Heavy data processing finished."

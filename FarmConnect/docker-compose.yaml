@@ -55,10 +55,6 @@ services:
       - ./frontend:/usr/src/app
       - /usr/src/app/node_modules
     working_dir: /usr/src/app
-    ports:
-      - "19000:19000"
-      - "19001:19001"
-      - "8081:8081"
     environment:
       REACT_NATIVE_PACKAGER_HOSTNAME: ${REACT_NATIVE_PACKAGER_HOSTNAME}
     env_file:
@@ -67,21 +63,6 @@ services:
       - db
     labels:
       - "traefik.http.routers.frontend.rule=Host(`frontend.localhost`)"
-  
-  load-balancer:
-    image: traefik:v3.6
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.postgres.address=:5432/tcp"
-      - "--log.level=INFO"
-    ports:
-      - "80:80"
-      - "8080:8080"
-      - "5432:5432"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -99,6 +80,7 @@ services:
       retries: 3
     labels:
       - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.localhost`)"
+
   valkey:
     image: valkey/valkey:7.2
     command: valkey-server --save 60 1 --loglevel notice
@@ -149,6 +131,29 @@ services:
       - celery-worker
     labels:
       - "traefik.http.routers.flower.rule=Host(`flower.localhost`)"
+
+
+  load-balancer:
+    image: traefik:v3.6
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.postgres.address=:5432/tcp"
+      - "--log.level=INFO"
+    ports:
+      - "80:80"
+      - "8080:8080"
+      - "5432:5432"
+      - "5050:5050"
+      - "5555:5555"
+      - "15672:15672"
+      - "5672:5672"
+      - "19000:19000"
+      - "19001:19001"
+      - "8081:8081"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
   postgres_data:

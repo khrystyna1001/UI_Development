@@ -234,9 +234,8 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 30.0,
     },
 }
-
-CELERY_RESULT_BACKEND = 'django-cache'
 CELERY_CACHE_BACKEND = 'default'
+CELERY_RESULT_EXPIRES = 3600
 
 CACHES = {
     'default': {
