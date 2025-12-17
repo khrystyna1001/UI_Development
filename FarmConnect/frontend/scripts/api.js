@@ -190,7 +190,7 @@ export const deleteMessage = async (id) => apiFetch(`/app/messages/${id}/`, { me
 
 // Favorite Blogs
 export const getFavorites = async () => apiFetch(`/app/favorites/`);
-export const toggleFavorite = async (blog_id) => apiFetch(`/app/favorites/toggle/`, { method: 'POST', body: JSON.stringify({ blog_id }) });
+export const toggleFavorite = async (blog_id) => apiFetch(`/app/favorites/${blog_id}/toggle/`, { method: 'POST', body: JSON.stringify({ blog_id }) });
 
 // Cart
 export const getCart = async () => apiFetch(`/app/carts/`);

@@ -268,32 +268,20 @@ class FavoriteBlogViewSet(ModelViewSet):
     def get_queryset(self):
         return FavoriteBlog.objects.filter(user=self.request.user).select_related('blog_post')
 
-    @action(detail=False, methods=['post'], url_path='toggle')
-    def toggle(self, request):
-        blog_post_id = request.data.get('blog_id')
-        blog_post = get_object_or_404(BlogPost, id=blog_post_id)
-
+    @action(detail=True, methods=['post'])
+    def toggle(self, request, pk=None):
+        blog_post = get_object_or_404(BlogPost, id=pk)
         
         if blog_post.author == request.user:
-            return Response(
-                {"error": "You cannot favorite your own blog post"}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-            
-        favorite, created = FavoriteBlog.objects.get_or_create(
-            user=request.user,
-            blog_post=blog_post
-        )
+            return Response({"error": "..."}, status=status.HTTP_400_BAD_REQUEST)
+
+        favorite, created = FavoriteBlog.objects.get_or_create(user=request.user, blog_post=blog_post)
         
         if not created:
             favorite.delete()
-            return Response(
-                {"message": "Blog post removed from favorites"}, 
-                status=status.HTTP_200_OK
-            )
-            
-        serializer = self.get_serializer(favorite)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response({"is_favorite": False}, status=status.HTTP_200_OK)
+        
+        return Response({"is_favorite": True}, status=status.HTTP_201_CREATED)
 
 
 class MyDataView(generics.RetrieveAPIView):

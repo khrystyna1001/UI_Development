@@ -352,8 +352,9 @@ class FavoriteBlog(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     def clean(self):
-        if self.blog_post.author == self.user:
-            raise ValidationError("You cannot favorite your own blog post.")
+        if hasattr(self, 'blog_post') and self.blog_post:
+            if self.blog_post.author == self.user:
+                raise ValidationError("You cannot favorite your own blog post.")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -361,25 +362,3 @@ class FavoriteBlog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} favorited {self.blog_post.title}"
-
-
-class LogEntry(models.Model):
-    LOG_LEVELS = (
-        ('DEBUG', 'Debug'),
-        ('INFO', 'Info'),
-        ('WARNING', 'Warning'),
-        ('ERROR', 'Error'),
-        ('CRITICAL', 'Critical'),
-    )
-    
-    level = models.CharField(max_length=10, choices=LOG_LEVELS, default='INFO')
-    message = models.TextField()
-    module = models.CharField(max_length=100, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['-created_at']
-        verbose_name_plural = 'Log Entries'
-    
-    def __str__(self):
-        return f"{self.get_level_display()}: {self.message[:100]}"

@@ -44,7 +44,6 @@ dependencies = [
     { name = "django-cors-headers" },
     { name = "django-crispy-forms" },
     { name = "django-environ" },
-    { name = "django-hermes" },
     { name = "django-redis" },
     { name = "djangorestframework" },
     { name = "djangorestframework-simplejwt" },
@@ -68,7 +67,6 @@ requires-dist = [
     { name = "django-cors-headers", specifier = ">=4.9.0" },
     { name = "django-crispy-forms", specifier = ">=2.5" },
     { name = "django-environ", specifier = ">=0.12.0" },
-    { name = "django-hermes", specifier = ">=1.4.2" },
     { name = "django-redis", specifier = ">=6.0.0" },
     { name = "djangorestframework", specifier = ">=3.16.1" },
     { name = "djangorestframework-simplejwt" },
@@ -416,12 +414,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/d6/04/65d2521842c42f471
 wheels = [
     { url = "https://files.pythonhosted.org/packages/83/b3/0a3bec4ecbfee960f39b1842c2f91e4754251e0a6ed443db9fe3f666ba8f/django_environ-0.12.0-py2.py3-none-any.whl", hash = "sha256:92fb346a158abda07ffe6eb23135ce92843af06ecf8753f43adf9d2366dcc0ca", size = 19957, upload-time = "2025-01-13T17:03:32.918Z" },
 ]
-
-[[package]]
-name = "django-hermes"
-version = "1.4.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/7e/f3/776a9574328ab64dda62e87f36fd6bedc88d4102e1a56975b4753364e4f5/django-hermes-1.4.2.tar.gz", hash = "sha256:0b3bb45262e1cd425ed6590e6c5420bffa33d4685958b9c212c8416a936f6949", size = 13288, upload-time = "2015-08-20T03:36:19.079Z" }
 
 [[package]]
 name = "django-redis"

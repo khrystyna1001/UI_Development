@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from faker import Faker
 from django.contrib.auth.models import User
-from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm, Chat, CartItem, Cart, FavoriteBlog, LogEntry
+from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm, Chat, CartItem, Cart, FavoriteBlog
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -88,7 +88,7 @@ class APITestCase(TestCase):
         self.blog_post_data = {
             'title': self.fake.text(max_nb_chars=80),
             'content': self.fake.text(max_nb_chars=100),
-            'author': self.test_user,
+            'author': self.second_user,
             'reads': 0,
             'category': valid_category,
         }
@@ -181,28 +181,12 @@ class APITestCase(TestCase):
 
         # --- Favorite Blog Setup ---
         self.favorite_blog_data = {
-            'user': self.test_user.id,
-            'blog_post': self.blog_post.id
+            'user': self.test_user,
+            'blog_post': self.blog_post
         }
-        self.favorite_blog = FavoriteBlog.objects.create(
-            user=self.second_user,
-            blog_post=self.blog_post
-        )
+        self.favorite_blog = FavoriteBlog.objects.create(**self.favorite_blog_data)
         self.favorite_blog_list_url = reverse('favorite-blog-list')
         self.favorite_blog_detail_url = reverse('favorite-blog-detail', kwargs={'pk': self.favorite_blog.pk})
-
-        # --- LogEntry Setup ---
-        from django.contrib.admin.models import LogEntry, ADDITION
-        from django.contrib.contenttypes.models import ContentType
-        content_type = ContentType.objects.get_for_model(BlogPost)
-        self.log_entry = LogEntry.objects.create(
-            user=self.test_user,
-            content_type=content_type,
-            object_id=self.blog_post.id,
-            object_repr=str(self.blog_post),
-            action_flag=ADDITION,
-            change_message='Test log entry'
-        )
 
         # --- Logout Setup ---
         self.logout_url = reverse('logout')

@@ -19,17 +19,18 @@ class CartViewSetTests(APITestCase):
     # POST /cart/items/
     def test_add_item_to_cart(self):
         second_product = Product.objects.create(
-            name='Test Product 2',
-            description='Test Description 2',
-            price=15.00,
-            quantity=10,
+            name=self.fake.word(),
+            description=self.fake.text(max_nb_chars=50),
+            price=round(self.fake.pyfloat(left_digits=2, right_digits=2, positive=True, min_value=0.50, max_value=10.00), 1),
+            quantity=self.fake.random_int(min=1, max=100),
+            author=self.test_user,
         )
         second_product.farms.add(self.farm)
 
         
         new_item_data = {
             'product_id': second_product.id,
-            'quantity': 2
+            'quantity': self.fake.random_int(min=1, max=10)
         }
         response = self.client.post(self.cart_item_list_url, new_item_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -38,12 +39,12 @@ class CartViewSetTests(APITestCase):
     # PATCH /cart/items/{ID}/
     def test_update_cart_item_quantity(self):
         updated_data = {
-            'quantity': 5
+            'quantity': self.fake.random_int(min=1, max=10)
         }
         response = self.client.patch(self.cart_item_detail_url, updated_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.cart_item.refresh_from_db()
-        self.assertEqual(self.cart_item.quantity, 5)
+        self.assertEqual(self.cart_item.quantity, updated_data['quantity'])
 
     # DELETE /cart/items/{ID}/
     def test_remove_item_from_cart(self):
@@ -55,7 +56,7 @@ class CartViewSetTests(APITestCase):
         CartItem.objects.create(
             cart=self.cart,
             product=self.product,
-            quantity=3
+            quantity=self.fake.random_int(min=1, max=10)
         )
         response = self.client.get(self.cart_detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
