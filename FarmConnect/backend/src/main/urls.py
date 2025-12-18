@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from app.views import BlogPostViewSet, ProductViewSet, ReviewViewSet, MessageViewSet, GalleryViewSet, FarmViewSet, SignupView, MyDataView, LogoutView, UserViewSet, ChatViewSet, CartViewSet, FavoriteBlogViewSet, CartItemViewSet
+from app.views import BlogPostViewSet, ProductViewSet, ReviewViewSet, MessageViewSet, GalleryViewSet, FarmViewSet, SignupView, MyDataView, LogoutView, UserViewSet, ChatViewSet, CartViewSet, FavoriteBlogViewSet, CartItemViewSet, NotificationViewSet
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import (
@@ -29,17 +29,28 @@ from rest_framework_simplejwt.views import (
 )
 
 router = DefaultRouter()
-router.register(r'blog', BlogPostViewSet, basename='blog')
-router.register(r'products', ProductViewSet, basename='products')
-router.register(r'reviews', ReviewViewSet, basename='reviews')
-router.register(r'messages', MessageViewSet, basename='messages')
-router.register(r'gallery', GalleryViewSet, basename='gallery')
+
+# Content Management APIs
+router.register(r'content/blog', BlogPostViewSet, basename='blog')
+router.register(r'content/reviews', ReviewViewSet, basename='reviews')
+router.register(r'content/gallery', GalleryViewSet, basename='gallery')
+
+# E-commerce APIs  
+router.register(r'shop/products', ProductViewSet, basename='products')
+router.register(r'shop/carts', CartViewSet, basename='cart')
+router.register(r'shop/cart-items', CartItemViewSet, basename='cart-item')
+router.register(r'shop/favorites', FavoriteBlogViewSet, basename='favorite-blog')
+
+# Farm Management APIs
 router.register(r'farms', FarmViewSet, basename='farms')
+
+# Communication APIs
+router.register(r'communications/messages', MessageViewSet, basename='messages')
+router.register(r'communications/chats', ChatViewSet, basename='chats')
+router.register(r'communications/notifications', NotificationViewSet, basename='notification')
+
+# User Management APIs
 router.register(r'users', UserViewSet, basename='users')
-router.register(r'chats', ChatViewSet, basename='chats')
-router.register(r'carts', CartViewSet, basename='cart')
-router.register(r'cart-items', CartItemViewSet, basename='cart-item')
-router.register(r'favorites', FavoriteBlogViewSet, basename='favorite-blog')
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('app/', include(router.urls)),
@@ -48,10 +59,10 @@ urlpatterns = [
     path('api/mydata/', MyDataView.as_view(), name='my-data'),
     path('api/logout/', LogoutView.as_view()),
 
-    # API Documentation
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    # Enhanced API Documentation
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('api/docs/schema/', SpectacularAPIView.as_view(), name='schema'),
     
     # JWT Authentication
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

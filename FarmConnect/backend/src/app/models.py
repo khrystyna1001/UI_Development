@@ -234,7 +234,7 @@ class GalleryImage(models.Model):
     def __str__(self):
         return self.title
 
-
+# Cart
 class Cart(models.Model):
     user = models.OneToOneField(
         User,
@@ -337,7 +337,7 @@ class CartItem(models.Model):
     def __str__(self):
         return f"{self.quantity}x {self.product.name} in cart (${self.total_price})"
 
-
+# Favorite Blog
 class FavoriteBlog(models.Model):
     user = models.ForeignKey(
         User,
@@ -362,3 +362,13 @@ class FavoriteBlog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} favorited {self.blog_post.title}"
+
+# Notification
+class Notification(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    content = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']

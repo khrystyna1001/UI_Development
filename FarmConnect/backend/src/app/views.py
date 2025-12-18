@@ -10,29 +10,70 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import action
 from django.db import transaction
 
-from app.models import BlogPost, Product, Farm, GalleryImage, Review, Message, User, Chat, FavoriteBlog, Cart, CartItem
-from app.serializer import BlogPostSerializer, ProductSerializer, FarmSerializer, GalleryImageSerializer, ReviewSerializer, MessageSerializer, UserRegisterSerializer, UserSerializer, ChatSerializer, FavoriteBlogSerializer, CartSerializer, CartItemSerializer
+from drf_spectacular.utils import extend_schema, extend_schema_view
+from app.models import BlogPost, Product, Farm, GalleryImage, Review, Message, User, Chat, FavoriteBlog, Cart, CartItem, Notification
+from app.serializer import BlogPostSerializer, ProductSerializer, FarmSerializer, GalleryImageSerializer, ReviewSerializer, MessageSerializer, UserRegisterSerializer, UserSerializer, ChatSerializer, FavoriteBlogSerializer, CartSerializer, CartItemSerializer, NotificationSerializer
 from app.tasks import send_notification, process_heavy_data
 
 # Create your views here.
 
 
+@extend_schema_view(
+    list=extend_schema(tags=['User Management']),
+    retrieve=extend_schema(tags=['User Management']),
+    create=extend_schema(tags=['User Management']),
+    update=extend_schema(tags=['User Management']),
+    partial_update=extend_schema(tags=['User Management']),
+    destroy=extend_schema(tags=['User Management'])
+)
 class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
+@extend_schema_view(
+    list=extend_schema(tags=['Content Management']),
+    retrieve=extend_schema(tags=['Content Management']),
+    create=extend_schema(tags=['Content Management']),
+    update=extend_schema(tags=['Content Management']),
+    partial_update=extend_schema(tags=['Content Management']),
+    destroy=extend_schema(tags=['Content Management'])
+)
 class BlogPostViewSet(ModelViewSet):
     serializer_class = BlogPostSerializer
     queryset = BlogPost.objects.all()
 
+@extend_schema_view(
+    list=extend_schema(tags=['E-commerce']),
+    retrieve=extend_schema(tags=['E-commerce']),
+    create=extend_schema(tags=['E-commerce']),
+    update=extend_schema(tags=['E-commerce']),
+    partial_update=extend_schema(tags=['E-commerce']),
+    destroy=extend_schema(tags=['E-commerce'])
+)
 class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
     
+@extend_schema_view(
+    list=extend_schema(tags=['Content Management']),
+    retrieve=extend_schema(tags=['Content Management']),
+    create=extend_schema(tags=['Content Management']),
+    update=extend_schema(tags=['Content Management']),
+    partial_update=extend_schema(tags=['Content Management']),
+    destroy=extend_schema(tags=['Content Management'])
+)
 class ReviewViewSet(ModelViewSet):
     serializer_class = ReviewSerializer
     queryset = Review.objects.all()
 
+@extend_schema_view(
+    list=extend_schema(tags=['Communication']),
+    retrieve=extend_schema(tags=['Communication']),
+    create=extend_schema(tags=['Communication']),
+    update=extend_schema(tags=['Communication']),
+    partial_update=extend_schema(tags=['Communication']),
+    destroy=extend_schema(tags=['Communication'])
+)
 class MessageViewSet(ModelViewSet):
     serializer_class = MessageSerializer
     queryset = Message.objects.all()
@@ -58,6 +99,14 @@ class MessageViewSet(ModelViewSet):
             queue='short'
         )
 
+@extend_schema_view(
+    list=extend_schema(tags=['Communication']),
+    retrieve=extend_schema(tags=['Communication']),
+    create=extend_schema(tags=['Communication']),
+    update=extend_schema(tags=['Communication']),
+    partial_update=extend_schema(tags=['Communication']),
+    destroy=extend_schema(tags=['Communication'])
+)
 class ChatViewSet(ModelViewSet):
     serializer_class = ChatSerializer
     queryset = Chat.objects.all()
@@ -125,14 +174,38 @@ class ChatViewSet(ModelViewSet):
         serializer = self.get_serializer(new_chat)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+@extend_schema_view(
+    list=extend_schema(tags=['Content Management']),
+    retrieve=extend_schema(tags=['Content Management']),
+    create=extend_schema(tags=['Content Management']),
+    update=extend_schema(tags=['Content Management']),
+    partial_update=extend_schema(tags=['Content Management']),
+    destroy=extend_schema(tags=['Content Management'])
+)
 class GalleryViewSet(ModelViewSet):
     serializer_class = GalleryImageSerializer
     queryset = GalleryImage.objects.all()
 
+@extend_schema_view(
+    list=extend_schema(tags=['Farm Management']),
+    retrieve=extend_schema(tags=['Farm Management']),
+    create=extend_schema(tags=['Farm Management']),
+    update=extend_schema(tags=['Farm Management']),
+    partial_update=extend_schema(tags=['Farm Management']),
+    destroy=extend_schema(tags=['Farm Management'])
+)
 class FarmViewSet(ModelViewSet):
     serializer_class = FarmSerializer
     queryset = Farm.objects.all()
 
+@extend_schema_view(
+    list=extend_schema(tags=['E-commerce']),
+    retrieve=extend_schema(tags=['E-commerce']),
+    create=extend_schema(tags=['E-commerce']),
+    update=extend_schema(tags=['E-commerce']),
+    partial_update=extend_schema(tags=['E-commerce']),
+    destroy=extend_schema(tags=['E-commerce'])
+)
 class CartItemViewSet(ModelViewSet):
     serializer_class = CartItemSerializer
     queryset = CartItem.objects.all()
@@ -144,6 +217,14 @@ class CartItemViewSet(ModelViewSet):
             message="Product added to cart"
         )
 
+@extend_schema_view(
+    list=extend_schema(tags=['E-commerce']),
+    retrieve=extend_schema(tags=['E-commerce']),
+    create=extend_schema(tags=['E-commerce']),
+    update=extend_schema(tags=['E-commerce']),
+    partial_update=extend_schema(tags=['E-commerce']),
+    destroy=extend_schema(tags=['E-commerce'])
+)
 class CartViewSet(ModelViewSet):
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated]
@@ -261,6 +342,14 @@ class CartViewSet(ModelViewSet):
         
         return Response({"message": "Checkout successful. Products purchased and quantity updated."}, status=status.HTTP_200_OK)
 
+@extend_schema_view(
+    list=extend_schema(tags=['E-commerce']),
+    retrieve=extend_schema(tags=['E-commerce']),
+    create=extend_schema(tags=['E-commerce']),
+    update=extend_schema(tags=['E-commerce']),
+    partial_update=extend_schema(tags=['E-commerce']),
+    destroy=extend_schema(tags=['E-commerce'])
+)
 class FavoriteBlogViewSet(ModelViewSet):
     serializer_class = FavoriteBlogSerializer
     permission_classes = [IsAuthenticated]
@@ -283,6 +372,34 @@ class FavoriteBlogViewSet(ModelViewSet):
         
         return Response({"is_favorite": True}, status=status.HTTP_201_CREATED)
 
+@extend_schema_view(
+    list=extend_schema(tags=['Communication']),
+    retrieve=extend_schema(tags=['Communication']),
+    create=extend_schema(tags=['Communication']),
+    update=extend_schema(tags=['Communication']),
+    partial_update=extend_schema(tags=['Communication']),
+    destroy=extend_schema(tags=['Communication']),
+    mark_all_as_read=extend_schema(tags=['Communication']),
+    mark_as_read=extend_schema(tags=['Communication'])
+)
+class NotificationViewSet(ModelViewSet):
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(recipient=self.request.user).order_by('-created_at')
+
+    @action(detail=False, methods=['post'])
+    def mark_all_as_read(self, request):
+        self.get_queryset().filter(is_read=False).update(is_read=True)
+        return Response({'status': 'All notifications marked as read'}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'])
+    def mark_as_read(self, request, pk=None):
+        notification = self.get_object()
+        notification.is_read = True
+        notification.save()
+        return Response({'status': 'Notification marked as read'})
 
 class MyDataView(generics.RetrieveAPIView):
     serializer_class = UserSerializer

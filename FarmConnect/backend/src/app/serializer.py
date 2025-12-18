@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm, Chat, Cart, CartItem, FavoriteBlog
+from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm, Chat, Cart, CartItem, FavoriteBlog, Notification
 from django.contrib.auth.models import User
 from dj_rest_auth.registration.serializers import RegisterSerializer
 
@@ -269,4 +269,11 @@ class FavoriteBlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = FavoriteBlog
         fields = ['id', 'user', 'blog_post', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+# Notification
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'content', 'is_read', 'created_at']
         read_only_fields = ['id', 'created_at']

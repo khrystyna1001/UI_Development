@@ -4,7 +4,8 @@ FROM python:3.13-slim-bookworm
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app:/app/src
+    PYTHONPATH=/app:/app/src \
+    TMPDIR=/var/tmp
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -23,9 +24,12 @@ WORKDIR /app
 # Copy only dependency files first for better caching
 COPY pyproject.toml uv.lock ./
 
-# Install Python dependencies
-RUN uv pip install --system --no-cache-dir -e . && \
-    uv pip install --system --no-cache-dir gunicorn uvicorn[standard]
+# Install Python dependencies with cache cleanup (using pip instead of uv to avoid extraction issues)
+RUN pip install --no-cache-dir -e . && \
+    pip install --no-cache-dir gunicorn uvicorn[standard] && \
+    rm -rf /root/.cache/pip && \
+    rm -rf /tmp/* && \
+    rm -rf /var/tmp/*
 
 # Copy entrypoint script and make it executable
 COPY ./entrypoint.sh /app/entrypoint.sh

@@ -99,10 +99,67 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'My API',
-    'DESCRIPTION': 'FarmConnect',
+    'TITLE': '🌾 FarmConnect API',
+    'DESCRIPTION': 'Complete API documentation for FarmConnect - Your Agricultural Marketplace Platform',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': False,
+        'filter': True,
+        'showExtensions': True,
+        'showCommonExtensions': True,
+        'tryItOutEnabled': True,
+        'docExpansion': 'none',
+        'defaultModelsExpandDepth': 2,
+        'defaultModelExpandDepth': 2,
+        'displayRequestDuration': True,
+    },
+    'SWAGGER_UI_FAVICON_HREF': 'https://farmconnect.com/favicon.ico',
+    'REDOC_UI_SETTINGS': {
+        'hideHostname': True,
+        'hideDownloadButton': False,
+        'docExpansion': 'none',
+        'pathInMiddlePanel': True,
+        'hideLoading': True,
+        'noAutoAuth': False,
+        'showObjectSchemaExamples': True,
+    },
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': '/api/',
+    'TAGS': [
+        {
+            'name': 'Content Management',
+            'description': 'Blog posts, reviews, and gallery management'
+        },
+        {
+            'name': 'E-commerce',
+            'description': 'Products, shopping cart, and favorites'
+        },
+        {
+            'name': 'Farm Management',
+            'description': 'Farm profiles and information'
+        },
+        {
+            'name': 'Communication',
+            'description': 'Messages, chats, and notifications'
+        },
+        {
+            'name': 'User Management',
+            'description': 'User profiles and authentication'
+        },
+    ],
+    'PREPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.preprocess_exclude_path_format',
+    ],
+    'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.postprocess_schema_enums',
+    ],
+    'ENUM_NAME_OVERRIDES': {},
+    'GENERIC_ADDITIONAL_PROPERTIES': None,
+    'CAMELIZE_NAMES': False,
+    'MINIMAL_VALIDATION_EXAMPLES': True,
 }
 
 ROOT_URLCONF = "src.main.urls"
@@ -229,13 +286,13 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 CELERY_BEAT_SCHEDULE = {
-    'debug-task-every-30-seconds': {
-        'task': 'app.tasks.debug_task',
-        'schedule': 30.0,
+    'delete-old-notifications': {
+        'task': 'app.tasks.cleanup_notifications',
+        'schedule': timedelta(days=1),
     },
 }
 CELERY_CACHE_BACKEND = 'default'
-CELERY_RESULT_EXPIRES = 3600
+CELERY_RESULT_EXPIRES = 86400
 
 CACHES = {
     'default': {

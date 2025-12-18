@@ -296,3 +296,85 @@ export const logout = async () => {
         throw error;
     }
 };
+
+// Notifications API
+export const getNotifications = async () => {
+    try {
+        const accessToken = await getToken();
+        if (!accessToken) {
+            throw new Error('No access token found');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/app/notifications/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Failed to fetch notifications');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Get notifications error:', error);
+        throw error;
+    }
+};
+
+export const markNotificationAsRead = async (notificationId) => {
+    try {
+        const accessToken = await getToken();
+        if (!accessToken) {
+            throw new Error('No access token found');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/app/notifications/${notificationId}/mark_as_read/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Failed to mark notification as read');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Mark notification as read error:', error);
+        throw error;
+    }
+};
+
+export const markAllNotificationsAsRead = async () => {
+    try {
+        const accessToken = await getToken();
+        if (!accessToken) {
+            throw new Error('No access token found');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/app/notifications/mark_all_as_read/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Failed to mark all notifications as read');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Mark all notifications as read error:', error);
+        throw error;
+    }
+};

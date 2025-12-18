@@ -79,7 +79,9 @@ services:
       timeout: 10s
       retries: 3
     labels:
+      - "traefik.enable=true"
       - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.localhost`)"
+      - "traefik.http.services.rabbitmq.loadBalancer.server.port=15672"
 
   valkey:
     image: valkey/valkey:7.2
@@ -130,7 +132,9 @@ services:
       - rabbitmq
       - celery-worker
     labels:
+      - "traefik.enable=true"
       - "traefik.http.routers.flower.rule=Host(`flower.localhost`)"
+      - "traefik.http.services.flower.loadBalancer.server.port=5555"
 
 
   load-balancer:
@@ -146,9 +150,6 @@ services:
       - "8080:8080"
       - "5432:5432"
       - "5050:5050"
-      - "5555:5555"
-      - "15672:15672"
-      - "5672:5672"
       - "19000:19000"
       - "19001:19001"
       - "8081:8081"
