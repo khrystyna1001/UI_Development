@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from faker import Faker
 from django.contrib.auth.models import User
-from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm, Chat, CartItem, Cart, FavoriteBlog
+from app.models import BlogPost, Product, Review, Message, GalleryImage, Farm, Chat, CartItem, Cart, FavoriteBlog, Notification
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -190,6 +190,16 @@ class APITestCase(TestCase):
 
         # --- Logout Setup ---
         self.logout_url = reverse('logout')
+
+        # --- Notification Setup ---
+        self.notification_data = {
+            'recipient': self.test_user,
+            'content': self.fake.text(max_nb_chars=200),
+            'is_read': False,
+        }
+        self.notification = Notification.objects.create(**self.notification_data)
+        self.notification_list_url = reverse('notification-list')
+        self.notification_detail_url = reverse('notification-detail', kwargs={'pk': self.notification.pk})
 
 
     def tearDown(self):

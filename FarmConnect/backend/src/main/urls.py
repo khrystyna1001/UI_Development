@@ -31,23 +31,23 @@ from rest_framework_simplejwt.views import (
 router = DefaultRouter()
 
 # Content Management APIs
-router.register(r'content/blog', BlogPostViewSet, basename='blog')
-router.register(r'content/reviews', ReviewViewSet, basename='reviews')
-router.register(r'content/gallery', GalleryViewSet, basename='gallery')
+router.register(r'blog', BlogPostViewSet, basename='blog')
+router.register(r'reviews', ReviewViewSet, basename='reviews')
+router.register(r'gallery', GalleryViewSet, basename='gallery')
 
 # E-commerce APIs  
-router.register(r'shop/products', ProductViewSet, basename='products')
-router.register(r'shop/carts', CartViewSet, basename='cart')
-router.register(r'shop/cart-items', CartItemViewSet, basename='cart-item')
-router.register(r'shop/favorites', FavoriteBlogViewSet, basename='favorite-blog')
+router.register(r'products', ProductViewSet, basename='products')
+router.register(r'carts', CartViewSet, basename='cart')
+router.register(r'cart-items', CartItemViewSet, basename='cart-item')
+router.register(r'favorites', FavoriteBlogViewSet, basename='favorite-blog')
 
 # Farm Management APIs
 router.register(r'farms', FarmViewSet, basename='farms')
 
 # Communication APIs
-router.register(r'communications/messages', MessageViewSet, basename='messages')
-router.register(r'communications/chats', ChatViewSet, basename='chats')
-router.register(r'communications/notifications', NotificationViewSet, basename='notification')
+router.register(r'messages', MessageViewSet, basename='messages')
+router.register(r'chats', ChatViewSet, basename='chats')
+router.register(r'notifications', NotificationViewSet, basename='notification')
 
 # User Management APIs
 router.register(r'users', UserViewSet, basename='users')

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { getNotifications, markNotificationAsRead } from '../../api';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { getNotifications, markNotificationAsRead } from '../../scripts/api';
 import NavigationFooter from '../../components/footer';
 import NavigationHeader from '../../components/header';
+import { styles } from '../../styles/nav/notifications';
 
 const NotificationPage = () => {
     const [notifications, setNotifications] = useState([]);
@@ -68,54 +69,5 @@ const NotificationPage = () => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    wrapper: { flex: 1, backgroundColor: '#FFF', paddingHorizontal: 20 },
-    heading: { 
-        fontSize: 12, 
-        fontWeight: '900', 
-        letterSpacing: 4, 
-        marginTop: 40, 
-        marginBottom: 20, 
-        color: '#000' 
-    },
-    itemContainer: {
-        paddingVertical: 20,
-        paddingHorizontal: 15,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: '#000', // Brutalist border
-    },
-    unreadItem: {
-        backgroundColor: '#FFF',
-        borderLeftWidth: 8, // Thick indicator for unread
-    },
-    readItem: {
-        backgroundColor: '#F9F9F9',
-        borderColor: '#E0E0E0',
-        borderLeftWidth: 1,
-    },
-    topRow: { 
-        flexDirection: 'row', 
-        justifyContent: 'space-between', 
-        marginBottom: 8 
-    },
-    timestamp: { fontSize: 10, color: '#AAA', fontWeight: '600' },
-    newTag: { fontSize: 10, fontWeight: '900', color: '#000' },
-    message: { 
-        fontSize: 15, 
-        color: '#000', 
-        lineHeight: 22, 
-        fontWeight: '500' 
-    },
-    readText: { color: '#888' },
-    empty: { 
-        textAlign: 'center', 
-        marginTop: 100, 
-        fontSize: 12, 
-        letterSpacing: 2, 
-        color: '#CCC' 
-    }
-});
 
 export default NotificationPage;

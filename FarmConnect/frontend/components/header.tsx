@@ -9,28 +9,37 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { logout } from '../scripts/api';
-import { getMyData } from '../scripts/api';
+import { getMyData, getNotifications } from '../scripts/api';
 
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 
 import { styles } from '../styles/components/navigation.jsx';
 
 export default function NavigationHeader() {
-    const [myData, setMyData] = useState(null);
-  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
+  const [myData, setMyData] = useState(null);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
     
     useEffect(() => {
         const fetchMyData = async () => {
             try {
                 const data = await getMyData();
                 setMyData(data);
-                console.log(data);
             } catch (error) {
                 console.error('Error fetching my data:', error);
             }
         };
         fetchMyData();
+        fetchNotifications();
     }, []);
+
+    const fetchNotifications = async () => {
+      try {
+        const notificationData = await getNotifications()
+        setHasUnreadNotifications(notificationData.some(notification => !notification.is_read))
+      } catch (error) {
+        console.error('Error fetching notifications:', error)
+      }
+    }
 
     const handleLogout = async () => {
         try {

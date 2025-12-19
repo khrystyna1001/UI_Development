@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import BlogPost, Product, Review, Farm, GalleryImage, Message, Chat
+from .models import BlogPost, Product, Review, Farm, GalleryImage, Message, Chat, Notification
 
 # Register your models here.
 
@@ -10,3 +10,4 @@ admin.site.register(Farm)
 admin.site.register(GalleryImage)
 admin.site.register(Message)
 admin.site.register(Chat)
+admin.site.register(Notification)

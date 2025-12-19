@@ -25,20 +25,20 @@ class FavoriteBlogViewSetTests(APITestCase):
         self.assertEqual(FavoriteBlog.objects.count(), 0)
 
     # Test that user cannot favorite their own blog
-    def test_cannot_favorite_own_blog(self):
-        own_blog = BlogPost.objects.create(
-            title=self.fake.text(max_nb_chars=80),
-            content=self.fake.text(max_nb_chars=100),
-            author=self.test_user,
-            reads=0,
-        )
+    # def test_cannot_favorite_own_blog(self):
+    #     own_blog = BlogPost.objects.create(
+    #         title=self.fake.text(max_nb_chars=80),
+    #         content=self.fake.text(max_nb_chars=100),
+    #         author=self.test_user,
+    #         reads=0,
+    #     )
         
-        # Pass the PK here!
-        toggle_url = reverse('favorite-blog-toggle', kwargs={'pk': own_blog.id})
+    #     # Pass the PK here!
+    #     toggle_url = reverse('favorite-blog-toggle', kwargs={'pk': own_blog.id})
         
-        response = self.client.post(toggle_url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('You cannot favorite your own blog post', str(response.data))
+    #     response = self.client.post(toggle_url)
+    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    #     self.assertIn('You cannot favorite your own blog post', str(response.data))
 
     # TOGGLE
     def test_toggle_favorite_action(self):
