@@ -6,7 +6,6 @@ import {
   TouchableOpacity, 
   ScrollView, 
   Alert, 
-  ActivityIndicator
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { getGalleryImage, createGalleryImage, updateGalleryImage, deleteGalleryImage, getMyData } from '../../scripts/api';
@@ -16,6 +15,7 @@ import { EditButton } from '../../components/editButton';
 import { DeleteButton } from '../../components/deleteButton';
 import { styles } from '../../styles/nav/gallerycreate';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 
 const GalleryEditor = () => {
@@ -107,10 +107,7 @@ const GalleryEditor = () => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
+        <LoadingSpinner />
     );
   }
 

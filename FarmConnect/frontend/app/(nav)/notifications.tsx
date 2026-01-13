@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react
 import { getNotifications, markNotificationAsRead } from '../../scripts/api';
 import NavigationFooter from '../../components/footer';
 import NavigationHeader from '../../components/header';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import { styles } from '../../styles/nav/notifications';
 
 const NotificationPage = () => {
@@ -53,7 +54,7 @@ const NotificationPage = () => {
         </TouchableOpacity>
     );
 
-    if (loading) return <ActivityIndicator style={{flex:1}} color="#000" />;
+    if (loading) return <LoadingSpinner />;
 
     return (
         <View style={styles.wrapper}>

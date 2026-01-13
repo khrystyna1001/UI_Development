@@ -4,8 +4,7 @@ import { View,
     ScrollView,
     TouchableOpacity,
     SafeAreaView,
-    Modal,
-    ActivityIndicator
+    Modal
     } from 'react-native';
 
 import { getProducts, getMyData } from "../../scripts/api";
@@ -13,6 +12,7 @@ import { getProducts, getMyData } from "../../scripts/api";
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from "../../components/header";
 import { CreateButton } from "../../components/createButton";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 import { router } from 'expo-router';
 
@@ -134,11 +134,7 @@ export default function ProductsPage () {
     };
   
     if (loading && !refreshing) {
-      return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={GREEN} />
-        </View>
-      );
+      return <LoadingSpinner color={GREEN} />;
     }
   
     if (error) {

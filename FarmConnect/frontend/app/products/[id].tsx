@@ -3,8 +3,7 @@ import {
     View, 
     Text, 
     Image,
-    ScrollView, 
-    ActivityIndicator, 
+    ScrollView,
     TouchableOpacity,
     Alert
 } from 'react-native';
@@ -21,6 +20,7 @@ import ReviewSection from '../../components/reviewSection';
 import { styles } from '../../styles/tabs/product';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 
 export default function ProductDetail() {
@@ -147,10 +147,7 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={styles.loadingText}>Loading product details...</Text>
-      </View>
+      <LoadingSpinner />
     );
   }
 

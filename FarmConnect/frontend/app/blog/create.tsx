@@ -17,6 +17,7 @@ import { EditButton } from "../../components/editButton";
 import { DeleteButton } from "../../components/deleteButton";
 import { styles } from '../../styles/nav/blogcreate.jsx';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 
 const BlogPostCategories = [
@@ -122,10 +123,7 @@ const BlogEditor = () => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
+      <LoadingSpinner />
     );
   }
 

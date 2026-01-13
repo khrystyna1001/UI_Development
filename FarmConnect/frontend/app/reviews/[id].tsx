@@ -3,7 +3,6 @@ import {
     View, 
     Text, 
     ScrollView, 
-    ActivityIndicator, 
     TouchableOpacity,
     Modal
 } from 'react-native';
@@ -18,6 +17,7 @@ import NavigationFooter from "../../components/footer";
 
 import { styles } from '../../styles/tabs/review';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 
 export default function ReviewDetail() {
@@ -64,10 +64,7 @@ export default function ReviewDetail() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4a90e2" />
-        <Text style={styles.loadingText}>Loading review details...</Text>
-      </View>
+      <LoadingSpinner />
     );
   }
 

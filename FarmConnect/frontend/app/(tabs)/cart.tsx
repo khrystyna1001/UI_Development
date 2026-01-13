@@ -4,7 +4,6 @@ import { SafeAreaView,
     Text, 
     Image, 
     TouchableOpacity, 
-    ActivityIndicator,
     ScrollView
 } from "react-native";
 
@@ -17,6 +16,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import NavigationFooter from '../../components/footer';
 import NavigationHeader from '../../components/header';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 
 export default function Cart() {
@@ -115,11 +115,7 @@ export default function Cart() {
   };
 
   if (loading) {
-    return (
-      <SafeAreaView style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color="#2ecc71" />
-      </SafeAreaView>
-    );
+    return <LoadingSpinner color="#2ecc71" />;
   }
 
   return (

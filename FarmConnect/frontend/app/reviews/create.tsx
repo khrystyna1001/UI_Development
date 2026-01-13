@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getReview, updateReview, getMyData } from '../../scripts/api';
 import { styles } from '../../styles/tabs/reviewcreate';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function CreateReviewScreen() {
   const router = useRouter();
@@ -84,9 +85,7 @@ export default function CreateReviewScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-      </View>
+      <LoadingSpinner />
     );
   }
 

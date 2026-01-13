@@ -6,13 +6,13 @@ import {
   ScrollView, 
   Image, 
   TouchableOpacity, 
-  ActivityIndicator,
   RefreshControl,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 import NavigationHeader from '../../components/header';
 import NavigationFooter from '../../components/footer';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 import { router } from 'expo-router';
 
@@ -109,11 +109,7 @@ const FarmListScreen = () => {
   };
 
   if (loading && !refreshing) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={GREEN} />
-      </View>
-    );
+    return <LoadingSpinner color={GREEN} />;
   }
 
   if (error) {

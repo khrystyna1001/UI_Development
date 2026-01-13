@@ -13,6 +13,7 @@ import { getBlogPost, getMyData, deleteBlogPost, getFavorites, toggleFavorite } 
 
 import NavigationHeader from '../../components/header';
 import NavigationFooter from "../../components/footer";
+import LoadingSpinner from '../../components/LoadingSpinner';
 import { UpdateButton } from "../../components/updateButton";
 import { DeleteButton } from "../../components/deleteButton";
 import ReviewSection from '../../components/reviewSection';
@@ -94,10 +95,7 @@ export default function BlogDetail() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={styles.loadingText}>Loading blog post...</Text>
-      </View>
+        <LoadingSpinner />
     );
   }
 

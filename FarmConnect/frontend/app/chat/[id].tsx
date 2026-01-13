@@ -17,6 +17,7 @@ import { format } from 'date-fns';
 import { getChat, deleteChat, deleteMessage, createMessage, getMyData, updateMessage } from '../../scripts/api';
 
 import { styles } from '../../styles/tabs/chat';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const sortMessagesByTime = (messages) => {
     const validMessages = messages.filter(msg => msg.created_at);
@@ -258,9 +259,7 @@ export default function ChatDetail() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-      </SafeAreaView>
+      <LoadingSpinner />
     );
   }
 

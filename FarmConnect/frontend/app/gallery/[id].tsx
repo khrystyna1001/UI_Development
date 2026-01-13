@@ -4,7 +4,6 @@ import {
   Text, 
   TouchableOpacity, 
   ScrollView, 
-  ActivityIndicator,
   Image,
   Alert
 } from 'react-native';
@@ -15,6 +14,7 @@ import NavigationFooter from "../../components/footer";
 import { DeleteButton } from '../../components/deleteButton';
 import { UpdateButton } from '../../components/updateButton';
 import { styles } from '../../styles/nav/image';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const GalleryImageProfile = () => {
   const { id } = useLocalSearchParams();
@@ -55,9 +55,7 @@ const GalleryImageProfile = () => {
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-      </View>
+      <LoadingSpinner />
     );
   }
 

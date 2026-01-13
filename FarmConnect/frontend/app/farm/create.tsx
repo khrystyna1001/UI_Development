@@ -4,8 +4,7 @@ import {
   Text, 
   TextInput, 
   TouchableOpacity, 
-  ScrollView, 
-  ActivityIndicator,
+  ScrollView,
   TouchableWithoutFeedback,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -23,6 +22,7 @@ import NavigationFooter from '../../components/footer';
 import { DeleteButton } from '../../components/deleteButton';
 import { EditButton } from '../../components/editButton';
 import { styles } from '../../styles/nav/farmcreate';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const FarmCreateScreen = () => {
   const { id } = useLocalSearchParams();
@@ -167,9 +167,7 @@ const FarmCreateScreen = () => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-      </View>
+      <LoadingSpinner />
     );
   }
 
@@ -226,7 +224,7 @@ const FarmCreateScreen = () => {
           <Text style={styles.subLabel}>Select products managed by this farm.</Text>
           <View style={styles.productsGrid}>
           {loadingProducts ? (
-            <ActivityIndicator size="small" color="#4CAF50" />
+            <LoadingSpinner />
           ) : (
             allProducts.map((product) => {
               const isProductSelected = selectedProducts.includes(product.id);

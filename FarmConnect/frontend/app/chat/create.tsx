@@ -11,6 +11,7 @@ import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { getUsers, createChat, getMyData } from '../../scripts/api';
 import { styles } from '../../styles/tabs/chatcreate';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function CreateChat() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -62,9 +63,7 @@ export default function CreateChat() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-      </SafeAreaView>
+      <LoadingSpinner />
     );
   }
 

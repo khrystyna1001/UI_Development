@@ -6,7 +6,6 @@ import {
   TouchableOpacity, 
   ScrollView, 
   Alert, 
-  ActivityIndicator,
   TouchableWithoutFeedback,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -18,6 +17,7 @@ import { DeleteButton } from '../../components/deleteButton';
 import { styles } from '../../styles/tabs/productcreate';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const ProductCategories = [
   "Vegetable",
@@ -157,10 +157,7 @@ const ProductEditor = () => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
+      <LoadingSpinner />
     );
   }
 

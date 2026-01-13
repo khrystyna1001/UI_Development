@@ -4,13 +4,13 @@ import { View,
     KeyboardAvoidingView,
     Platform,
     Pressable,
-    ActivityIndicator,
     } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { login } from '../../scripts/api';
 import { styles } from '../../styles/auth/login.jsx';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const Icon = ({ name, size, color }) => (
   <Text style={{ fontSize: size, color: color, marginLeft: 10 }}>
@@ -107,7 +107,7 @@ export default function LoginScreen() {
           disabled={isLoading}
         >
           {isLoading ? (
-            <ActivityIndicator color="#fff" />
+            <LoadingSpinner />
           ) : (
             <>
               <Text style={styles.buttonText}>Log In</Text>

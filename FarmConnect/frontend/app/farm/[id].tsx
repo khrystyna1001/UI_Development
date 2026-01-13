@@ -4,7 +4,6 @@ import {
   Text, 
   ScrollView, 
   TouchableOpacity, 
-  ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -17,6 +16,7 @@ import { DeleteButton } from '../../components/deleteButton';
 import { styles } from '../../styles/nav/farmdetail';
 import { Feather } from '@expo/vector-icons';
 import { UpdateButton } from '@/components/updateButton';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const FarmDetailScreen = () => {
   const { id } = useLocalSearchParams();
@@ -71,9 +71,7 @@ const FarmDetailScreen = () => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-      </View>
+      <LoadingSpinner />
     );
   }
 

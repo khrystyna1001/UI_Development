@@ -13,6 +13,8 @@ import { signup } from '../../scripts/api';
 
 import styles from '../../styles/auth/signup.jsx';
 
+import LoadingSpinner from '../../components/LoadingSpinner';
+
 
 const Icon = ({ name, size, color }) => (
   <Text style={{ fontSize: size, color: color, marginLeft: 10 }}>
@@ -66,6 +68,10 @@ export default function SignupScreen () {
       setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <KeyboardAvoidingView

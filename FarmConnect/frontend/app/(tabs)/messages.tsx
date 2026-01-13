@@ -14,8 +14,11 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import { getChats, getMyData } from '../../scripts/api';
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from '../../components/header';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import { CreateButton } from '../../components/createButton';
 import { styles } from '../../styles/tabs/messages.jsx';
+
+const GREEN = "#4CAF50";
 
 const ChatItem = ({ chat, currentUserId, otherUser, onPress }) => {
   const lastMessage = chat.messages?.[chat.messages.length - 1];
@@ -152,13 +155,7 @@ export default function Messages() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <NavigationHeader />
-        <View style={styles.loadingContainer}>
-          <Text>Loading messages...</Text>
-        </View>
-        <NavigationFooter />
-      </SafeAreaView>
+      <LoadingSpinner color={GREEN} />
     );
   }
 

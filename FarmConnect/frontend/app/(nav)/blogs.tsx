@@ -6,7 +6,6 @@ import { View,
     TextInput,
     SafeAreaView,
     Modal,
-    ActivityIndicator,
     } from 'react-native';
 
 import { getBlogPosts, getMyData } from "../../scripts/api";
@@ -14,6 +13,7 @@ import { getBlogPosts, getMyData } from "../../scripts/api";
 import NavigationFooter from "../../components/footer";
 import NavigationHeader from "../../components/header";
 import { CreateButton } from "../../components/createButton";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 import { router } from 'expo-router';
 
@@ -124,11 +124,7 @@ export default function BlogPage () {
     };
   
     if (loading && !refreshing) {
-      return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={GREEN} />
-        </View>
-      );
+      return <LoadingSpinner color={GREEN} />;
     }
   
     if (error) {

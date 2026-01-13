@@ -38,16 +38,6 @@ services:
     labels:
       - "traefik.http.routers.app-service.rule=Host(`localhost`)"
 
-  pgadmin:
-    image: dpage/pgadmin4:9.8
-    environment:
-      PGADMIN_DEFAULT_EMAIL: demo@example.com
-      PGADMIN_DEFAULT_PASSWORD: secret
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
-    labels:
-      - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.localhost`)"
-
   frontend:
     build: ./frontend
     command: npx expo start --lan
